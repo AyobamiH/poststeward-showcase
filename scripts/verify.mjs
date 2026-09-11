@@ -4,15 +4,28 @@ import { extname, join, relative } from "node:path";
 const root = new URL("../", import.meta.url);
 const rootPath = root.pathname;
 const canonicalPrefix = "https://github.com/AyobamiH/poststeward";
+const publicOrigin = "https://poststeward.com";
+const workerName = "poststeward-showcase";
+const wranglerVersion = "4.130.0";
 
 const required = [
   "README.md",
   "SECURITY.md",
+  "package.json",
+  "wrangler.jsonc",
+  "wrangler.domain.jsonc",
+  ".github/workflows/deploy.yml",
   "public/index.html",
+  "public/404.html",
   "public/styles.css",
   "public/app.js",
   "public/evidence.json",
+  "public/_headers",
+  "public/robots.txt",
+  "public/sitemap.xml",
+  "scripts/smoke-deployment.mjs",
   "docs/ARCHITECTURE.md",
+  "docs/CLOUDFLARE_DEPLOYMENT.md",
   "docs/LAUNCH_PLAN.md",
   "launch/PRODUCT_HUNT.md",
   "launch/OPENAI_SHOWCASE.md"
@@ -37,8 +50,16 @@ for (const fact of evidence.facts ?? []) {
 }
 
 const html = await text("public/index.html");
-for (const marker of ["lang=\"en-GB\"", "<main id=\"main\">", "Simulation only", "Canonical repo", "meta name=\"viewport\""]) {
-  if (!html.includes(marker)) failures.push(`HTML accessibility/boundary marker missing: ${marker}`);
+for (const marker of [
+  "lang=\"en-GB\"",
+  "<main id=\"main\">",
+  "Simulation only",
+  "Canonical repo",
+  "meta name=\"viewport\"",
+  `rel=\"canonical\" href=\"${publicOrigin}/\"`,
+  `property=\"og:url\" content=\"${publicOrigin}/\"`
+]) {
+  if (!html.includes(marker)) failures.push(`HTML accessibility/boundary/domain marker missing: ${marker}`);
 }
 
 const css = await text("public/styles.css");
@@ -53,12 +74,61 @@ for (const argument of fetchCalls) {
   }
 }
 
+const workerConfig = JSON.parse(await text("wrangler.jsonc"));
+if (workerConfig.name !== workerName) failures.push("workers.dev config must keep the poststeward-showcase Worker name");
+if (workerConfig.workers_dev !== true) failures.push("workers.dev config must explicitly enable workers_dev");
+if (workerConfig.preview_urls !== false) failures.push("preview URLs must remain disabled");
+if (workerConfig.assets?.directory !== "./public") failures.push("workers.dev config must serve ./public");
+if (workerConfig.routes) failures.push("workers.dev config must not attach production routes/domains");
+
+const domainConfig = JSON.parse(await text("wrangler.domain.jsonc"));
+if (domainConfig.name !== workerName) failures.push("custom-domain config must deploy the same Worker name");
+if (domainConfig.workers_dev !== false) failures.push("custom-domain config must disable workers.dev");
+if (domainConfig.preview_urls !== false) failures.push("custom-domain config must disable preview URLs");
+if (domainConfig.assets?.directory !== "./public") failures.push("custom-domain config must serve ./public");
+const expectedDomains = ["poststeward.com", "www.poststeward.com"];
+const configuredDomains = (domainConfig.routes ?? []).map((route) => route.pattern).sort();
+if (JSON.stringify(configuredDomains) !== JSON.stringify([...expectedDomains].sort())) {
+  failures.push(`custom-domain config must contain exactly: ${expectedDomains.join(", ")}`);
+}
+for (const route of domainConfig.routes ?? []) {
+  if (route.custom_domain !== true) failures.push(`production hostname must be a Cloudflare Custom Domain: ${route.pattern}`);
+}
+
+const packageJson = JSON.parse(await text("package.json"));
+if (packageJson.engines?.node !== ">=24") failures.push("Node engine must stay aligned with canonical PostSteward (>=24)");
+for (const command of [packageJson.scripts?.deploy, packageJson.scripts?.["deploy:domain"]]) {
+  if (!command?.includes(`wrangler@${wranglerVersion}`)) failures.push(`deploy commands must pin Wrangler ${wranglerVersion}`);
+}
+
+const deployWorkflow = await text(".github/workflows/deploy.yml");
+for (const marker of [
+  `wrangler@${wranglerVersion}`,
+  "CLOUDFLARE_ACCOUNT_ID",
+  "CLOUDFLARE_API_TOKEN",
+  "persist-credentials: false",
+  "WRANGLER_SEND_METRICS",
+  "scripts/smoke-deployment.mjs"
+]) {
+  if (!deployWorkflow.includes(marker)) failures.push(`deployment workflow marker missing: ${marker}`);
+}
+
+const headers = await text("public/_headers");
+for (const marker of ["Strict-Transport-Security", "Content-Security-Policy", "X-Frame-Options: DENY", "Permissions-Policy:"]) {
+  if (!headers.includes(marker)) failures.push(`security header missing: ${marker}`);
+}
+
+const robots = await text("public/robots.txt");
+if (!robots.includes(`${publicOrigin}/sitemap.xml`)) failures.push("robots.txt must advertise the canonical sitemap");
+const sitemap = await text("public/sitemap.xml");
+if (!sitemap.includes(`<loc>${publicOrigin}/</loc>`)) failures.push("sitemap must contain the canonical homepage");
+
 async function walk(dir) {
   const out = [];
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const full = join(dir, entry.name);
     if (entry.isDirectory() && ![".git", "node_modules"].includes(entry.name)) out.push(...await walk(full));
-    else if (entry.isFile() && [".js", ".mjs", ".html", ".json", ".md", ".yml", ".yaml", ".jsonc"].includes(extname(entry.name))) out.push(full);
+    else if (entry.isFile() && [".js", ".mjs", ".html", ".json", ".md", ".yml", ".yaml", ".jsonc", ".txt", ".xml"].includes(extname(entry.name))) out.push(full);
   }
   return out;
 }
@@ -89,4 +159,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Showcase verification passed: ${evidence.facts.length} evidence facts, canonical ${evidence.canonicalRevision.slice(0, 8)}.`);
+console.log(`Showcase verification passed: ${evidence.facts.length} evidence facts, canonical ${evidence.canonicalRevision.slice(0, 8)}, Worker ${workerName}, domain ${publicOrigin}.`);

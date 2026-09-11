@@ -11,7 +11,8 @@ Public launch, demonstration and acquisition surface for [PostSteward](https://g
 - versioned product evidence tied to canonical GitHub receipts;
 - Product Hunt and OpenAI Developer Showcase preparation;
 - a CI guard that rejects provider credentials/write logic and unsupported verified claims;
-- Cloudflare Static Assets configuration and restrictive browser security headers.
+- Cloudflare Static Assets configuration and restrictive browser security headers;
+- an isolated Cloudflare deployment path for `poststeward.com`.
 
 ## What it must never contain
 
@@ -44,10 +45,18 @@ Update an `open` gate to `verified` only after the canonical repository has a re
 
 - [Launch plan](docs/LAUNCH_PLAN.md)
 - [Architecture boundary](docs/ARCHITECTURE.md)
+- [Cloudflare deployment](docs/CLOUDFLARE_DEPLOYMENT.md)
 - [Product Hunt pack](launch/PRODUCT_HUNT.md)
 - [OpenAI Showcase pack](launch/OPENAI_SHOWCASE.md)
 - [Security policy](SECURITY.md)
 
 ## Deployment
 
-`wrangler.jsonc` defines an assets-only Cloudflare deployment named `poststeward-showcase`. Supply Cloudflare credentials and the eventual public domain outside this repository. Do not add secrets to git.
+The showcase uses the same release-tooling discipline proven in canonical PostSteward without sharing application state or product secrets.
+
+- `wrangler.jsonc` deploys `poststeward-showcase` to the account `workers.dev` namespace for initial hosted verification.
+- `wrangler.domain.jsonc` attaches the same Worker to `poststeward.com` and `www.poststeward.com` as Cloudflare Custom Domains and disables the alternate `workers.dev`/preview origins.
+- `.github/workflows/deploy.yml` verifies first, requires a protected `showcase` environment, pins Wrangler `4.130.0`, and performs bounded hosted smoke checks after deployment.
+- `https://poststeward.com/` is the canonical public URL in page metadata, sitemap and launch material.
+
+Cloudflare credentials stay outside git. See [Cloudflare deployment](docs/CLOUDFLARE_DEPLOYMENT.md) for the exact environment contract and domain activation sequence.
