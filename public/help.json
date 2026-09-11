@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "product": "PostSteward",
+  "showcase": true,
+  "showcaseNote": "Documentation and UI only; poststeward.com does not expose effectful publishing endpoints.",
+  "summary": "Scoped agent publishing over MCP/HTTP/WebMCP with exact copy, explicit routing and durable receipts.",
+  "operationCount": 26,
+  "scopes": ["read","campaign:write","publish","schedule","connections","automation","billing"],
+  "receiptStates": ["scheduled","waiting_container","executing","published_verified","published_unverified","ambiguous_effect","drift_blocked","failed","cancelled"],
+  "limits": {"deliveryReservationsPerUtcDay":20,"activeSchedulesPerWorkspace":100,"sourceMonitoringMinutes":15,"scheduledMetrics":"daily for recent receipts"},
+  "links": {"guide":"/agent-guide.md","agents":"/agents.txt","llms":"/llms.txt","mcp":"/mcp.json","openapi":"/openapi.json","operations":"/docs/operations.md"}
+}
