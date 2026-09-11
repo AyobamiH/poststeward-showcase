@@ -1,0 +1,19 @@
+# PostSteward
+
+> Keep building. Let your agent keep building the market.
+
+PostSteward is the publishing layer for developer agents. It exists because technical builders often stop market-building while they are heads-down shipping, then arrive at launch with no accumulated story, conversations or warm pipeline.
+
+The agent uses project and GTM context it already has, finds grounded stories in the work as it happens, and uses PostSteward to execute the publishing step through agent-native interfaces.
+
+Interfaces: CLI, HTTP, WebMCP.
+
+The launch site includes an interactive synthetic command-centre demo. It does not contact a social provider.
+
+Supporting controls include scoped authority, fixed destinations, bounded retries and durable publication receipts.
+
+Free: agent publishing, schedules, routing and receipts.
+Advanced: USD 5/workspace/month for continuing source monitoring, campaign inventory, spacing and scheduled metrics. Public billing opens after launch acceptance.
+
+Public website: https://poststeward.com/
+Product metadata: https://poststeward.com/product.json

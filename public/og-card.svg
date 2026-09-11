@@ -1,14 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#07110e"/>
-  <circle cx="1010" cy="70" r="310" fill="#0d261c"/>
-  <circle cx="1010" cy="70" r="220" fill="none" stroke="#8ef0b2" stroke-opacity=".12"/>
-  <rect x="76" y="70" width="64" height="64" rx="16" fill="#0f211b"/>
-  <path d="M94 88h21c8 0 13 4 13 11 0 6-4 10-10 11l7 6-6 6-13-12h-4v12h-8V88Zm8 7v8h13c3 0 5-1 5-4s-2-4-5-4h-13Z" fill="#8ef0b2"/>
-  <circle cx="123" cy="87" r="5" fill="#d9ff8c"/>
-  <text x="158" y="113" font-family="Inter,Arial,sans-serif" font-size="38" font-weight="700" fill="#eef8f2">PostSteward</text>
-  <text x="76" y="255" font-family="Inter,Arial,sans-serif" font-size="72" font-weight="700" letter-spacing="-3" fill="#eef8f2">Give the agent a publishing lane.</text>
-  <text x="76" y="335" font-family="Inter,Arial,sans-serif" font-size="72" font-weight="500" letter-spacing="-3" fill="#9db8a9">Not the keys to the building.</text>
-  <text x="76" y="420" font-family="Inter,Arial,sans-serif" font-size="28" fill="#9db8a9">Explicit approval · durable receipts · provider readback</text>
-  <rect x="76" y="492" width="368" height="58" rx="29" fill="#8ef0b2"/>
-  <text x="111" y="530" font-family="Inter,Arial,sans-serif" font-size="23" font-weight="700" fill="#062113">Accountable publishing for AI agents</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">PostSteward - agent-native continuous GTM</title>
+  <desc id="desc">Keep building. Let your agent keep building the market.</desc>
+  <rect width="1200" height="630" fill="#0b0a08"/>
+  <path d="M0 80H1200M0 550H1200M80 0V630M1120 0V630" stroke="#332f22"/>
+  <text x="104" y="126" fill="#e2b94f" font-family="monospace" font-size="22">POSTSTEWARD_ / AGENT-NATIVE CONTINUOUS GTM</text>
+  <text x="104" y="254" fill="#ede8d7" font-family="monospace" font-weight="700" font-size="58">KEEP BUILDING.</text>
+  <text x="104" y="332" fill="#e2b94f" font-family="monospace" font-weight="700" font-size="58">LET YOUR AGENT KEEP</text>
+  <text x="104" y="410" fill="#e2b94f" font-family="monospace" font-weight="700" font-size="58">BUILDING THE MARKET.</text>
+  <text x="104" y="490" fill="#9b9482" font-family="monospace" font-size="24">CLI  /  HTTP  /  WEBMCP</text>
 </svg>

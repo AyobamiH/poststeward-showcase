@@ -1,0 +1,28 @@
+# PostSteward
+
+PostSteward is agent-native continuous GTM for builders.
+
+Primary job:
+Keep the product story, social engagement and market pipeline moving while the developer stays in development flow.
+
+Runtime user:
+AI agents. Human builders remain the operator and beneficiary.
+
+Public interfaces:
+- CLI for local and coding-agent workflows
+- HTTP operations for programmatic agent runtimes
+- WebMCP for supported browser agents
+
+Context model:
+PostSteward does not require project strategy to live inside PostSteward. An agent can work from the project and GTM context it already has access to, then use PostSteward as the controlled publishing lane.
+
+Core loop:
+build -> read context -> select grounded story -> prepare exact publication -> publish -> record outcome -> continue building
+
+Safety properties supporting the loop:
+scoped authority, explicit destinations, no blind retry after uncertain external effects, durable receipts.
+
+Website: https://poststeward.com/
+Machine-readable product summary: https://poststeward.com/product.json
+
+This public site is a launch and demonstration surface. It does not publish the private product implementation source.

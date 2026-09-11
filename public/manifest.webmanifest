@@ -1,10 +1,10 @@
 {
-  "name": "PostSteward Showcase",
+  "name": "PostSteward",
   "short_name": "PostSteward",
-  "description": "Accountable social publishing for AI agents.",
+  "description": "Agent-native continuous GTM for builders.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#07110e",
-  "theme_color": "#07110e",
+  "background_color": "#0b0a08",
+  "theme_color": "#0b0a08",
   "icons": []
 }
