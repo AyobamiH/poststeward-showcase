@@ -111,6 +111,9 @@ for (const marker of [
   'mode="custom-domain"',
   "persist-credentials: false",
   "WRANGLER_SEND_METRICS",
+  "SHOWCASE_ORIGINS",
+  "https://poststeward.com,https://www.poststeward.com",
+  "node --check scripts/smoke-deployment.mjs",
   "scripts/smoke-deployment.mjs"
 ]) {
   if (!deployWorkflow.includes(marker)) failures.push(`deployment workflow marker missing: ${marker}`);

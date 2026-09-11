@@ -42,6 +42,7 @@ jobs:
           node-version: 24
       - run: npm run verify
       - run: node --check public/app.js
+      - run: node --check scripts/smoke-deployment.mjs
 
   deploy:
     needs: verify
@@ -91,10 +92,10 @@ jobs:
 
           if [[ "$mode" == "workers-dev" ]]; then
             echo "config=wrangler.jsonc" >> "$GITHUB_OUTPUT"
-            echo "origin=https://poststeward-showcase.woeinvests.workers.dev" >> "$GITHUB_OUTPUT"
+            echo "origins=https://poststeward-showcase.woeinvests.workers.dev" >> "$GITHUB_OUTPUT"
           else
             echo "config=wrangler.domain.jsonc" >> "$GITHUB_OUTPUT"
-            echo "origin=https://poststeward.com" >> "$GITHUB_OUTPUT"
+            echo "origins=https://poststeward.com,https://www.poststeward.com" >> "$GITHUB_OUTPUT"
           fi
           echo "mode=$mode" >> "$GITHUB_OUTPUT"
 
@@ -107,5 +108,5 @@ jobs:
       - name: Verify hosted deployment
         if: steps.credentials.outputs.ready == 'true'
         env:
-          SHOWCASE_ORIGIN: ${{ steps.target.outputs.origin }}
+          SHOWCASE_ORIGINS: ${{ steps.target.outputs.origins }}
         run: node scripts/smoke-deployment.mjs
