@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">PostSteward mark</title>
+  <rect width="64" height="64" rx="16" fill="#0f211b"/>
+  <path d="M18 18h21c8 0 13 4 13 11 0 6-4 10-10 11l7 6-6 6-13-12h-4v12h-8V18Zm8 7v8h13c3 0 5-1 5-4s-2-4-5-4H26Z" fill="#8ef0b2"/>
+  <circle cx="47" cy="17" r="5" fill="#d9ff8c"/>
+</svg>
