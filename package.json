@@ -1,0 +1,15 @@
+{
+  "name": "poststeward-showcase",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "verify": "node scripts/verify.mjs",
+    "check": "node scripts/verify.mjs",
+    "dev": "python3 -m http.server 4173 -d public",
+    "deploy": "npx --yes wrangler@4 deploy"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
