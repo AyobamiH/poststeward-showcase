@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#07110e" />
+  <meta name="description" content="PostSteward is an accountable publishing layer for AI agents: exact review, explicit approval, durable publication state and provider readback." />
+  <meta property="og:title" content="PostSteward — accountable publishing for AI agents" />
+  <meta property="og:description" content="Let agents prepare social publications without giving them unchecked authority." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="/og-card.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <title>PostSteward — accountable publishing for AI agents</title>
+  <link rel="icon" href="/mark.svg" type="image/svg+xml" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="stylesheet" href="/styles.css" />
+  <script src="/app.js" type="module"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="ambient ambient--one" aria-hidden="true"></div>
+  <div class="ambient ambient--two" aria-hidden="true"></div>
+
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="PostSteward home">
+      <img src="/mark.svg" alt="" width="34" height="34" />
+      <span>PostSteward</span>
+      <em>showcase</em>
+    </a>
+    <nav aria-label="Primary navigation">
+      <a href="#walkthrough">How it works</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#boundary">Boundary</a>
+      <a class="nav-cta" href="https://github.com/AyobamiH/poststeward" target="_blank" rel="noreferrer">Canonical repo ↗</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="eyebrow"><span></span> Accountable social publishing for AI agents</div>
+      <h1>Give the agent a publishing lane.<br /><i>Not the keys to the building.</i></h1>
+      <p class="hero-copy">PostSteward turns an agent’s proposed social post into an exact, reviewable effect: explicit owner approval, a cancellation boundary, durable state and independent provider readback.</p>
+      <div class="hero-actions">
+        <a class="button button--primary" href="#walkthrough">Run the walkthrough <span aria-hidden="true">↓</span></a>
+        <a class="button button--ghost" href="https://poststeward-staging.woeinvests.workers.dev/pilot" target="_blank" rel="noreferrer">Owner acceptance surface ↗</a>
+      </div>
+      <p class="hero-note">The walkthrough below is deliberately non-effectful. Real account authority and publication stay inside canonical PostSteward.</p>
+
+      <div class="signal-strip" aria-label="Current verified engineering signals">
+        <div><strong id="signal-tests">—</strong><span>automated tests</span></div>
+        <div><strong id="signal-hosted">—</strong><span>hosted checks</span></div>
+        <div><strong id="signal-threads">—</strong><span>Threads OAuth</span></div>
+        <div><strong id="signal-live">—</strong><span>live publish + readback</span></div>
+      </div>
+    </section>
+
+    <section class="problem section-shell">
+      <div class="section-label">The problem</div>
+      <div class="problem-grid">
+        <h2>Agents are getting more capable.<br />External effects need to get more accountable.</h2>
+        <div class="problem-copy">
+          <p>A social API call is not just another tool invocation. It creates a public, durable effect under a real account identity.</p>
+          <p>PostSteward separates <strong>what an agent wants to do</strong> from <strong>what the owner actually authorises</strong>, then preserves enough evidence to inspect what happened afterwards.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="walkthrough section-shell" id="walkthrough">
+      <div class="section-heading">
+        <div>
+          <div class="section-label">Interactive walkthrough</div>
+          <h2>Five controls between intent and “it’s live”.</h2>
+        </div>
+        <div class="simulation-badge"><span></span> Simulation only — no post is sent</div>
+      </div>
+
+      <div class="demo-shell">
+        <div class="demo-copy">
+          <div id="step-kicker" class="demo-kicker"></div>
+          <h3 id="step-title"></h3>
+          <p id="step-copy"></p>
+          <div class="demo-controls">
+            <button id="step-prev" class="button button--ghost" type="button">Previous</button>
+            <span id="step-index" aria-live="polite"></span>
+            <button id="step-next" class="button button--primary" type="button">Next control</button>
+          </div>
+        </div>
+        <div class="terminal" aria-label="Illustrative control log">
+          <div class="terminal-top"><span></span><span></span><span></span><b>poststeward / effect trace</b></div>
+          <ol id="step-log"></ol>
+          <div class="terminal-foot">showcase://non-effectful</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="evidence section-shell" id="evidence">
+      <div class="section-heading">
+        <div>
+          <div class="section-label">Evidence, not launch theatre</div>
+          <h2>Every important claim gets a receipt.</h2>
+        </div>
+        <p>Canonical revision <a id="canonical-revision" href="https://github.com/AyobamiH/poststeward" target="_blank" rel="noreferrer">loading…</a></p>
+      </div>
+      <div id="evidence-grid" class="evidence-grid" aria-live="polite">
+        <p>Loading versioned evidence…</p>
+      </div>
+    </section>
+
+    <section class="boundary section-shell" id="boundary">
+      <div class="boundary-card">
+        <div>
+          <div class="section-label">One product. One source of truth.</div>
+          <h2>The showcase is the stage.<br />PostSteward remains the product.</h2>
+        </div>
+        <div class="boundary-flow" aria-label="Repository boundary">
+          <div class="boundary-node"><small>Public layer</small><strong>poststeward-showcase</strong><span>story · evidence · demo · launch assets</span></div>
+          <div class="boundary-arrow" aria-hidden="true">↓</div>
+          <div class="boundary-node boundary-node--canonical"><small>Canonical product</small><strong>AyobamiH/poststeward</strong><span>authority · state · OAuth · publication · readback</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="final-cta section-shell">
+      <div class="final-cta-card">
+        <div>
+          <div class="section-label">Current launch candidate</div>
+          <h2>The engineering is real.<br />The final live proof is next.</h2>
+          <p>The remaining headline acceptance gate is one controlled Threads publication through the canonical owner journey followed by independent readback. This showcase will not mark it complete early.</p>
+        </div>
+        <div class="final-actions">
+          <a class="button button--primary" href="https://github.com/AyobamiH/poststeward" target="_blank" rel="noreferrer">Inspect PostSteward ↗</a>
+          <a class="button button--ghost" href="https://github.com/AyobamiH/poststeward-showcase" target="_blank" rel="noreferrer">Inspect this showcase ↗</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div><img src="/mark.svg" alt="" width="24" height="24" /><strong>PostSteward</strong></div>
+    <p>Showcase claims are intentionally narrower than the canonical product roadmap.</p>
+    <a href="https://github.com/AyobamiH/poststeward/blob/main/README.md" target="_blank" rel="noreferrer">Current canonical status ↗</a>
+  </footer>
+</body>
+</html>

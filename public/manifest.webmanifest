@@ -1,0 +1,10 @@
+{
+  "name": "PostSteward Showcase",
+  "short_name": "PostSteward",
+  "description": "Accountable social publishing for AI agents.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07110e",
+  "theme_color": "#07110e",
+  "icons": []
+}
