@@ -1,31 +1,30 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "name": "PostSteward",
   "publicOrigin": "https://poststeward.com",
-  "category": "Agent-native continuous GTM for builders",
-  "positioning": "Keep building. Let your agent keep building the market.",
-  "audience": [
-    "developers",
-    "technical founders",
-    "agent operators",
-    "small technical teams"
-  ],
-  "problem": "Builders should not have to choose between staying in development flow and building market history before launch.",
-  "outcome": "Keep the product story, engagement and pipeline moving while development continues.",
-  "interfaces": ["CLI", "HTTP", "WebMCP"],
-  "contextModel": "Bring the project and GTM context your agent already has. PostSteward is the publishing execution lane, not the system that must own your strategy data.",
-  "workflow": [
-    "build signal",
-    "agent reads project and GTM context",
-    "agent selects a grounded story",
-    "PostSteward executes a controlled publication",
-    "provider outcome becomes an inspectable receipt",
-    "market history compounds before launch"
-  ],
-  "plans": {
-    "free": "Agent publishing, schedules, controlled routing and receipts",
-    "advanced": "USD 5 per workspace per month for continuing source monitoring, campaign inventory, spacing and scheduled metrics",
-    "advancedAvailability": "Public billing opens after launch acceptance"
+  "audience": ["AI agents", "developers", "technical founders", "agent operators"],
+  "purpose": "Let an agent keep the product story, engagement and GTM pipeline moving while the builder stays in development.",
+  "category": "Agent-first social publishing infrastructure for continuous GTM",
+  "interfaces": ["Remote MCP", "HTTP", "CLI via HTTP", "WebMCP"],
+  "providers": ["X", "Threads", "LinkedIn"],
+  "showcase": {
+    "effectfulPublicAccess": false,
+    "workspace": "synthetic preview",
+    "credentialsAccepted": false,
+    "billingEnabled": false
   },
-  "sourceDisclosure": "This public repository hosts the launch experience only. Product implementation source is not published here."
+  "plans": {
+    "free": {"price": 0, "features": ["publishing", "explicit scheduling", "routing", "receipts", "on-demand metrics", "agent transports"]},
+    "advanced": {"priceUsdPerWorkspaceMonth": 5, "features": ["source monitoring", "replenishment", "rolling allocation", "spacing controls", "scheduled metrics"]}
+  },
+  "discovery": {
+    "agentGuide": "/agent-guide.md",
+    "llms": "/llms.txt",
+    "agents": "/agents.txt",
+    "mcp": "/mcp.json",
+    "help": "/help.json",
+    "openapi": "/openapi.json",
+    "operations": "/docs/operations.md"
+  },
+  "sourceDisclosure": "The public launch repository contains only the showcase surface. Product implementation source is not published here."
 }
