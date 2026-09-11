@@ -1,54 +1,63 @@
-# Launch plan
+# PostSteward launch plan
 
-## Objective
+## Category
 
-Prepare PostSteward for public discovery without changing the canonical `AyobamiH/poststeward` roadmap.
+**Agent-native continuous GTM for builders.**
 
-## Critical path
+PostSteward is not positioned as another social scheduler and not primarily as a safety product.
 
-### Gate A — showcase foundation
+The core problem is that developers and technical founders frequently stop market-building while they are heads-down shipping. If they keep coding, they go silent. If they keep posting, they break development flow. The result is often a cold launch that starts audience and pipeline building on release day.
 
-- [x] Separate repository and explicit architecture boundary.
-- [x] Public landing page and non-effectful interactive walkthrough.
-- [x] Versioned evidence panel tied to canonical receipts.
-- [x] Product Hunt and OpenAI Showcase preparation files.
-- [x] CI boundary verification and static security headers.
+PostSteward lets an agent keep the product story moving from real project and GTM context while the builder stays in development.
 
-### Gate B — canonical live proof
+## Primary promise
 
-Must happen in `AyobamiH/poststeward`, not here:
+**Keep building. Let your agent keep building the market.**
 
-- [ ] Complete a real owner Threads grant.
-- [ ] Verify stable provider identity.
-- [ ] Prepare exact destination and text.
-- [ ] Approve one immutable review.
-- [ ] Observe the cancellation boundary.
-- [ ] Complete one durable provider publication.
-- [ ] Independently read back the resulting post.
-- [ ] Record the canonical acceptance receipt.
+Supporting line:
 
-Only after the receipt exists may `public/evidence.json` move `live-publication` from `open` to `verified`.
+**Do not finish building before you start building the market.**
 
-### Gate C — public availability
+## Runtime user
 
-- [ ] Deploy the showcase to a stable public origin.
-- [ ] Decide the public PostSteward user entry point; do not expose an owner-only staging journey as a general signup path.
-- [ ] Verify desktop/mobile rendering, social cards and external links on the deployed origin.
-- [ ] Record the public URL in Product Hunt/OpenAI submission drafts.
+The runtime user is the agent. The human is the operator and beneficiary.
 
-### Gate D — launch packaging
+Launch interfaces:
 
-Product Hunt currently expects a direct product URL, a <=60 character tagline, <=500 character description, square thumbnail and at least two gallery images. A video is optional. Launch copy is prepared in `launch/PRODUCT_HUNT.md`; visual capture happens after Gate B so gallery frames can show real evidence.
+- CLI;
+- HTTP;
+- WebMCP.
 
-For OpenAI Developer Showcase, keep model attribution evidence-backed. Do not claim GPT-6 Astra built or powered a flow unless the relevant development/session provenance supports that statement.
+## Demo story
 
-## Definition of launch-ready
+The public command-centre demo uses synthetic data and shows:
 
-Launch-ready means all of the following are true at the same time:
+1. a build milestone exists;
+2. the agent reads project/GTM context;
+3. it selects a grounded story;
+4. destination and exact copy are prepared;
+5. the controlled publishing boundary is crossed;
+6. a result is recorded;
+7. the developer never leaves the build.
 
-1. the showcase is publicly reachable and high-craft;
-2. the canonical live Threads publish/readback receipt exists;
-3. every headline claim maps to evidence;
-4. a new visitor can understand the product in under one minute;
-5. the Product Hunt gallery/demo shows the real effect path, not fabricated provider success;
-6. launch does not require a commit to the canonical product solely for marketing presentation.
+Receipts and scoped authority are shown as the trust layer underneath the outcome.
+
+## Product Hunt critical path
+
+Before submission:
+
+- production site live on apex and `www`;
+- public/private source boundary passes CI;
+- homepage reflects the continuous-GTM positioning;
+- synthetic demo is clearly labelled;
+- Product Hunt thumbnail and gallery are raster assets at recommended dimensions;
+- 60-90 second demo tells the builder problem before implementation details;
+- public user path is honest about any billing or provider limitations.
+
+## Claim rules
+
+Do not claim native ownership of context systems the agent merely has access to. A Google Drive GTM vault, repository notes or other connected sources are examples of context the agent can use, not necessarily direct PostSteward integrations.
+
+Do not fabricate engagement or lead counts. Any dashboard figures shown in launch material must be labelled synthetic unless they are backed by real public evidence.
+
+Do not publish private implementation-source locations, credentials or internal acceptance artefacts.

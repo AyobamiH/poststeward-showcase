@@ -1,133 +1,57 @@
-const state = {
-  step: 0,
-  steps: [
-    {
-      kicker: "01 · Agent intent",
-      title: "The agent proposes a publication",
-      copy: "The agent can prepare an exact destination and exact text. It does not receive unchecked social-account authority.",
-      log: ["intent.received", "destination=threads", "content.digest=7e81…", "effect=not-authorised"]
-    },
-    {
-      kicker: "02 · Owner review",
-      title: "A human sees the exact effect first",
-      copy: "PostSteward freezes the review inputs so the approved destination and copy cannot silently drift between review and execution.",
-      log: ["review.created", "destination.locked=true", "content.locked=true", "approval=required"]
-    },
-    {
-      kicker: "03 · Escape hatch",
-      title: "Approval still has a cancellation boundary",
-      copy: "The canonical owner journey includes a thirty-second cancellation window before dispatch. The showcase only demonstrates the state transition.",
-      log: ["approval.recorded", "cancel.window=30s", "provider.write=pending", "simulation=true"]
-    },
-    {
-      kicker: "04 · Durable write",
-      title: "The provider write is treated as an external effect",
-      copy: "PostSteward reserves publication durably and does not blindly retry an uncertain write. That is the difference between automation and accountable automation.",
-      log: ["reservation=durable", "write.intent=fenced", "blind.retry=false", "provider=canonical-service-only"]
-    },
-    {
-      kicker: "05 · Independent readback",
-      title: "A receipt is not the same as verification",
-      copy: "After the provider returns an identifier, PostSteward separately reads the published object back and checks the durable identity and exact content where the provider supports it.",
-      log: ["provider.id=durable", "readback=separate", "receipt=inspectable", "verified≠assumed"]
-    }
-  ]
-};
+const runButton = document.querySelector("#run-loop");
+const agentSteps = [...document.querySelectorAll("#agent-steps li")];
+const stories = [...document.querySelectorAll(".story")];
+const log = document.querySelector("#agent-log");
+const laneBadge = document.querySelector("#lane-badge");
+const queueBadge = document.querySelector("#queue-badge");
+const receiptBadge = document.querySelector("#receipt-badge");
+const receiptStory = document.querySelector("#receipt-story");
+const receiptResult = document.querySelector("#receipt-result");
+const buildStatus = document.querySelector("#build-status");
+const queueStatus = document.querySelector("#queue-status");
+const laneStatus = document.querySelector("#lane-status");
+const pipelineStatus = document.querySelector("#pipeline-status");
 
-const byId = (id) => document.getElementById(id);
-const stepKicker = byId("step-kicker");
-const stepTitle = byId("step-title");
-const stepCopy = byId("step-copy");
-const stepLog = byId("step-log");
-const stepIndex = byId("step-index");
-const prevButton = byId("step-prev");
-const nextButton = byId("step-next");
+const messages = [
+  "[CONTEXT] Agent read the current milestone and the reviewed GTM narrative.",
+  "[STORY] Selected the developer context-switch problem because it is grounded in the current build story.",
+  "[PREPARED] Destination and exact copy are fixed before the publishing boundary.",
+  "[DISPATCH] Synthetic demo crossed the controlled publishing boundary. No real provider call was made.",
+  "[RECEIPT] Demo outcome recorded. The developer never left the build to run this loop.",
+];
 
-function escapeHtml(value) {
-  return value.replace(/[&<>'"]/g, (char) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    "'": "&#39;",
-    '"': "&quot;"
-  }[char]));
+let step = 0;
+
+function render() {
+  agentSteps.forEach((item, index) => {
+    item.classList.toggle("done", index < step);
+    item.classList.toggle("active", index === Math.min(step, agentSteps.length - 1));
+  });
+
+  stories.forEach((story, index) => {
+    story.classList.toggle("selected", index === (step < 2 ? 0 : Math.min(step - 1, 2)));
+  });
+
+  log.textContent = step === 0
+    ? "[READY] Agent can continue the GTM loop without pulling the developer out of the build."
+    : messages[step - 1];
+
+  laneBadge.textContent = step === 0 ? "IDLE" : step < 4 ? "RUNNING" : "CONTROLLED";
+  queueBadge.textContent = step < 2 ? "READY" : "STORY SELECTED";
+  receiptBadge.textContent = step < 5 ? "WAITING" : "RECORDED";
+  receiptStory.textContent = step < 2 ? "not dispatched" : "Why building and marketing should not be serial jobs";
+  receiptResult.textContent = step < 5 ? "awaiting agent step" : "synthetic provider outcome recorded";
+  buildStatus.textContent = step === 0 ? "NEW MILESTONE" : "DEVELOPER BUILDING";
+  queueStatus.textContent = step < 2 ? "3 GROUNDED" : "1 SELECTED";
+  laneStatus.textContent = step === 0 ? "READY" : step < 5 ? "ACTIVE" : "COMPLETE";
+  pipelineStatus.textContent = step < 5 ? "WARMING" : "STORY ADDED";
+  runButton.textContent = step >= messages.length ? "Reset agent loop" : "Run next agent step";
 }
 
-function renderStep() {
-  const step = state.steps[state.step];
-  stepKicker.textContent = step.kicker;
-  stepTitle.textContent = step.title;
-  stepCopy.textContent = step.copy;
-  stepIndex.textContent = `${state.step + 1} / ${state.steps.length}`;
-  stepLog.replaceChildren(...step.log.map((line, index) => {
-    const row = document.createElement("li");
-    row.innerHTML = `<span>${String(index + 1).padStart(2, "0")}</span><code>${escapeHtml(line)}</code>`;
-    return row;
-  }));
-  prevButton.disabled = state.step === 0;
-  nextButton.textContent = state.step === state.steps.length - 1 ? "Restart walkthrough" : "Next control";
-}
-
-prevButton.addEventListener("click", () => {
-  state.step = Math.max(0, state.step - 1);
-  renderStep();
+runButton?.addEventListener("click", () => {
+  if (step >= messages.length) step = 0;
+  else step += 1;
+  render();
 });
 
-nextButton.addEventListener("click", () => {
-  state.step = state.step === state.steps.length - 1 ? 0 : state.step + 1;
-  renderStep();
-});
-
-async function loadEvidence() {
-  const target = byId("evidence-grid");
-  const revision = byId("canonical-revision");
-  try {
-    const response = await fetch("./evidence.json", { cache: "no-store" });
-    if (!response.ok) throw new Error(`Evidence unavailable (${response.status})`);
-    const evidence = await response.json();
-    const facts = new Map(evidence.facts.map((fact) => [fact.id, fact]));
-
-    revision.textContent = evidence.canonicalRevision.slice(0, 8);
-    revision.href = `${evidence.canonicalRepository}/commit/${evidence.canonicalRevision}`;
-    byId("signal-tests").textContent = facts.get("tests")?.value.replace(" passed", "") ?? "—";
-    byId("signal-hosted").textContent = facts.get("hosted-checks")?.value.replace(" passed", "") ?? "—";
-    byId("signal-threads").textContent = facts.get("threads-oauth")?.state === "verified" ? "Ready" : "Open";
-    byId("signal-live").textContent = facts.get("live-publication")?.state === "verified" ? "Verified" : "Next";
-
-    target.replaceChildren(...evidence.facts.map((fact) => {
-      const card = document.createElement("article");
-      card.className = "evidence-card";
-
-      const stateBadge = document.createElement("div");
-      stateBadge.className = `evidence-state evidence-state--${fact.state}`;
-      stateBadge.textContent = fact.state === "verified" ? "Verified" : "Open gate";
-
-      const label = document.createElement("p");
-      label.textContent = fact.label;
-
-      const value = document.createElement("strong");
-      value.textContent = fact.value;
-
-      const link = document.createElement("a");
-      link.href = fact.evidence;
-      link.target = "_blank";
-      link.rel = "noreferrer";
-      link.append("Inspect evidence ");
-      const arrow = document.createElement("span");
-      arrow.setAttribute("aria-hidden", "true");
-      arrow.textContent = "↗";
-      link.append(arrow);
-
-      card.append(stateBadge, label, value, link);
-      return card;
-    }));
-  } catch {
-    const error = document.createElement("p");
-    error.className = "evidence-error";
-    error.textContent = "Evidence panel could not load. Use the canonical repository links instead.";
-    target.replaceChildren(error);
-  }
-}
-
-renderStep();
-loadEvidence();
+render();

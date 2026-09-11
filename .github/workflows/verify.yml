@@ -8,20 +8,20 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: showcase-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24
-      - name: Verify architecture boundary and evidence
+      - name: Verify public boundary and launch contract
         run: npm run verify
       - name: Check browser JavaScript syntax
         run: node --check public/app.js
+      - name: Check hosted smoke verifier syntax
+        run: node --check scripts/smoke-deployment.mjs

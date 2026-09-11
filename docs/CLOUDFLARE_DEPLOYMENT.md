@@ -1,77 +1,45 @@
-# Cloudflare deployment
+# Cloudflare deployment contract
 
-## Purpose
+## Production target
 
-Deploy the public showcase without sharing runtime authority with canonical `AyobamiH/poststeward`.
+The normal production target is the Cloudflare Worker `poststeward-showcase` serving Static Assets on two Custom Domains:
 
-The canonical repository established the proven conventions reused here: Node 24, a protected Cloudflare API token, telemetry disabled in CI, pinned Wrangler tooling and post-deployment verification. The showcase deliberately does **not** reuse PostSteward's D1, Durable Objects, OAuth secrets, billing secrets or application deployment workflow.
+- `poststeward.com`
+- `www.poststeward.com`
 
-## Cloudflare topology
+`wrangler.domain.jsonc` is the production configuration. It disables `workers.dev` and preview URLs and attaches both hostnames as Custom Domains.
 
-### Production Custom Domains
+`wrangler.jsonc` exists only as a manually selected diagnostic/recovery target on the account's `workers.dev` subdomain.
 
-`poststeward.com` has now been purchased in Cloudflare. `wrangler.domain.jsonc` is therefore the normal `main`-branch deployment target and attaches:
+## Authentication
 
-- `poststeward.com`;
-- `www.poststeward.com`.
+The Cloudflare account ID is a non-secret identifier pinned in the deployment workflow. Authentication uses one protected GitHub environment secret:
 
-Both are Cloudflare **Custom Domains**, not Workers Routes. PostSteward Showcase is the origin, so Cloudflare creates and manages the required DNS records and certificates. The production configuration disables both `workers.dev` and preview URLs so the launch has one public origin family.
+`CLOUDFLARE_API_TOKEN`
 
-The homepage declares `https://poststeward.com/` as canonical even while `www` is attached.
+Use a dedicated, least-privilege token for this launch Worker. Do not reuse unrelated product credentials and do not commit the token.
 
-### Diagnostic Workers origin
+## CI behaviour
 
-`wrangler.jsonc` retains `https://poststeward-showcase.woeinvests.workers.dev` only as an explicit diagnostic/recovery target. Ordinary pushes to `main` do not choose it. It can be selected manually through workflow dispatch if production-domain diagnosis requires an origin independent of Custom Domain attachment.
+On a deployment-relevant push to `main`:
 
-## Cloudflare account
+1. checkout uses a pinned action SHA with persisted Git credentials disabled;
+2. Node 24 runs the repository verifier;
+3. browser JavaScript and the hosted smoke verifier receive syntax checks;
+4. exact Wrangler `4.130.0` deploys `wrangler.domain.jsonc`;
+5. hosted acceptance independently exercises both production hostnames.
 
-The non-secret Cloudflare account ID was recovered from canonical PostSteward's redacted staging inspection and is pinned in the showcase workflow:
+Hosted acceptance requires:
 
-`6ddcbcb8474f1a7e460b2f0aabec0e2f`
+- HTTPS success;
+- the current continuous-GTM product markers;
+- canonical metadata pointing at the apex;
+- `product.json` with CLI, HTTP and WebMCP interfaces;
+- HSTS, CSP, X-Content-Type-Options, Referrer-Policy, X-Frame-Options, COOP, CORP and Permissions-Policy;
+- no private implementation-repository identifier in the rendered page.
 
-That inspection kept the API token masked. The showcase therefore does not require a duplicate GitHub variable for the account identifier.
+## Failure policy
 
-## GitHub environment
+A missing token produces a safe no-op rather than an unauthenticated deploy attempt. A configured token that cannot deploy is a real failure and should be diagnosed at the failing Cloudflare layer.
 
-The deployment job uses a GitHub environment named `showcase`.
-
-Configure only one protected value:
-
-- environment secret `CLOUDFLARE_API_TOKEN` — a dedicated deploy token for this public showcase.
-
-Do **not** copy the canonical PostSteward token merely for convenience. Do not paste the token into source files, issues, workflow logs or chat.
-
-## API token scope
-
-Prefer a dedicated token for this public showcase rather than copying the canonical PostSteward deployment token. Start from Cloudflare's **Edit Cloudflare Workers** token template and scope resources down to account `6ddcbcb8474f1a7e460b2f0aabec0e2f` and the `poststeward.com` zone.
-
-The token needs only the Worker script/custom-domain capabilities Wrangler requires. Do not grant D1, R2, KV, billing or unrelated account administration solely for this showcase.
-
-## Workflow behaviour
-
-`.github/workflows/deploy.yml` runs verification first. The deployment job then:
-
-1. refuses to deploy outside `AyobamiH/poststeward-showcase` `main`;
-2. uses the pinned non-secret Cloudflare account ID;
-3. checks whether the dedicated API token is present;
-4. skips effectfully, but successfully, when that secret is absent;
-5. targets `poststeward.com` on ordinary `main` pushes;
-6. retains `workers.dev` only as an explicit manual diagnostic target;
-7. deploys with exactly Wrangler `4.130.0`, matching the canonical PostSteward release tooling;
-8. runs bounded HTTPS smoke verification against the selected origin.
-
-The smoke check requires the expected showcase HTML, versioned evidence and security headers. Custom-domain certificate/DNS convergence can retry for up to two minutes; a deployment upload is not treated as acceptance until the hosted checks pass.
-
-## Domain activation sequence
-
-1. `poststeward.com` is purchased in the Cloudflare account.
-2. Confirm the zone is active and there is no conflicting origin record for the apex or `www`.
-3. Save the dedicated `CLOUDFLARE_API_TOKEN` secret in the GitHub `showcase` environment.
-4. Merge a deployment-relevant change to `main` (or explicitly dispatch `custom-domain`).
-5. Require the hosted smoke job to pass on `https://poststeward.com`.
-6. Independently verify `https://www.poststeward.com` resolves through the same Cloudflare Custom Domain family.
-7. Use `https://poststeward.com` for Product Hunt and OpenAI Developer Showcase submissions.
-
-## Boundary
-
-Deploying this repository must never mutate `AyobamiH/poststeward`, its Worker, D1 database, Durable Objects, OAuth applications or provider credentials. The only shared infrastructure assumption is the Cloudflare account/Workers namespace.
+Workers.dev can be selected manually only for diagnostic isolation. It is not the Product Hunt origin.

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "name": "PostSteward",
+  "publicOrigin": "https://poststeward.com",
+  "category": "Agent-native continuous GTM for builders",
+  "positioning": "Keep building. Let your agent keep building the market.",
+  "audience": [
+    "developers",
+    "technical founders",
+    "agent operators",
+    "small technical teams"
+  ],
+  "problem": "Builders should not have to choose between staying in development flow and building market history before launch.",
+  "outcome": "Keep the product story, engagement and pipeline moving while development continues.",
+  "interfaces": ["CLI", "HTTP", "WebMCP"],
+  "contextModel": "Bring the project and GTM context your agent already has. PostSteward is the publishing execution lane, not the system that must own your strategy data.",
+  "workflow": [
+    "build signal",
+    "agent reads project and GTM context",
+    "agent selects a grounded story",
+    "PostSteward executes a controlled publication",
+    "provider outcome becomes an inspectable receipt",
+    "market history compounds before launch"
+  ],
+  "plans": {
+    "free": "Agent publishing, schedules, controlled routing and receipts",
+    "advanced": "USD 5 per workspace per month for continuing source monitoring, campaign inventory, spacing and scheduled metrics",
+    "advancedAvailability": "Public billing opens after launch acceptance"
+  },
+  "sourceDisclosure": "This public repository hosts the launch experience only. Product implementation source is not published here."
+}

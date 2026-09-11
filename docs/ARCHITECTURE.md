@@ -1,47 +1,42 @@
-# Showcase architecture
+# Public launch architecture
 
 ## Purpose
 
-This repository is a presentation boundary around the canonical PostSteward product. It exists so launch work can move quickly without changing the product roadmap or creating a second implementation.
+This repository hosts the public PostSteward launch experience. It explains the product accurately, demonstrates the agent operating model and provides a hardened path to `poststeward.com` without publishing the private product implementation.
 
-```text
-Product Hunt / OpenAI Showcase / visitors
-                    |
-                    v
-        poststeward-showcase
-     story + evidence + walkthrough
-                    |
-      links / explicit hand-off only
-                    |
-                    v
-          AyobamiH/poststeward
- auth + authority + state + publication
-      + recovery + billing + readback
-```
+## Product model
 
-## Runtime
+PostSteward is agent-native continuous GTM for builders.
 
-The v1 showcase is static HTML, CSS and browser JavaScript with no runtime package dependencies. It can be deployed through Cloudflare Static Assets.
+The developer remains in the build. An agent works from project and GTM context it already has access to, selects a grounded story and uses PostSteward as the publishing execution lane. Over time, the product story, engagement and pipeline can accumulate before launch.
 
-The browser JavaScript performs one same-origin read of `evidence.json`. It does not call social providers, Stripe, Google, GitHub APIs or canonical PostSteward mutation endpoints.
+The public narrative therefore leads with the builder outcome. Scoped authority, deterministic effects and receipts explain why the agent lane can be trusted, but they are supporting architecture rather than the headline category.
 
-## Trust boundary
+## Public runtime
 
-The showcase can link to canonical product surfaces, but all effectful work remains there. There is no credential input, OAuth callback, social provider adapter, billing route, durable store or agent token in this repository.
+The launch site is deliberately dependency-light:
 
-A repository verifier enforces this boundary with fail-closed pattern checks and requires verified claims to point at evidence in `AyobamiH/poststeward`.
+- static HTML/CSS/JavaScript;
+- no client-side network requests in the interactive demo;
+- Cloudflare Workers Static Assets;
+- apex and `www` Custom Domains;
+- strict edge security headers;
+- machine-readable `product.json`, `agents.txt` and `llms.txt`.
 
-## Evidence model
+The interactive command centre uses synthetic launch data and cannot publish anything.
 
-`public/evidence.json` is the versioned public claim set. Each fact has:
+## Source boundary
 
-- an ID;
-- a human-readable label and value;
-- `verified` or `open` state;
-- a canonical evidence URL.
+No private implementation source, implementation-repository location, provider credential or customer data belongs in this repository.
 
-An open gate stays open until the canonical product produces real external evidence. The showcase does not infer completion from implemented code, passing fixtures or deployed configuration.
+CI enforces this as a deployment invariant. The verifier rejects known private-source identifiers, the former evidence-led launch structure, private staging origins and common provider-authority/secret patterns.
 
-## Deployment
+## Agent-facing story
 
-`wrangler.jsonc` defines a static-assets deployment named `poststeward-showcase`. Security headers are in `public/_headers`. Deployment credentials, domains and environment configuration must be supplied outside the repository.
+The public launch highlights three runtime interfaces:
+
+1. CLI for local and coding agents.
+2. HTTP for programmatic agent runtimes.
+3. WebMCP for supported browser agents.
+
+The strategy/context layer is intentionally decoupled. A GTM plan may live in connected documents, source vaults, project notes or the agent's existing working context. PostSteward is the execution lane, not a requirement to relocate that context.
