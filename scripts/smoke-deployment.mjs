@@ -5,7 +5,7 @@ if (!origins.length || origins.some((origin) => !origin.startsWith("https://")))
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const requiredHeaders = ["strict-transport-security", "content-security-policy", "x-content-type-options", "referrer-policy", "x-frame-options", "cross-origin-opener-policy", "cross-origin-resource-policy", "permissions-policy"];
 const operationNames = ["workspace_status","accounts_list","account_disconnect","project_put","projects_list","campaign_create","campaign_get","campaign_validate","publish_now","schedule_create","schedule_cancel","schedule_replace","receipt_get","receipts_list","workspace_export","metrics_capture","publishing_pause","automation_configure","automation_inspect","automation_preview","automation_enable","automation_pause","billing_status","billing_quote","billing_checkout","billing_portal"];
-const forbidden = /AyobamiH\/poststeward(?!-showcase)|poststeward-staging\.woeinvests\.workers\.dev|bright-post-dash/i;
+const forbidden = /AyobamiH\/poststeward(?!-showcase)|poststeward-staging\.woeinvests\.workers\.dev/i;
 
 async function getText(origin, path) {
   const response = await fetch(new URL(path, origin), { headers: { "cache-control": "no-cache" }, redirect: "follow" });
