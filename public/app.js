@@ -85,22 +85,47 @@ async function loadEvidence() {
     const response = await fetch("./evidence.json", { cache: "no-store" });
     if (!response.ok) throw new Error(`Evidence unavailable (${response.status})`);
     const evidence = await response.json();
+    const facts = new Map(evidence.facts.map((fact) => [fact.id, fact]));
+
     revision.textContent = evidence.canonicalRevision.slice(0, 8);
     revision.href = `${evidence.canonicalRepository}/commit/${evidence.canonicalRevision}`;
+    byId("signal-tests").textContent = facts.get("tests")?.value.replace(" passed", "") ?? "—";
+    byId("signal-hosted").textContent = facts.get("hosted-checks")?.value.replace(" passed", "") ?? "—";
+    byId("signal-threads").textContent = facts.get("threads-oauth")?.state === "verified" ? "Ready" : "Open";
+    byId("signal-live").textContent = facts.get("live-publication")?.state === "verified" ? "Verified" : "Next";
+
     target.replaceChildren(...evidence.facts.map((fact) => {
       const card = document.createElement("article");
       card.className = "evidence-card";
-      const stateLabel = fact.state === "verified" ? "Verified" : "Open gate";
-      card.innerHTML = `
-        <div class="evidence-state evidence-state--${fact.state}">${stateLabel}</div>
-        <p>${escapeHtml(fact.label)}</p>
-        <strong>${escapeHtml(fact.value)}</strong>
-        <a href="${fact.evidence}" target="_blank" rel="noreferrer">Inspect evidence <span aria-hidden="true">↗</span></a>
-      `;
+
+      const stateBadge = document.createElement("div");
+      stateBadge.className = `evidence-state evidence-state--${fact.state}`;
+      stateBadge.textContent = fact.state === "verified" ? "Verified" : "Open gate";
+
+      const label = document.createElement("p");
+      label.textContent = fact.label;
+
+      const value = document.createElement("strong");
+      value.textContent = fact.value;
+
+      const link = document.createElement("a");
+      link.href = fact.evidence;
+      link.target = "_blank";
+      link.rel = "noreferrer";
+      link.append("Inspect evidence ");
+      const arrow = document.createElement("span");
+      arrow.setAttribute("aria-hidden", "true");
+      arrow.textContent = "↗";
+      link.append(arrow);
+
+      card.append(stateBadge, label, value, link);
       return card;
     }));
   } catch {
-    target.innerHTML = `<p class="evidence-error">Evidence panel could not load. Use the canonical repository links instead.</p>`;
+    const error = document.createElement("p");
+    error.className = "evidence-error";
+    error.textContent = "Evidence panel could not load. Use the canonical repository links instead.";
+    target.replaceChildren(error);
   }
 }
 
