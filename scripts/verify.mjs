@@ -3,6 +3,7 @@ import { extname, join, relative } from "node:path";
 
 const root = new URL("../", import.meta.url);
 const rootPath = root.pathname;
+const canonicalPrefix = "https://github.com/AyobamiH/poststeward";
 
 const required = [
   "README.md",
@@ -26,14 +27,13 @@ for (const path of required) {
 
 const evidence = JSON.parse(await text("public/evidence.json"));
 if (evidence.schemaVersion !== 1) failures.push("evidence schemaVersion must be 1");
+if (evidence.canonicalRepository !== canonicalPrefix) failures.push("canonicalRepository must be AyobamiH/poststeward");
 if (!/^[0-9a-f]{40}$/.test(evidence.canonicalRevision ?? "")) failures.push("canonicalRevision must be a full git SHA");
 if (!Array.isArray(evidence.facts) || evidence.facts.length < 5) failures.push("at least five evidence facts are required");
 for (const fact of evidence.facts ?? []) {
   if (!fact.id || !fact.label || !fact.value || !fact.evidence) failures.push(`evidence fact is incomplete: ${fact.id ?? "unknown"}`);
   if (!["verified", "open"].includes(fact.state)) failures.push(`invalid evidence state for ${fact.id}: ${fact.state}`);
-  if (fact.state === "verified" && !fact.evidence.startsWith("https://github.com/AyobamiH/poststeward")) {
-    failures.push(`verified fact must point to canonical GitHub evidence: ${fact.id}`);
-  }
+  if (!fact.evidence.startsWith(canonicalPrefix)) failures.push(`evidence must point to canonical GitHub source: ${fact.id}`);
 }
 
 const html = await text("public/index.html");
