@@ -1,13 +1,18 @@
-# Security policy
+# Security boundary
 
-## Repository scope
+This repository is intentionally a non-effectful public launch surface.
 
-This repository is a static public showcase. It must never hold PostSteward owner sessions, provider access/refresh tokens, OAuth client secrets, Stripe secrets, signing keys or private customer data.
+It must never contain:
 
-## Effect boundary
+- social-provider credentials or refresh tokens;
+- customer or operator session data;
+- billing secrets;
+- private implementation source or links that disclose its repository location;
+- effectful provider adapters;
+- production account identifiers that are not intended to be public.
 
-The showcase must not directly call social-provider APIs or reproduce canonical product write paths. Interactive controls are illustrative and explicitly labelled as simulation. Real account connections, approvals and publication stay inside `AyobamiH/poststeward`.
+The browser demo is synthetic and must make no network call from `public/app.js`.
 
-## Reporting
+Deployment authentication is isolated to the GitHub `showcase` environment secret `CLOUDFLARE_API_TOKEN`. The token value must never be committed, printed or pasted into public issues.
 
-For a security concern in the showcase, open a private GitHub security advisory on this repository rather than posting secrets in a public issue.
+CI scans the public tree for private-source identifiers and common credential/provider-authority patterns before deployment.

@@ -1,40 +1,38 @@
-# OpenAI Developer Showcase pack
+# OpenAI Showcase pack
 
-The OpenAI Developer Showcase currently includes GPT-6 Astra as a model filter and Agents as a use-case category. This repository is therefore structured to make model provenance and product evidence explicit rather than retrofitting an Astra claim after the fact.
+## Title
 
-## Submission title
+**PostSteward - continuous GTM for developer agents**
 
-PostSteward — accountable publishing for AI agents
+## Description
 
-## Short description
+PostSteward gives the agent already working with a developer's project a machine-native path to keep telling the product story while development continues. The agent can work from project and GTM context it already has, then use CLI, HTTP or WebMCP to execute controlled social publishing. The goal is to arrive at launch with accumulated narrative, conversations and a warm pipeline instead of beginning market-building on release day.
 
-A launch experience for PostSteward, a system that separates an AI agent’s proposed social publication from the owner authority required to create the real external effect. The flow combines exact review, explicit approval, durable effect fencing and provider readback.
+## Why agents matter
 
-## What to demonstrate
+The product is designed around a simple role split:
 
-- the agent proposes a concrete effect;
-- the owner sees the exact destination and content;
-- approval is explicit and bound to that review;
-- external writes are durably fenced rather than blindly retried;
-- dispatch and verification are separate states;
-- evidence links back to the canonical implementation and real acceptance receipt.
+- the developer or technical founder is the operator and beneficiary;
+- the AI agent is the runtime user;
+- PostSteward is the controlled external-effect lane.
 
-## GPT-6 Astra attribution gate
+That is why agent interfaces are first-class rather than an afterthought.
 
-**Status: open until provenance is reconciled.**
+## Trust model
 
-Before submission, record which parts of the showcase/product work were actually produced with GPT-6 Astra and retain links or other non-sensitive evidence. Do not describe the entire PostSteward codebase as “built with Astra” merely because the launch showcase or a later engineering session used Astra.
+The launch story leads with continuous GTM, then explains the controls needed for autonomous external effects:
 
-A safe final sentence should be specific, for example:
+- scoped authority;
+- explicit destinations and exact publication intent;
+- bounded behaviour around uncertain effects;
+- durable, inspectable outcomes.
 
-> GPT-6 Astra helped us turn the existing PostSteward engineering evidence into a focused public launch experience and pressure-test the boundary between agent intent and owner-authorised external effects.
+## Model attribution rule
 
-Use that sentence only if the underlying development-session provenance supports it.
+Only attribute work to a named OpenAI model when the exact contribution is supported by the development session or submission evidence. Do not describe the whole product as built by a model merely because that model helped with launch positioning, review or showcase preparation.
 
-## Final submission gate
+## Submission visuals
 
-- [ ] Public showcase URL exists.
-- [ ] Canonical real Threads publication/readback receipt exists.
-- [ ] Model attribution has been reconciled.
-- [ ] Demo contains no private credentials, account IDs or OAuth material.
-- [ ] Every strong product claim is backed by canonical evidence.
+Use the same five-frame story as Product Hunt: builder problem, continuous GTM loop, agent-native interfaces, command centre, trust layer.
+
+The public demo must remain clearly labelled synthetic and must not expose private implementation-source locations or internal credentials.

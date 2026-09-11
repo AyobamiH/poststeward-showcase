@@ -1,63 +1,61 @@
-# PostSteward Showcase
+# PostSteward launch surface
 
-Public launch, demonstration and acquisition surface for [PostSteward](https://github.com/AyobamiH/poststeward).
+**PostSteward is agent-native continuous GTM for builders.**
 
-> **Architecture rule:** `AyobamiH/poststeward` is the canonical product. This repository is the stage, not a fork, rewrite, scheduler or second implementation.
+Keep building. Let your agent keep building the market.
 
-## What this repository contains
+This repository hosts the public launch experience for `poststeward.com`: the Product Hunt story, an effect-free interactive command-centre demo, machine-readable product metadata and the Cloudflare deployment acceptance checks.
 
-- a high-craft static launch site;
-- a deliberately non-effectful five-step publication walkthrough;
-- versioned product evidence tied to canonical GitHub receipts;
-- Product Hunt and OpenAI Developer Showcase preparation;
-- a CI guard that rejects provider credentials/write logic and unsupported verified claims;
-- Cloudflare Static Assets configuration and restrictive browser security headers;
-- an isolated Cloudflare deployment path for `poststeward.com`.
+## The problem
 
-## What it must never contain
+Developers and technical founders often have to choose between two bad modes:
 
-- social-provider credentials or provider write logic;
-- PostSteward authentication, billing, recovery or durable product state;
-- a fabricated provider success state;
-- a claim that an external acceptance gate passed without a canonical receipt;
-- deployment logic that mutates `AyobamiH/poststeward`.
+- stay in the build and let the market go quiet; or
+- stop development repeatedly to reconstruct context, create content and publish it.
 
-Real publication and account authority remain inside canonical PostSteward.
+That creates a cold-launch problem. By the time the product is ready, the audience, conversations and pipeline are only just starting.
 
-## Local preview
+PostSteward lets the agent already working with project and GTM context keep the story moving while development continues.
 
-No dependency install is required for the site or verifier.
+## Agent-native interfaces
+
+The product is designed for agents as runtime users, with humans remaining the operator and beneficiary:
+
+- **CLI** for coding agents and local operator workflows;
+- **HTTP** for programmatic agent runtimes;
+- **WebMCP** for supported browser agents.
+
+The public demo makes no provider calls. It exists to explain the operating model without requiring account access.
+
+## Public/private boundary
+
+This repository is a launch and presentation surface. It intentionally does **not** contain or link to private product implementation source, provider credentials, customer data, production authority or internal evidence repositories.
+
+Public claims are constrained to behaviour visible in this repository and hosted deployment acceptance.
+
+## Local verification
 
 ```bash
 npm run verify
+node --check public/app.js
+node --check scripts/smoke-deployment.mjs
+```
+
+Local preview:
+
+```bash
 npm run dev
 ```
 
-Open `http://localhost:4173`.
-
-## Evidence
-
-`public/evidence.json` is the public claim ledger. The initial showcase candidate is pinned to canonical revision `e8a95086548a23541e89e2f33d56c0abd274d9cc` and intentionally leaves the controlled real Threads publication/readback gate open.
-
-Update an `open` gate to `verified` only after the canonical repository has a real evidence URL.
-
-## Launch work
-
-- [Launch plan](docs/LAUNCH_PLAN.md)
-- [Architecture boundary](docs/ARCHITECTURE.md)
-- [Cloudflare deployment](docs/CLOUDFLARE_DEPLOYMENT.md)
-- [Product Hunt pack](launch/PRODUCT_HUNT.md)
-- [OpenAI Showcase pack](launch/OPENAI_SHOWCASE.md)
-- [Security policy](SECURITY.md)
-
 ## Deployment
 
-The showcase uses the same release-tooling discipline proven in canonical PostSteward without sharing application state or product secrets.
+Production is served from Cloudflare Workers Static Assets on:
 
-- `poststeward.com` has been purchased and is now the normal production deployment target.
-- `wrangler.domain.jsonc` attaches `poststeward.com` and `www.poststeward.com` as Cloudflare Custom Domains and disables alternate `workers.dev`/preview origins.
-- `wrangler.jsonc` retains `poststeward-showcase.woeinvests.workers.dev` only as a manually selected diagnostic target.
-- `.github/workflows/deploy.yml` verifies first, uses the recovered non-secret Cloudflare account ID, requires only a dedicated `CLOUDFLARE_API_TOKEN` secret in the protected `showcase` environment, pins Wrangler `4.130.0`, and performs bounded hosted smoke checks after deployment.
-- `https://poststeward.com/` is the canonical public URL in page metadata, sitemap and launch material.
+- `https://poststeward.com`
+- `https://www.poststeward.com`
 
-Cloudflare credentials stay outside git. See [Cloudflare deployment](docs/CLOUDFLARE_DEPLOYMENT.md) for the exact environment contract and activation sequence.
+`main` deploys the custom-domain configuration after verification. The workflow then exercises both production hostnames and checks the product markers, security headers, public product metadata and public/private source boundary.
+
+The only protected deployment value is the dedicated GitHub environment secret `CLOUDFLARE_API_TOKEN`.
+
+See `docs/CLOUDFLARE_DEPLOYMENT.md` for the deployment contract and `launch/PRODUCT_HUNT.md` for the launch package.

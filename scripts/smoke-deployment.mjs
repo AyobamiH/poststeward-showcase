@@ -1,21 +1,11 @@
-const configuredOrigins = process.env.SHOWCASE_ORIGINS ?? process.env.SHOWCASE_ORIGIN;
-if (!configuredOrigins) {
-  throw new Error("SHOWCASE_ORIGINS or SHOWCASE_ORIGIN must be configured");
-}
+const rawOrigins = process.env.SHOWCASE_ORIGINS;
+if (!rawOrigins) throw new Error("SHOWCASE_ORIGINS is required");
 
-const origins = [...new Set(
-  configuredOrigins
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean)
-)];
-
+const origins = rawOrigins.split(",").map((value) => value.trim()).filter(Boolean);
 if (!origins.length || origins.some((origin) => !origin.startsWith("https://"))) {
-  throw new Error("all showcase origins must be https URLs");
+  throw new Error("SHOWCASE_ORIGINS must contain https URLs");
 }
 
-const canonicalOrigin = "https://poststeward.com";
-const canonicalMarker = `<link rel="canonical" href="${canonicalOrigin}/"`;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const requiredHeaders = [
   "strict-transport-security",
@@ -27,6 +17,7 @@ const requiredHeaders = [
   "cross-origin-resource-policy",
   "permissions-policy"
 ];
+const requiredInterfaces = new Set(["CLI", "HTTP", "WebMCP"]);
 
 async function verifyOrigin(origin) {
   let lastError;
@@ -43,37 +34,43 @@ async function verifyOrigin(origin) {
       }
 
       const html = await response.text();
-      if (!html.includes("PostSteward") || !html.includes("Simulation only")) {
-        throw new Error("root HTML does not match showcase markers");
+      for (const marker of [
+        "PostSteward",
+        "Keep building.",
+        "Let your agent keep building the market.",
+        "CLI / HTTP / WEBMCP",
+        "Synthetic launch data",
+        '<link rel="canonical" href="https://poststeward.com/"'
+      ]) {
+        if (!html.includes(marker)) throw new Error(`root HTML missing marker: ${marker}`);
       }
-      if (!html.includes(canonicalMarker)) {
-        throw new Error(`root HTML does not declare ${canonicalOrigin}/ as canonical`);
+      if (/AyobamiH\/poststeward(?!-showcase)/i.test(html)) {
+        throw new Error("root HTML exposes a private implementation repository identifier");
       }
 
-      const evidenceResponse = await fetch(new URL("/evidence.json", response.url), {
-        redirect: "follow",
+      const productResponse = await fetch(new URL("/product.json", origin), {
         headers: { "cache-control": "no-cache" }
       });
-      if (!evidenceResponse.ok) throw new Error(`evidence returned ${evidenceResponse.status}`);
-      const evidence = await evidenceResponse.json();
-      if (!/^[0-9a-f]{40}$/.test(evidence.canonicalRevision ?? "")) {
-        throw new Error("hosted evidence has no canonical revision");
+      if (!productResponse.ok) throw new Error(`product metadata returned ${productResponse.status}`);
+      const product = await productResponse.json();
+      if (product.category !== "Agent-native continuous GTM for builders") {
+        throw new Error("product category does not match launch positioning");
+      }
+      const interfaces = new Set(product.interfaces ?? []);
+      for (const value of requiredInterfaces) {
+        if (!interfaces.has(value)) throw new Error(`product metadata missing interface: ${value}`);
       }
 
-      console.log(`Hosted showcase verified at ${origin} on attempt ${attempt}; final URL ${response.url}.`);
+      console.log(`Hosted PostSteward verified at ${origin} on attempt ${attempt}; final URL ${response.url}.`);
       return;
     } catch (error) {
       lastError = error;
-      console.log(`Hosted verification for ${origin} attempt ${attempt}/12 did not converge: ${error.message}`);
+      console.log(`Hosted verification ${origin} attempt ${attempt}/12 did not converge: ${error.message}`);
       if (attempt < 12) await sleep(10_000);
     }
   }
-
   throw lastError;
 }
 
-for (const origin of origins) {
-  await verifyOrigin(origin);
-}
-
-console.log(`Hosted showcase verification passed for ${origins.length} origin(s).`);
+for (const origin of origins) await verifyOrigin(origin);
+console.log(`Hosted PostSteward verification passed for ${origins.length} origin(s).`);
