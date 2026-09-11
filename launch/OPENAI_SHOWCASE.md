@@ -2,37 +2,44 @@
 
 ## Title
 
-**PostSteward - continuous GTM for developer agents**
+**PostSteward — social publishing infrastructure for AI agents**
 
 ## Description
 
-PostSteward gives the agent already working with a developer's project a machine-native path to keep telling the product story while development continues. The agent can work from project and GTM context it already has, then use CLI, HTTP or WebMCP to execute controlled social publishing. The goal is to arrive at launch with accumulated narrative, conversations and a warm pipeline instead of beginning market-building on release day.
+PostSteward gives an AI agent a scoped, inspectable path to social publishing. The same named operation catalogue is reachable over remote MCP and HTTP, shell/cURL uses the HTTP surface, and a connected browser workspace can expose those scoped operations through WebMCP. The agent resolves explicit destinations, stores exact copy, publishes or schedules once and reads a durable receipt for the actual provider outcome.
 
-## Why agents matter
+The product grew from a builder problem: a developer should not have to leave development every time the product story needs to move. PostSteward lets the agent keep social engagement and the GTM pipeline warm while the builder stays in the build.
 
-The product is designed around a simple role split:
+## Agent-native surfaces
 
-- the developer or technical founder is the operator and beneficiary;
-- the AI agent is the runtime user;
-- PostSteward is the controlled external-effect lane.
+The launch experience preserves the actual agent-facing information architecture:
 
-That is why agent interfaces are first-class rather than an afterthought.
+- service overview;
+- four-step agent onboarding;
+- workspace preview;
+- full 26-operation catalogue;
+- scopes and consequence annotations;
+- receipt states and retry rules;
+- `agent-guide.md`, `agents.txt`, `llms.txt`, `mcp.json`, OpenAPI and machine help.
 
 ## Trust model
 
-The launch story leads with continuous GTM, then explains the controls needed for autonomous external effects:
+- scoped tokens rather than provider credentials;
+- explicit project/account routing;
+- immutable exact campaign copy;
+- one idempotency key per consequence;
+- receipt-first outcome inspection;
+- no blind retry after an ambiguous external effect;
+- source content treated as untrusted data under continuing operation.
 
-- scoped authority;
-- explicit destinations and exact publication intent;
-- bounded behaviour around uncertain effects;
-- durable, inspectable outcomes.
+## Showcase boundary
+
+The public launch site is non-effectful. It does not accept provider credentials, issue live agent tokens, create payments or send posts. Usage examples use a service-origin placeholder until public effectful access is opened.
 
 ## Model attribution rule
 
-Only attribute work to a named OpenAI model when the exact contribution is supported by the development session or submission evidence. Do not describe the whole product as built by a model merely because that model helped with launch positioning, review or showcase preparation.
+Only attribute work to a named OpenAI model when the exact contribution is supported by development-session or submission evidence. Do not describe the entire product as built by a model merely because that model helped with development review, launch positioning or showcase preparation.
 
 ## Submission visuals
 
-Use the same five-frame story as Product Hunt: builder problem, continuous GTM loop, agent-native interfaces, command centre, trust layer.
-
-The public demo must remain clearly labelled synthetic and must not expose private implementation-source locations or internal credentials.
+Use the real terminal UI and agent routes: overview, transports, onboarding, workspace, operation catalogue and receipt semantics. Do not replace the agent interface with a generic marketing dashboard.
