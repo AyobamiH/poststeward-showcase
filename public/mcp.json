@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "name": "poststeward",
+  "status": "showcase-documentation-only",
+  "effectfulPublicEndpoint": false,
+  "transports": {
+    "remoteMcp": {"endpointTemplate": "<POSTSTEWARD_SERVICE_ORIGIN>/mcp", "auth": "Authorization: Bearer <agent token>"},
+    "http": {"endpointTemplate": "<POSTSTEWARD_SERVICE_ORIGIN>/api/operations/{operation}", "auth": "Authorization: Bearer <agent token>"},
+    "cli": {"kind": "shell over HTTP", "example": "curl -X POST <POSTSTEWARD_SERVICE_ORIGIN>/api/operations/workspace_status ..."},
+    "webMcp": {"surface": "connected workspace", "api": "document.modelContext", "registration": "same scoped operation catalogue"}
+  },
+  "operationCount": 26,
+  "operations": [
+    {"name":"workspace_status","scope":"read","tier":"free","effects":["READ_ONLY"]},
+    {"name":"accounts_list","scope":"read","tier":"free","effects":["READ_ONLY"]},
+    {"name":"account_disconnect","scope":"connections","tier":"free","effects":["AUTHORITY_CHANGE","FUTURE_CONSEQUENCE"]},
+    {"name":"project_put","scope":"campaign:write","tier":"free","effects":["STATE_WRITE"]},
+    {"name":"projects_list","scope":"read","tier":"free","effects":["READ_ONLY"]},
+    {"name":"campaign_create","scope":"campaign:write","tier":"free","effects":["STATE_WRITE"]},
+    {"name":"campaign_get","scope":"read","tier":"free","effects":["READ_ONLY"]},
+    {"name":"campaign_validate","scope":"read","tier":"free","effects":["READ_ONLY"]},
+    {"name":"publish_now","scope":"publish","tier":"free","effects":["STATE_WRITE","EXTERNAL_PROVIDER_EFFECT"]},
+    {"name":"schedule_create","scope":"schedule","tier":"free","effects":["STATE_WRITE","FUTURE_CONSEQUENCE"]},
+    {"name":"schedule_cancel","scope":"schedule","tier":"free","effects":["STATE_WRITE","FUTURE_CONSEQUENCE"]},
+    {"name":"schedule_replace","scope":"schedule","tier":"free","effects":["STATE_WRITE","FUTURE_CONSEQUENCE"]},
+    {"name":"receipt_get","scope":"read","tier":"free","effects":["READ_ONLY"]},
+    {"name":"receipts_list","scope":"read","tier":"free","effects":["READ_ONLY"]},
+    {"name":"workspace_export","scope":"read","tier":"free","effects":["READ_ONLY"]},
+    {"name":"metrics_capture","scope":"read","tier":"free","effects":["STATE_WRITE"]},
+    {"name":"publishing_pause","scope":"publish","tier":"free","effects":["AUTHORITY_CHANGE","FUTURE_CONSEQUENCE"]},
+    {"name":"automation_configure","scope":"automation","tier":"advanced","effects":["STATE_WRITE"]},
+    {"name":"automation_inspect","scope":"read","tier":"free","effects":["READ_ONLY"]},
+    {"name":"automation_preview","scope":"automation","tier":"advanced","effects":["READ_ONLY"]},
+    {"name":"automation_enable","scope":"automation","tier":"advanced","effects":["AUTHORITY_CHANGE","FUTURE_CONSEQUENCE"]},
+    {"name":"automation_pause","scope":"automation","tier":"free","effects":["AUTHORITY_CHANGE","FUTURE_CONSEQUENCE"]},
+    {"name":"billing_status","scope":"read","tier":"free","effects":["READ_ONLY"]},
+    {"name":"billing_quote","scope":"billing","tier":"free","effects":["STATE_WRITE"]},
+    {"name":"billing_checkout","scope":"billing","tier":"free","effects":["FINANCIAL_EFFECT"]},
+    {"name":"billing_portal","scope":"billing","tier":"free","effects":["STATE_WRITE"]}
+  ],
+  "rules": {"exactCopy":true,"idempotencyKeysForMutations":true,"blindRetryAfterAmbiguity":false,"receiptIsOutcomeAuthority":true}
+}

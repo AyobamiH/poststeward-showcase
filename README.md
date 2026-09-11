@@ -1,37 +1,55 @@
-# PostSteward launch surface
+# PostSteward public launch surface
 
-**PostSteward is agent-native continuous GTM for builders.**
+**PostSteward is social publishing infrastructure built for AI agents.**
 
-Keep building. Let your agent keep building the market.
+Its runtime user is the agent. The developer or technical founder remains the operator and beneficiary.
 
-This repository hosts the public launch experience for `poststeward.com`: the Product Hunt story, an effect-free interactive command-centre demo, machine-readable product metadata and the Cloudflare deployment acceptance checks.
+The product exists because builders should not have to stop development every time they need to tell the market what changed. An authorised agent can keep the product story, social engagement and GTM pipeline moving through PostSteward while the builder stays in the build.
 
-## The problem
+## What agents get
 
-Developers and technical founders often have to choose between two bad modes:
+The public launch surface preserves the actual agent contract:
 
-- stay in the build and let the market go quiet; or
-- stop development repeatedly to reconstruct context, create content and publish it.
+- **Remote MCP** with a scoped Bearer token;
+- **HTTP operations** with the same named catalogue;
+- **CLI via HTTP** for shell/cURL and coding-agent workflows;
+- **browser WebMCP** on a real connected workspace;
+- explicit project-to-account routing;
+- immutable exact campaign copy;
+- publish-now and explicit schedules;
+- durable delivery receipts and provider readback states;
+- scoped agent grants;
+- Advanced continuing operation for reviewed source monitoring and spaced allocation.
 
-That creates a cold-launch problem. By the time the product is ready, the audience, conversations and pipeline are only just starting.
+The agent guide, Markdown guide, `agents.txt`, `llms.txt`, `mcp.json`, help metadata, OpenAPI and operation reference describe one 26-operation contract.
 
-PostSteward lets the agent already working with project and GTM context keep the story moving while development continues.
+## Showcase boundary
 
-## Agent-native interfaces
+`poststeward.com` is the public Product Hunt / showcase surface. It deliberately does **not** accept provider credentials, issue live agent tokens, create payments or execute social posts.
 
-The product is designed for agents as runtime users, with humans remaining the operator and beneficiary:
+Where the real product has an effectful capability, the showcase preserves its UI and usage documentation but labels the action as preview-only. Examples use `<POSTSTEWARD_SERVICE_ORIGIN>` rather than exposing a private service origin.
 
-- **CLI** for coding agents and local operator workflows;
-- **HTTP** for programmatic agent runtimes;
-- **WebMCP** for supported browser agents.
+The synthetic workspace at `/workspace/` mirrors the operator panels without creating external effects.
 
-The public demo makes no provider calls. It exists to explain the operating model without requiring account access.
+## Public routes
+
+- `/` — service overview and agent transports
+- `/onboarding/` — four-step setup flow
+- `/agent-guide/` — complete human-readable agent manual
+- `/workspace/` — non-effectful workspace preview
+- `/agent-guide.md` — Markdown manual
+- `/agents.txt` — autonomous-caller rules
+- `/llms.txt` — LLM discovery index
+- `/mcp.json` — transport and 26-operation metadata
+- `/help.json` — machine-readable help summary
+- `/openapi.json` — generic HTTP operation contract
+- `/docs/operations.md` — operation reference
 
 ## Public/private boundary
 
-This repository is a launch and presentation surface. It intentionally does **not** contain or link to private product implementation source, provider credentials, customer data, production authority or internal evidence repositories.
+This repository contains only the launch surface. It must not contain or link to private product implementation source, private UI-source locations, provider credentials, customer data or private service origins.
 
-Public claims are constrained to behaviour visible in this repository and hosted deployment acceptance.
+CI rejects those identifiers and also rejects drift in the agent UI, machine-readable operation catalogue or showcase safety boundary.
 
 ## Local verification
 
@@ -49,13 +67,9 @@ npm run dev
 
 ## Deployment
 
-Production is served from Cloudflare Workers Static Assets on:
+Production is served by Cloudflare Workers Static Assets at:
 
 - `https://poststeward.com`
 - `https://www.poststeward.com`
 
-`main` deploys the custom-domain configuration after verification. The workflow then exercises both production hostnames and checks the product markers, security headers, public product metadata and public/private source boundary.
-
-The only protected deployment value is the dedicated GitHub environment secret `CLOUDFLARE_API_TOKEN`.
-
-See `docs/CLOUDFLARE_DEPLOYMENT.md` for the deployment contract and `launch/PRODUCT_HUNT.md` for the launch package.
+Every `main` deployment verifies both hostnames, security headers, the homepage, onboarding, agent guide, workspace preview and machine-readable agent contract.

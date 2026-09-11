@@ -2,41 +2,64 @@
 
 ## Purpose
 
-This repository hosts the public PostSteward launch experience. It explains the product accurately, demonstrates the agent operating model and provides a hardened path to `poststeward.com` without publishing the private product implementation.
+This repository hosts the public PostSteward launch and documentation surface without publishing the private implementation.
+
+The design goal is **agent-surface parity**: preserve the actual agent-first service UI and contract, then replace only unavailable public effects with clearly marked showcase states.
 
 ## Product model
 
-PostSteward is agent-native continuous GTM for builders.
+PostSteward is social publishing infrastructure whose runtime user is an AI agent.
 
-The developer remains in the build. An agent works from project and GTM context it already has access to, selects a grounded story and uses PostSteward as the publishing execution lane. Over time, the product story, engagement and pipeline can accumulate before launch.
+An authorised agent can operate through:
 
-The public narrative therefore leads with the builder outcome. Scoped authority, deterministic effects and receipts explain why the agent lane can be trusted, but they are supporting architecture rather than the headline category.
+1. remote MCP;
+2. plain HTTP operations;
+3. CLI shell/cURL over the HTTP surface;
+4. browser WebMCP on a connected workspace.
 
-## Public runtime
+The builder problem explains why the product exists: the agent can keep the product story, engagement and GTM pipeline moving while the developer stays in development. It does not replace the product's agent-first interface with a human marketing dashboard.
 
-The launch site is deliberately dependency-light:
+## Public surfaces
 
-- static HTML/CSS/JavaScript;
-- no client-side network requests in the interactive demo;
-- Cloudflare Workers Static Assets;
-- apex and `www` Custom Domains;
-- strict edge security headers;
-- machine-readable `product.json`, `agents.txt` and `llms.txt`.
+The showcase mirrors the production information architecture:
 
-The interactive command centre uses synthetic launch data and cannot publish anything.
+- service landing page;
+- four-step onboarding;
+- full agent manual;
+- workspace structure: connections, projects, exact campaigns, receipts, agent grants and Advanced automation;
+- machine-readable discovery and operation metadata.
+
+The workspace uses synthetic records and all action controls are non-effectful.
+
+## One agent contract
+
+The public agent guide and machine-readable artefacts describe the same current 26-operation catalogue:
+
+- `agent-guide.md`
+- `agents.txt`
+- `llms.txt`
+- `mcp.json`
+- `help.json`
+- `openapi.json`
+- `docs/operations.md`
+
+CI verifies the count and every operation name so the public showcase cannot silently drift into a weaker or stale contract.
+
+## Showcase safety boundary
+
+The browser JavaScript is deliberately fetch-free. The public site:
+
+- never accepts provider credentials;
+- never mints an agent token;
+- never invokes a provider or private PostSteward service;
+- never creates checkout or payment state;
+- uses `<POSTSTEWARD_SERVICE_ORIGIN>` in executable examples;
+- labels the workspace synthetic and non-effectful.
+
+## Hosting
+
+The launch site remains dependency-light static HTML/CSS/JavaScript on Cloudflare Workers Static Assets. Apex and `www` are Custom Domains, protected by the existing security headers and dual-host hosted verification.
 
 ## Source boundary
 
-No private implementation source, implementation-repository location, provider credential or customer data belongs in this repository.
-
-CI enforces this as a deployment invariant. The verifier rejects known private-source identifiers, the former evidence-led launch structure, private staging origins and common provider-authority/secret patterns.
-
-## Agent-facing story
-
-The public launch highlights three runtime interfaces:
-
-1. CLI for local and coding agents.
-2. HTTP for programmatic agent runtimes.
-3. WebMCP for supported browser agents.
-
-The strategy/context layer is intentionally decoupled. A GTM plan may live in connected documents, source vaults, project notes or the agent's existing working context. PostSteward is the execution lane, not a requirement to relocate that context.
+No private implementation repository identifier, private UI-source identifier, private staging/service origin, provider credential or customer data belongs in this repository. Verification fails if any of those patterns return.

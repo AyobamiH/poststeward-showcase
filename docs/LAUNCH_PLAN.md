@@ -1,63 +1,54 @@
 # PostSteward launch plan
 
-## Category
+## Product category
 
-**Agent-native continuous GTM for builders.**
+**Agent-first social publishing infrastructure for builders.**
 
-PostSteward is not positioned as another social scheduler and not primarily as a safety product.
+The runtime user is the AI agent. Product Hunt visitors are humans evaluating whether PostSteward gives their agents a reliable way to publish and keep GTM moving while they stay in the build.
 
-The core problem is that developers and technical founders frequently stop market-building while they are heads-down shipping. If they keep coding, they go silent. If they keep posting, they break development flow. The result is often a cold launch that starts audience and pipeline building on release day.
+## Launch promise
 
-PostSteward lets an agent keep the product story moving from real project and GTM context while the builder stays in development.
+**Social publishing your AI agent can prove.**
 
-## Primary promise
+Supporting outcome:
 
-**Keep building. Let your agent keep building the market.**
+**Keep building while your agent keeps the product story and pipeline moving.**
 
-Supporting line:
+## What the launch must show
 
-**Do not finish building before you start building the market.**
+The public experience should demonstrate the real information architecture, not invent a simplified marketing dashboard:
 
-## Runtime user
+1. the agent service overview;
+2. remote MCP, HTTP, CLI-via-HTTP and WebMCP paths;
+3. four-step onboarding;
+4. the full operation catalogue and safety rules;
+5. workspace panels for connections, project binding, exact campaigns, receipts, agent access and Advanced automation;
+6. machine-readable discovery for agents and LLMs.
 
-The runtime user is the agent. The human is the operator and beneficiary.
+Where effectful public access is not yet opened, preserve the UI and usage contract but mark the action preview-only.
 
-Launch interfaces:
+## Why builders care
 
-- CLI;
-- HTTP;
-- WebMCP.
-
-## Demo story
-
-The public command-centre demo uses synthetic data and shows:
-
-1. a build milestone exists;
-2. the agent reads project/GTM context;
-3. it selects a grounded story;
-4. destination and exact copy are prepared;
-5. the controlled publishing boundary is crossed;
-6. a result is recorded;
-7. the developer never leaves the build.
-
-Receipts and scoped authority are shown as the trust layer underneath the outcome.
+A developer who waits until release day to start telling the product story also starts recognition, conversations and pipeline from zero. PostSteward lets the agent already working alongside the builder keep that market-building activity moving without forcing the developer out of flow.
 
 ## Product Hunt critical path
 
 Before submission:
 
-- production site live on apex and `www`;
+- apex and `www` pass hosted acceptance;
+- agent-first route parity passes CI;
+- all 26 current operations are discoverable in the machine contract;
+- synthetic workspace is clearly labelled and no control causes an external effect;
 - public/private source boundary passes CI;
-- homepage reflects the continuous-GTM positioning;
-- synthetic demo is clearly labelled;
-- Product Hunt thumbnail and gallery are raster assets at recommended dimensions;
-- 60-90 second demo tells the builder problem before implementation details;
-- public user path is honest about any billing or provider limitations.
+- Product Hunt raster assets and demo use the real agent-facing UI;
+- billing and provider limitations are described accurately.
 
 ## Claim rules
 
-Do not claim native ownership of context systems the agent merely has access to. A Google Drive GTM vault, repository notes or other connected sources are examples of context the agent can use, not necessarily direct PostSteward integrations.
+Do not call shell/cURL a dedicated PostSteward CLI binary. Say **CLI via HTTP** unless a packaged CLI is released.
 
-Do not fabricate engagement or lead counts. Any dashboard figures shown in launch material must be labelled synthetic unless they are backed by real public evidence.
+Do not claim that PostSteward owns a context system merely because an agent can access it. Project/GTM context can come from connected documents, repositories, notes or the agent's working context.
 
-Do not publish private implementation-source locations, credentials or internal acceptance artefacts.
+Do not fabricate engagement, lead, publication or customer counts. Synthetic records must be labelled synthetic.
+
+Do not publish private implementation-source locations, UI-source locations, credentials or private service origins.
