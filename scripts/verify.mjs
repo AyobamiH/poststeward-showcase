@@ -7,6 +7,7 @@ const canonicalPrefix = "https://github.com/AyobamiH/poststeward";
 const publicOrigin = "https://poststeward.com";
 const workerName = "poststeward-showcase";
 const wranglerVersion = "4.130.0";
+const cloudflareAccountId = "6ddcbcb8474f1a7e460b2f0aabec0e2f";
 
 const required = [
   "README.md",
@@ -104,14 +105,18 @@ for (const command of [packageJson.scripts?.deploy, packageJson.scripts?.["deplo
 const deployWorkflow = await text(".github/workflows/deploy.yml");
 for (const marker of [
   `wrangler@${wranglerVersion}`,
-  "CLOUDFLARE_ACCOUNT_ID",
+  `CLOUDFLARE_ACCOUNT_ID: ${cloudflareAccountId}`,
   "CLOUDFLARE_API_TOKEN",
+  "default: custom-domain",
+  'mode="custom-domain"',
   "persist-credentials: false",
   "WRANGLER_SEND_METRICS",
   "scripts/smoke-deployment.mjs"
 ]) {
   if (!deployWorkflow.includes(marker)) failures.push(`deployment workflow marker missing: ${marker}`);
 }
+if (deployWorkflow.includes("CLOUDFLARE_CUSTOM_DOMAIN_ENABLED")) failures.push("purchased domain must not depend on a custom-domain feature toggle");
+if (deployWorkflow.includes("vars.CLOUDFLARE_ACCOUNT_ID")) failures.push("Cloudflare account ID must use the recovered non-secret pinned identifier");
 
 const headers = await text("public/_headers");
 for (const marker of ["Strict-Transport-Security", "Content-Security-Policy", "X-Frame-Options: DENY", "Permissions-Policy:"]) {
