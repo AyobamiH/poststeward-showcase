@@ -17,9 +17,9 @@ on:
         required: true
         type: choice
         options:
-          - workers-dev
           - custom-domain
-        default: workers-dev
+          - workers-dev
+        default: custom-domain
 
 permissions:
   contents: read
@@ -50,7 +50,9 @@ jobs:
     timeout-minutes: 10
     environment: showcase
     env:
-      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      # Cloudflare account IDs are identifiers, not credentials. This value was
+      # recovered from canonical PostSteward's redacted staging inspection.
+      CLOUDFLARE_ACCOUNT_ID: 6ddcbcb8474f1a7e460b2f0aabec0e2f
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       WRANGLER_SEND_METRICS: "false"
     steps:
@@ -61,15 +63,15 @@ jobs:
         with:
           node-version: 24
 
-      - name: Check deployment credentials
+      - name: Check deployment credential
         id: credentials
         shell: bash
         run: |
-          if [[ -n "$CLOUDFLARE_ACCOUNT_ID" && -n "$CLOUDFLARE_API_TOKEN" ]]; then
+          if [[ -n "$CLOUDFLARE_API_TOKEN" ]]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
             echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "Cloudflare deployment skipped: configure showcase environment variable CLOUDFLARE_ACCOUNT_ID and secret CLOUDFLARE_API_TOKEN."
+            echo "Cloudflare deployment skipped: configure only the dedicated CLOUDFLARE_API_TOKEN secret in the showcase environment."
           fi
 
       - name: Select deployment target
@@ -79,21 +81,20 @@ jobs:
         env:
           EVENT_NAME: ${{ github.event_name }}
           REQUESTED_TARGET: ${{ inputs.target }}
-          CUSTOM_DOMAIN_ENABLED: ${{ vars.CLOUDFLARE_CUSTOM_DOMAIN_ENABLED }}
         run: |
-          mode="workers-dev"
+          # The purchased production domain is the normal main-branch target.
+          # workers.dev remains available only as an explicit diagnostic target.
+          mode="custom-domain"
           if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
-            mode="${REQUESTED_TARGET:-workers-dev}"
-          elif [[ "$CUSTOM_DOMAIN_ENABLED" == "true" ]]; then
-            mode="custom-domain"
+            mode="${REQUESTED_TARGET:-custom-domain}"
           fi
 
-          if [[ "$mode" == "custom-domain" ]]; then
-            echo "config=wrangler.domain.jsonc" >> "$GITHUB_OUTPUT"
-            echo "origin=https://poststeward.com" >> "$GITHUB_OUTPUT"
-          else
+          if [[ "$mode" == "workers-dev" ]]; then
             echo "config=wrangler.jsonc" >> "$GITHUB_OUTPUT"
             echo "origin=https://poststeward-showcase.woeinvests.workers.dev" >> "$GITHUB_OUTPUT"
+          else
+            echo "config=wrangler.domain.jsonc" >> "$GITHUB_OUTPUT"
+            echo "origin=https://poststeward.com" >> "$GITHUB_OUTPUT"
           fi
           echo "mode=$mode" >> "$GITHUB_OUTPUT"
 

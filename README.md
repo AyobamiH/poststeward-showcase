@@ -54,9 +54,10 @@ Update an `open` gate to `verified` only after the canonical repository has a re
 
 The showcase uses the same release-tooling discipline proven in canonical PostSteward without sharing application state or product secrets.
 
-- `wrangler.jsonc` deploys `poststeward-showcase` to the account `workers.dev` namespace for initial hosted verification.
-- `wrangler.domain.jsonc` attaches the same Worker to `poststeward.com` and `www.poststeward.com` as Cloudflare Custom Domains and disables the alternate `workers.dev`/preview origins.
-- `.github/workflows/deploy.yml` verifies first, requires a protected `showcase` environment, pins Wrangler `4.130.0`, and performs bounded hosted smoke checks after deployment.
+- `poststeward.com` has been purchased and is now the normal production deployment target.
+- `wrangler.domain.jsonc` attaches `poststeward.com` and `www.poststeward.com` as Cloudflare Custom Domains and disables alternate `workers.dev`/preview origins.
+- `wrangler.jsonc` retains `poststeward-showcase.woeinvests.workers.dev` only as a manually selected diagnostic target.
+- `.github/workflows/deploy.yml` verifies first, uses the recovered non-secret Cloudflare account ID, requires only a dedicated `CLOUDFLARE_API_TOKEN` secret in the protected `showcase` environment, pins Wrangler `4.130.0`, and performs bounded hosted smoke checks after deployment.
 - `https://poststeward.com/` is the canonical public URL in page metadata, sitemap and launch material.
 
-Cloudflare credentials stay outside git. See [Cloudflare deployment](docs/CLOUDFLARE_DEPLOYMENT.md) for the exact environment contract and domain activation sequence.
+Cloudflare credentials stay outside git. See [Cloudflare deployment](docs/CLOUDFLARE_DEPLOYMENT.md) for the exact environment contract and activation sequence.
