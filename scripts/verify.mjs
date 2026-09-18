@@ -21,7 +21,7 @@ const required = [
   "README.md", "SECURITY.md", "package.json", "wrangler.jsonc",
   "wrangler.domain.jsonc", ".github/workflows/deploy.yml",
   ".github/workflows/verify.yml", "public/index.html", "public/404.html",
-  "public/styles.css", "public/app.js", "public/onboarding/index.html",
+  "public/styles.css", "public/home.css", "public/home-composition.css", "public/favicon.svg", "public/og-image.svg", "public/app.js", "public/onboarding/index.html",
   "public/agent-guide/index.html", "public/workspace/index.html",
   "public/agent-guide.md", "public/product.json", "public/agents.txt",
   "public/llms.txt", "public/mcp.json", "public/help.json",
@@ -57,11 +57,14 @@ if (!String(product.sourceDisclosure ?? "").includes("implementation source is n
 
 const home = await text("public/index.html");
 for (const marker of [
-  "lang=\"en-GB\"", "<main id=\"main\"", "Let an agent post to X, Threads and LinkedIn",
-  "Three agent paths, one operation catalogue", "Scoped tokens, not credentials",
-  "Built to be found and understood", "[SHOWCASE MODE]", "CLI via HTTP",
+  "lang=\"en-GB\"", "<main id=\"main\" class=\"home home-organised\"", "Let agents publish.",
+  "Keep proof of what happened.", "Receipts, not assumptions",
+  "BUILT TO BE DISCOVERED BY SOFTWARE", "[SHOWCASE MODE]", "CLI via HTTP",
   "document.modelContext", `rel=\"canonical\" href=\"${publicOrigin}/\"`
 ]) if (!home.includes(marker)) failures.push(`homepage parity marker missing: ${marker}`);
+if (home.includes('/auth/login')) failures.push("public showcase homepage must not link to the private sign-in surface");
+if (!home.includes('href="/workspace/"')) failures.push("public showcase homepage must route workspace actions to the preview");
+if (!home.includes('&lt;POSTSTEWARD_SERVICE_ORIGIN&gt;')) failures.push("homepage machine example must preserve the private service-origin placeholder");
 
 const onboarding = await text("public/onboarding/index.html");
 for (const marker of ["Four steps to give an agent publishing access", "Connect a publishing account", "Bind a project", "Issue a scoped agent token", "Publish, then read the receipt", "<POSTSTEWARD_SERVICE_ORIGIN>"]) {
@@ -111,6 +114,14 @@ for (const marker of ["Remote MCP", "CLI: shell/cURL calls", "WebMCP", "effectfu
 const css = await text("public/styles.css");
 for (const marker of ["--primary:oklch(0.8 0.145 82)", "JetBrains Mono", "repeating-linear-gradient", ":focus-visible", "prefers-reduced-motion", ".terminal-shell"]) {
   if (!css.includes(marker)) failures.push(`scaffold design marker missing: ${marker}`);
+}
+const homeCss = await text("public/home.css");
+for (const marker of ["--brand: #ff6847", ".control-map", ".agent-surface", ".site-footer"]) {
+  if (!homeCss.includes(marker)) failures.push(`staging-home design marker missing: ${marker}`);
+}
+const homeComposition = await text("public/home-composition.css");
+for (const marker of [".hero-organised", ".feature-story", ".pricing-organised"]) {
+  if (!homeComposition.includes(marker)) failures.push(`staging-home composition marker missing: ${marker}`);
 }
 const app = await text("public/app.js");
 if (/fetch\s*\(/.test(app)) failures.push("showcase JavaScript must remain effect-free and make no network calls");
