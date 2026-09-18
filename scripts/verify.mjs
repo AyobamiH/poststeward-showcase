@@ -116,11 +116,11 @@ for (const marker of ["--primary:oklch(0.8 0.145 82)", "JetBrains Mono", "repeat
   if (!css.includes(marker)) failures.push(`scaffold design marker missing: ${marker}`);
 }
 const homeCss = await text("public/home.css");
-for (const marker of ["--brand: #ff6847", ".control-map", ".agent-surface", ".site-footer"]) {
+for (const marker of ["--brand: #ff6847", "--bg-canvas:", ".button.primary", ".machine-label"]) {
   if (!homeCss.includes(marker)) failures.push(`staging-home design marker missing: ${marker}`);
 }
 const homeComposition = await text("public/home-composition.css");
-for (const marker of [".hero-organised", ".feature-story", ".pricing-organised"]) {
+for (const marker of [".hero-organised", ".control-map", ".agent-surface", ".pricing-organised"]) {
   if (!homeComposition.includes(marker)) failures.push(`staging-home composition marker missing: ${marker}`);
 }
 const app = await text("public/app.js");
