@@ -8,30 +8,20 @@
   <link rel="canonical" href="https://poststeward.com/data-deletion/">
   <title>Data Deletion Instructions — PostSteward</title>
   <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
-  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/home.css"><link rel="stylesheet" href="/public-pages.css">
 </head>
-<body>
+<body class="public-page">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="terminal-shell site-header">
-  <div class="status-strip"><span>[STATUS: PUBLIC]</span><span class="accent">[POSTSTEWARD LEGAL]</span><span>REVISION // 2026-09-19</span></div>
-  <div class="header-main">
-    <a class="brand" href="/">POST<span class="accent">STEWARD</span><span class="cursor">_</span></a>
-    <nav aria-label="Legal navigation">
-      <a href="/privacy/">./privacy</a>
-      <a href="/terms/">./terms</a>
-      <a aria-current="page" href="/data-deletion/">./deletion</a>
-    </nav>
-  </div>
-</header>
-<main id="main" class="terminal-shell narrow">
-  <section class="section">
+<header class="public-page-header"><div class="public-page-header-inner"><a class="wordmark" href="/" aria-label="PostSteward home"><img class="brand-mark" src="/favicon.svg?v=2" alt=""><span>PostSteward</span></a><nav aria-label="Primary navigation"><a href="/onboarding/">Connect</a><a href="/agent-guide/">Guide</a><a href="/workspace/">Workspace preview</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a aria-current="page" href="/data-deletion/">Data deletion</a></nav></div></header>
+<main id="main" class="public-page-main">
+  <section class="public-section">
     <p class="terminal-label">root@poststeward:~$ delete --help</p>
     <h1 style="text-transform:none">User data deletion</h1>
     <p class="lead">You can remove PostSteward's locally held workspace data and connected credentials. Deleting PostSteward data does not automatically delete posts or revoke every grant held by an external social platform.</p>
     <p class="small muted"><strong>Effective date:</strong> 19 September 2026 · <strong>Contact:</strong> <a href="mailto:community@oneclickpostfactory.com">community@oneclickpostfactory.com</a></p>
   </section>
 
-  <section class="section">
+  <section class="public-section">
     <h2>Option 1 — Delete from the connected workspace</h2>
     <ol class="step-list">
       <li class="step"><span class="step-number">[01]</span><div><h3>Sign in as the workspace owner</h3><p class="small muted">Use the same verified owner identity that controls the PostSteward workspace.</p></div></li>
@@ -41,7 +31,7 @@
     </ol>
   </section>
 
-  <section class="section">
+  <section class="public-section">
     <h2>What completed workspace deletion removes</h2>
     <ul class="clean small muted">
       <li><span class="dash">—</span>Owner sessions and scoped agent grants for that workspace.</li>
@@ -53,30 +43,24 @@
     <p class="small muted" style="margin-top:1rem">A minimal completed-deletion tombstone may remain so an old backup or restored state cannot recreate the deleted workspace's publishing authority.</p>
   </section>
 
-  <section class="section">
+  <section class="public-section">
     <h2>Option 2 — Request deletion by email</h2>
     <p class="small muted">If you cannot access the workspace, email <a href="mailto:community@oneclickpostfactory.com?subject=PostSteward%20data%20deletion%20request">community@oneclickpostfactory.com</a> with the subject <strong>PostSteward data deletion request</strong>.</p>
     <p class="small muted">Include the email address used to sign in and enough information to identify the workspace. We may need to verify that you control the owner identity before processing the request. Do not send passwords, API keys, access tokens, recovery keys or social-provider secrets.</p>
   </section>
 
-  <section class="section">
+  <section class="public-section">
     <h2>Threads / Meta and other provider data</h2>
     <p class="small muted">PostSteward removes locally usable provider credentials during workspace deletion, but provider-side authorisation grants and already-published social posts live on the external provider. If you want the provider's own copy or grant removed, also use that provider's account/app controls.</p>
     <p class="small muted">For Threads/Meta, you can remove the PostSteward app's access from the relevant Meta account settings in addition to deleting the PostSteward workspace. Removing provider access does not itself erase a post that has already been published; delete that content through the social platform if required.</p>
   </section>
 
-  <section class="section">
+  <section class="public-section">
     <h2>Questions or confirmation</h2>
     <p class="small muted">For deletion status or privacy questions, contact <a href="mailto:community@oneclickpostfactory.com">community@oneclickpostfactory.com</a>.</p>
     <div class="reference-row"><a href="/privacy/">Privacy Policy</a><a href="/terms/">Terms of Service</a></div>
   </section>
 </main>
-<footer class="terminal-shell narrow footer">
-  <span class="accent">poststeward@legal:~$</span>
-  <a href="/privacy/">Privacy</a> ·
-  <a href="/terms/">Terms</a> ·
-  <a href="/data-deletion/">Data deletion</a> ·
-  <a href="mailto:community@oneclickpostfactory.com">Contact</a>
-</footer>
+<footer class="public-page-footer"><div class="public-page-footer-inner"><span>© 2026 PostSteward · Reliable social publishing for AI agents.</span><nav><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/data-deletion/">Data deletion</a><a href="/agent-guide/">Agent guide</a></nav></div></footer>
 </body>
 </html>
