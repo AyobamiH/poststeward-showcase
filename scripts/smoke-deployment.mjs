@@ -21,7 +21,7 @@ async function verifyOrigin(origin) {
     try {
       const root = await getText(origin, "/");
       for (const header of requiredHeaders) if (!root.response.headers.get(header)) throw new Error(`root missing ${header}`);
-      for (const marker of ["Let an agent post to X, Threads and LinkedIn", "Three agent paths, one operation catalogue", "[SHOWCASE MODE]", '<link rel="canonical" href="https://poststeward.com/"']) if (!root.body.includes(marker)) throw new Error(`root HTML missing marker: ${marker}`);
+      for (const marker of ["Let agents publish.", "Keep proof of what happened.", "[SHOWCASE MODE]", '<link rel="canonical" href="https://poststeward.com/"']) if (!root.body.includes(marker)) throw new Error(`root HTML missing marker: ${marker}`);
 
       const onboarding = await getText(origin, "/onboarding/");
       for (const marker of ["Four steps to give an agent publishing access", "Issue a scoped agent token", "Publish, then read the receipt"]) if (!onboarding.body.includes(marker)) throw new Error(`onboarding missing marker: ${marker}`);
