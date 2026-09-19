@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="PostSteward Privacy Policy: what data the service uses, why, how it is protected, retained and deleted.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://poststeward.com/privacy/">
+  <title>Privacy Policy — PostSteward</title>
+  <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="terminal-shell site-header">
+  <div class="status-strip"><span>[STATUS: PUBLIC]</span><span class="accent">[POSTSTEWARD LEGAL]</span><span>REVISION // 2026-09-19</span></div>
+  <div class="header-main">
+    <a class="brand" href="/">POST<span class="accent">STEWARD</span><span class="cursor">_</span></a>
+    <nav aria-label="Legal navigation">
+      <a aria-current="page" href="/privacy/">./privacy</a>
+      <a href="/terms/">./terms</a>
+      <a href="/data-deletion/">./deletion</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="terminal-shell narrow">
+  <section class="section">
+    <p class="terminal-label">root@poststeward:~$ cat privacy</p>
+    <h1 style="text-transform:none">Privacy Policy</h1>
+    <p class="lead">This policy explains how PostSteward handles information when an owner connects social accounts, gives an AI agent scoped publishing authority, schedules work or inspects publishing evidence.</p>
+    <p class="small muted"><strong>Effective date:</strong> 19 September 2026 · <strong>Contact:</strong> <a href="mailto:community@oneclickpostfactory.com">community@oneclickpostfactory.com</a></p>
+  </section>
+
+  <section class="section">
+    <h2>1. Information PostSteward processes</h2>
+    <ul class="clean small muted">
+      <li><span class="dash">—</span><strong>Owner identity:</strong> sign-in subject, verified email and the minimum session records needed to authenticate the workspace.</li>
+      <li><span class="dash">—</span><strong>Connected social accounts:</strong> provider, stable account identity, account alias, granted capabilities and encrypted OAuth credentials or refresh material where the provider supplies them.</li>
+      <li><span class="dash">—</span><strong>Publishing data:</strong> projects, exact campaign copy, schedules, idempotency keys, delivery states, provider post identifiers, published links, readback evidence and available metrics.</li>
+      <li><span class="dash">—</span><strong>Agent access:</strong> grant identifiers, scopes, expiry and revocation state. Plaintext agent tokens are shown once and are not returned later.</li>
+      <li><span class="dash">—</span><strong>Optional source connections:</strong> selected repository identifiers and encrypted owner-authorised credentials when an owner deliberately connects a supported private source.</li>
+      <li><span class="dash">—</span><strong>Billing records when enabled:</strong> subscription/customer references and entitlement state from the payment processor. PostSteward does not store full payment-card details.</li>
+      <li><span class="dash">—</span><strong>Security and recovery state:</strong> bounded OAuth state, deletion/recovery state, request identifiers and minimal records needed to prevent deleted authority from being resurrected.</li>
+    </ul>
+  </section>
+
+  <section class="section">
+    <h2>2. Why the data is used</h2>
+    <div class="rule-grid">
+      <article><h3>Operate the service</h3><p class="small muted">Authenticate owners, route approved content to the exact connected account, run explicit schedules and expose scoped agent operations.</p></article>
+      <article><h3>Keep publishing safe</h3><p class="small muted">Verify identities and scopes, prevent blind duplicate retries, detect authority drift and preserve ambiguous outcomes for inspection.</p></article>
+      <article><h3>Provide evidence</h3><p class="small muted">Keep durable receipts so owners and agents can distinguish scheduled, verified, unverified, failed and uncertain provider effects.</p></article>
+      <article><h3>Support and security</h3><p class="small muted">Investigate faults, enforce limits, respond to deletion/privacy requests and protect workspaces against unauthorised access.</p></article>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>3. Service providers and external platforms</h2>
+    <p class="small muted">PostSteward may interact with services chosen by the owner, including identity providers, social networks such as X, Threads/Meta and LinkedIn, Cloudflare infrastructure, GitHub for an optional connected source, and Stripe when paid billing is enabled. Those providers process information under their own terms and privacy policies.</p>
+    <p class="small muted">Posting to a social network is an external effect: once content is published, that network may retain copies, engagement, logs or other information independently of PostSteward.</p>
+  </section>
+
+  <section class="section">
+    <h2>4. Security</h2>
+    <ul class="clean small muted">
+      <li><span class="dash">—</span>Provider credentials are encrypted at rest with authenticated encryption and workspace-specific context.</li>
+      <li><span class="dash">—</span>Browser mutations require an authenticated session plus origin/CSRF checks.</li>
+      <li><span class="dash">—</span>Agent grants are scoped, expiring and revocable; owner-level admin authority is not delegated through the agent grant endpoint.</li>
+      <li><span class="dash">—</span>Sensitive OAuth codes, access tokens and refresh tokens are not intended for application logs or browser storage.</li>
+      <li><span class="dash">—</span>Uncertain provider writes are preserved as uncertain rather than retried blindly.</li>
+    </ul>
+  </section>
+
+  <section class="section">
+    <h2>5. Retention and deletion</h2>
+    <p class="small muted">Operational records are retained while they are useful to the workspace and within service safety ceilings. Owners can request workspace erasure. A completed deletion removes locally usable provider credentials, sessions, grants, workspace application records, linked private-source credentials, provider OAuth state and related workspace mappings.</p>
+    <p class="small muted">A minimal completed-deletion tombstone may be retained to prevent restored historical state from resurrecting deleted publishing authority. Provider-side posts and provider-side authorisation grants are controlled by the relevant external platform and may require separate deletion or revocation there.</p>
+    <div class="actions"><a class="button outline" href="/data-deletion/">Read data deletion instructions</a></div>
+  </section>
+
+  <section class="section">
+    <h2>6. Your choices and requests</h2>
+    <p class="small muted">Depending on applicable law, you may have rights to request access, correction, export, restriction or deletion of personal data. You may also disconnect a social account or revoke an agent grant from the connected workspace.</p>
+    <p class="small muted">For a privacy request, email <a href="mailto:community@oneclickpostfactory.com">community@oneclickpostfactory.com</a>. Include the email address used to sign in and the nature of the request. Do not send passwords, access tokens, API keys or social-provider secrets by email.</p>
+  </section>
+
+  <section class="section">
+    <h2>7. Changes to this policy</h2>
+    <p class="small muted">This policy may be updated as PostSteward's production capabilities, providers or legal obligations change. Material changes will be reflected by updating this page and its effective date.</p>
+  </section>
+</main>
+<footer class="terminal-shell narrow footer">
+  <span class="accent">poststeward@legal:~$</span>
+  <a href="/privacy/">Privacy</a> ·
+  <a href="/terms/">Terms</a> ·
+  <a href="/data-deletion/">Data deletion</a> ·
+  <a href="mailto:community@oneclickpostfactory.com">Contact</a>
+</footer>
+</body>
+</html>

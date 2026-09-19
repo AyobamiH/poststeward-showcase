@@ -22,7 +22,7 @@ const required = [
   "wrangler.domain.jsonc", ".github/workflows/deploy.yml",
   ".github/workflows/verify.yml", "public/index.html", "public/404.html",
   "public/styles.css", "public/home.css", "public/home-composition.css", "public/favicon.svg", "public/og-image.svg", "public/app.js", "public/onboarding/index.html",
-  "public/agent-guide/index.html", "public/workspace/index.html",
+  "public/agent-guide/index.html", "public/workspace/index.html", "public/privacy/index.html", "public/terms/index.html", "public/data-deletion/index.html",
   "public/agent-guide.md", "public/product.json", "public/agents.txt",
   "public/llms.txt", "public/mcp.json", "public/help.json",
   "public/openapi.json", "public/docs/operations.md", "public/_headers",
@@ -89,6 +89,24 @@ for (const marker of ["Everything an agent needs to publish and prove it", "Oper
 const workspace = await text("public/workspace/index.html");
 for (const marker of ["[SHOWCASE: NO EXTERNAL EFFECTS]", "Connect an account", "Bind a project", "Submit exact copy", "Delivery receipts", "Agent access", "Advanced", "Token display is intentionally unavailable"]) {
   if (!workspace.includes(marker)) failures.push(`workspace parity marker missing: ${marker}`);
+}
+
+
+const privacy = await text("public/privacy/index.html");
+for (const marker of ["Privacy Policy", "Provider credentials are encrypted", "community@oneclickpostfactory.com", 'href="/data-deletion/"']) {
+  if (!privacy.includes(marker)) failures.push(`privacy page marker missing: ${marker}`);
+}
+const terms = await text("public/terms/index.html");
+for (const marker of ["Terms of Service", "Agent authority", "External providers", "laws of England and Wales"]) {
+  if (!terms.includes(marker)) failures.push(`terms page marker missing: ${marker}`);
+}
+const deletion = await text("public/data-deletion/index.html");
+for (const marker of ["User data deletion", "PostSteward data deletion request", "minimal completed-deletion tombstone", "Threads / Meta"]) {
+  if (!deletion.includes(marker)) failures.push(`data-deletion page marker missing: ${marker}`);
+}
+for (const page of [privacy, terms, deletion]) {
+  if (!page.includes('href="/favicon.svg?v=2"')) failures.push("legal page must use canonical versioned favicon");
+  if (page.includes("/mark.svg")) failures.push("legal page must not use legacy green favicon");
 }
 
 const mcp = JSON.parse(await text("public/mcp.json"));
@@ -175,7 +193,7 @@ const robots = await text("public/robots.txt");
 if (!robots.includes("Disallow: /workspace/")) failures.push("robots.txt must keep the synthetic workspace out of search results");
 if (!robots.includes(`${publicOrigin}/sitemap.xml`)) failures.push("robots.txt must advertise the public sitemap");
 const sitemap = await text("public/sitemap.xml");
-for (const url of [`${publicOrigin}/`, `${publicOrigin}/onboarding/`, `${publicOrigin}/agent-guide/`]) if (!sitemap.includes(`<loc>${url}</loc>`)) failures.push(`sitemap missing: ${url}`);
+for (const url of [`${publicOrigin}/`, `${publicOrigin}/onboarding/`, `${publicOrigin}/agent-guide/`, `${publicOrigin}/privacy/`, `${publicOrigin}/terms/`, `${publicOrigin}/data-deletion/`]) if (!sitemap.includes(`<loc>${url}</loc>`)) failures.push(`sitemap missing: ${url}`);
 
 async function walk(dir) {
   const out = [];
