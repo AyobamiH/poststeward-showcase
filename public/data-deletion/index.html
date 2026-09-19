@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="How to request deletion of PostSteward workspace data and revoke connected social-provider access.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://poststeward.com/data-deletion/">
+  <title>Data Deletion Instructions — PostSteward</title>
+  <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to content</a>
+<header class="terminal-shell site-header">
+  <div class="status-strip"><span>[STATUS: PUBLIC]</span><span class="accent">[POSTSTEWARD LEGAL]</span><span>REVISION // 2026-09-19</span></div>
+  <div class="header-main">
+    <a class="brand" href="/">POST<span class="accent">STEWARD</span><span class="cursor">_</span></a>
+    <nav aria-label="Legal navigation">
+      <a href="/privacy/">./privacy</a>
+      <a href="/terms/">./terms</a>
+      <a aria-current="page" href="/data-deletion/">./deletion</a>
+    </nav>
+  </div>
+</header>
+<main id="main" class="terminal-shell narrow">
+  <section class="section">
+    <p class="terminal-label">root@poststeward:~$ delete --help</p>
+    <h1 style="text-transform:none">User data deletion</h1>
+    <p class="lead">You can remove PostSteward's locally held workspace data and connected credentials. Deleting PostSteward data does not automatically delete posts or revoke every grant held by an external social platform.</p>
+    <p class="small muted"><strong>Effective date:</strong> 19 September 2026 · <strong>Contact:</strong> <a href="mailto:community@oneclickpostfactory.com">community@oneclickpostfactory.com</a></p>
+  </section>
+
+  <section class="section">
+    <h2>Option 1 — Delete from the connected workspace</h2>
+    <ol class="step-list">
+      <li class="step"><span class="step-number">[01]</span><div><h3>Sign in as the workspace owner</h3><p class="small muted">Use the same verified owner identity that controls the PostSteward workspace.</p></div></li>
+      <li class="step"><span class="step-number">[02]</span><div><h3>Open the Lifecycle / deletion controls</h3><p class="small muted">Workspace deletion is an owner-only operation and requires a current owner session and explicit confirmation.</p></div></li>
+      <li class="step"><span class="step-number">[03]</span><div><h3>Confirm the exact deletion phrase</h3><p class="small muted">The workspace shows the exact confirmation phrase. This prevents an agent or accidental click from erasing the workspace.</p></div></li>
+      <li class="step"><span class="step-number">[04]</span><div><h3>Allow any in-flight provider effect to settle</h3><p class="small muted">If a provider write may already be in flight, PostSteward keeps the workspace fenced until the bounded effect window is safe to clear. It does not erase evidence while a write may still be executing.</p></div></li>
+    </ol>
+  </section>
+
+  <section class="section">
+    <h2>What completed workspace deletion removes</h2>
+    <ul class="clean small muted">
+      <li><span class="dash">—</span>Owner sessions and scoped agent grants for that workspace.</li>
+      <li><span class="dash">—</span>Locally stored provider access/refresh credentials and pending provider OAuth state.</li>
+      <li><span class="dash">—</span>Projects, campaigns, schedules, automation state and workspace application records.</li>
+      <li><span class="dash">—</span>Private-source links and locally stored encrypted credentials for connected private sources.</li>
+      <li><span class="dash">—</span>Workspace billing mappings, recovery coordinator rows and external-effect rows after the safety settlement gate completes.</li>
+    </ul>
+    <p class="small muted" style="margin-top:1rem">A minimal completed-deletion tombstone may remain so an old backup or restored state cannot recreate the deleted workspace's publishing authority.</p>
+  </section>
+
+  <section class="section">
+    <h2>Option 2 — Request deletion by email</h2>
+    <p class="small muted">If you cannot access the workspace, email <a href="mailto:community@oneclickpostfactory.com?subject=PostSteward%20data%20deletion%20request">community@oneclickpostfactory.com</a> with the subject <strong>PostSteward data deletion request</strong>.</p>
+    <p class="small muted">Include the email address used to sign in and enough information to identify the workspace. We may need to verify that you control the owner identity before processing the request. Do not send passwords, API keys, access tokens, recovery keys or social-provider secrets.</p>
+  </section>
+
+  <section class="section">
+    <h2>Threads / Meta and other provider data</h2>
+    <p class="small muted">PostSteward removes locally usable provider credentials during workspace deletion, but provider-side authorisation grants and already-published social posts live on the external provider. If you want the provider's own copy or grant removed, also use that provider's account/app controls.</p>
+    <p class="small muted">For Threads/Meta, you can remove the PostSteward app's access from the relevant Meta account settings in addition to deleting the PostSteward workspace. Removing provider access does not itself erase a post that has already been published; delete that content through the social platform if required.</p>
+  </section>
+
+  <section class="section">
+    <h2>Questions or confirmation</h2>
+    <p class="small muted">For deletion status or privacy questions, contact <a href="mailto:community@oneclickpostfactory.com">community@oneclickpostfactory.com</a>.</p>
+    <div class="reference-row"><a href="/privacy/">Privacy Policy</a><a href="/terms/">Terms of Service</a></div>
+  </section>
+</main>
+<footer class="terminal-shell narrow footer">
+  <span class="accent">poststeward@legal:~$</span>
+  <a href="/privacy/">Privacy</a> ·
+  <a href="/terms/">Terms</a> ·
+  <a href="/data-deletion/">Data deletion</a> ·
+  <a href="mailto:community@oneclickpostfactory.com">Contact</a>
+</footer>
+</body>
+</html>
