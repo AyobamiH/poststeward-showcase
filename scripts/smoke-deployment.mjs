@@ -32,6 +32,16 @@ async function verifyOrigin(origin) {
       const workspace = await getText(origin, "/workspace/");
       for (const marker of ["[SHOWCASE: NO EXTERNAL EFFECTS]", "Delivery receipts", "Agent access", "Advanced"]) if (!workspace.body.includes(marker)) throw new Error(`workspace preview missing marker: ${marker}`);
 
+
+      const privacy = await getText(origin, "/privacy/");
+      for (const marker of ["Privacy Policy", "Provider credentials are encrypted", "community@oneclickpostfactory.com"]) if (!privacy.body.includes(marker)) throw new Error(`privacy missing marker: ${marker}`);
+
+      const terms = await getText(origin, "/terms/");
+      for (const marker of ["Terms of Service", "Agent authority", "External providers"]) if (!terms.body.includes(marker)) throw new Error(`terms missing marker: ${marker}`);
+
+      const deletion = await getText(origin, "/data-deletion/");
+      for (const marker of ["User data deletion", "PostSteward data deletion request", "Threads / Meta"]) if (!deletion.body.includes(marker)) throw new Error(`data deletion missing marker: ${marker}`);
+
       const markdown = await getText(origin, "/agent-guide.md");
       if (!markdown.body.includes("## Operation catalogue") || !markdown.body.includes("`publish_now`")) throw new Error("agent-guide.md is incomplete");
       const agents = await getText(origin, "/agents.txt");
