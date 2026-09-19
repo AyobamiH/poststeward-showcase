@@ -21,7 +21,7 @@ const required = [
   "README.md", "SECURITY.md", "package.json", "wrangler.jsonc",
   "wrangler.domain.jsonc", ".github/workflows/deploy.yml",
   ".github/workflows/verify.yml", "public/index.html", "public/404.html",
-  "public/styles.css", "public/home.css", "public/home-composition.css", "public/favicon.svg", "public/og-image.svg", "public/app.js", "public/onboarding/index.html",
+  "public/styles.css", "public/home.css", "public/home-composition.css", "public/public-pages.css", "public/favicon.svg", "public/og-image.svg", "public/app.js", "public/onboarding/index.html",
   "public/agent-guide/index.html", "public/workspace/index.html", "public/privacy/index.html", "public/terms/index.html", "public/data-deletion/index.html",
   "public/agent-guide.md", "public/product.json", "public/agents.txt",
   "public/llms.txt", "public/mcp.json", "public/help.json",
@@ -151,6 +151,28 @@ const homeComposition = await text("public/home-composition.css");
 for (const marker of [".hero-organised", ".control-map", ".agent-surface", ".pricing-organised"]) {
   if (!homeComposition.includes(marker)) failures.push(`staging-home composition marker missing: ${marker}`);
 }
+
+const publicPagesCss = await text("public/public-pages.css");
+for (const marker of [".public-page-header", ".public-page-main", ".public-section", "var(--brand)", "var(--bg-canvas)"]) {
+  if (!publicPagesCss.includes(marker)) failures.push(`staging public-page visual marker missing: ${marker}`);
+}
+for (const path of [
+  "public/onboarding/index.html",
+  "public/agent-guide/index.html",
+  "public/workspace/index.html",
+  "public/privacy/index.html",
+  "public/terms/index.html",
+  "public/data-deletion/index.html",
+]) {
+  const page = await text(path);
+  if (!page.includes('href="/home.css"') || !page.includes('href="/public-pages.css"'))
+    failures.push(`public page not using staging visual system: ${path}`);
+  if (!page.includes('class="public-page"') || !page.includes('class="public-page-header"'))
+    failures.push(`public page shell drifted from staging visual system: ${path}`);
+  if (/terminal-shell|status-strip|header-main|href="\/styles\.css"|\/mark\.svg/.test(page))
+    failures.push(`legacy terminal visual system remains in ${path}`);
+}
+
 const app = await text("public/app.js");
 if (/fetch\s*\(/.test(app)) failures.push("showcase JavaScript must remain effect-free and make no network calls");
 if (!app.includes("Showcase preview only")) failures.push("preview actions must keep their non-effectful boundary explicit");
