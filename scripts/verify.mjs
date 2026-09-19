@@ -42,6 +42,16 @@ try {
   failures.push("legacy evidence.json must not exist on the public launch surface");
 } catch {}
 
+
+const favicon = await text("public/favicon.svg");
+const legacyMark = await text("public/mark.svg");
+if (legacyMark !== favicon) failures.push("legacy mark.svg must alias the canonical PostSteward favicon");
+for (const path of ["public/index.html", "public/onboarding/index.html", "public/agent-guide/index.html", "public/workspace/index.html"]) {
+  const page = await text(path);
+  if (!page.includes('rel="icon" href="/favicon.svg?v=2"')) failures.push(`canonical versioned favicon missing: ${path}`);
+  if (page.includes('/mark.svg')) failures.push(`legacy green favicon reference remains: ${path}`);
+}
+
 const product = JSON.parse(await text("public/product.json"));
 if (product.schemaVersion !== 2) failures.push("product schemaVersion must be 2");
 if (product.name !== "PostSteward") failures.push("product name must be PostSteward");
