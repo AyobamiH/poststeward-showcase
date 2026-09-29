@@ -4,7 +4,7 @@
 
 Its runtime user is the agent. The developer or technical founder remains the operator and beneficiary.
 
-The product exists because builders should not have to stop development every time they need to tell the market what changed. An authorised agent can keep the product story, social engagement and GTM pipeline moving through PostSteward while the builder stays in the build.
+The product exists because builders should not have to stop development every time they need to tell the market what changed. An authorised agent can keep the product story, social engagement and GTM pipeline moving through PostSteward while the builder stays in the build. PostSteward Local adds an installable local runtime for human operators and agents that prefer machine-local execution.
 
 ## What agents get
 
@@ -34,7 +34,8 @@ The synthetic workspace at `/workspace/` mirrors the operator panels without cre
 ## Public routes
 
 - `/` — service overview and agent transports
-- `/onboarding/` — four-step setup flow
+- `/install.sh` — PostSteward Local installer for Linux/WSL2
+- `/onboarding/` — hosted four-step setup flow
 - `/agent-guide/` — complete human-readable agent manual
 - `/workspace/` — non-effectful workspace preview
 - `/agent-guide.md` — Markdown manual

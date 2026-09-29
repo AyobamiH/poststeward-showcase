@@ -73,7 +73,8 @@
             consequential write.
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="/workspace/">Explore setup</a>
+            <a class="button primary" href="#local">Install PostSteward Local</a>
+            <a class="button" href="/workspace/">Explore hosted setup</a>
             <a class="button" href="/agent-guide/">Connect an agent</a>
           </div>
           <p class="hero-note">
@@ -284,6 +285,36 @@
             </div>
           </div>
         </article>
+      </section>
+
+      <section class="agent-surface" id="local" aria-labelledby="local-title">
+        <div class="agent-surface-inner">
+          <div>
+            <p class="eyebrow">POSTSTEWARD LOCAL</p>
+            <h2 id="local-title">A local publishing runtime for humans and agents.</h2>
+            <p class="lead">
+              Install the Post-Once-derived runtime under the PostSteward product,
+              connect X, Threads and LinkedIn, review exact copy, then publish or
+              schedule through explicit receipt-backed boundaries.
+            </p>
+            <div class="protocol-row">
+              <a class="protocol" href="/install.sh">install.sh</a>
+              <a class="protocol" href="/agent-guide/">agent guide</a>
+              <a class="protocol" href="/workspace/">hosted workspace</a>
+            </div>
+            <p class="muted">
+              Installation grants no provider or publishing authority. OAuth remains
+              a human consent step; agents operate after the owner connects destinations.
+            </p>
+          </div>
+          <pre class="machine-example">curl -fsSL --proto '=https' --tlsv1.2 \
+  https://poststeward.com/install.sh | bash
+
+# automation / agent bootstrap
+curl -fsSL --proto '=https' --tlsv1.2 \
+  https://poststeward.com/install.sh | \
+  bash -s -- --no-onboard --verify</pre>
+        </div>
       </section>
 
       <section class="agent-surface" id="agents" aria-labelledby="agent-surface-title">

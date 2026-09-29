@@ -49,6 +49,10 @@ async function verifyOrigin(origin) {
       const llms = await getText(origin, "/llms.txt");
       if (!llms.body.includes("CLI: shell/cURL calls") || !llms.body.includes("WebMCP")) throw new Error("llms.txt lost agent transport discovery");
 
+      const installer = await getText(origin, "/install.sh");
+      for (const marker of ["post-once-runtime-beta", "--no-onboard", "--verify", "--dry-run"])
+        if (!installer.body.includes(marker)) throw new Error(`install.sh missing marker: ${marker}`);
+
       const mcpResponse = await fetch(new URL("/mcp.json", origin), { headers: { "cache-control": "no-cache" } });
       if (!mcpResponse.ok) throw new Error(`mcp.json returned ${mcpResponse.status}`);
       const mcpText = await mcpResponse.text();
