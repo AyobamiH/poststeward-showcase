@@ -23,7 +23,7 @@ const required = [
   ".github/workflows/verify.yml", "public/index.html", "public/404.html",
   "public/styles.css", "public/home.css", "public/home-composition.css", "public/public-pages.css", "public/favicon.svg", "public/og-image.svg", "public/app.js", "public/onboarding/index.html",
   "public/agent-guide/index.html", "public/workspace/index.html", "public/privacy/index.html", "public/terms/index.html", "public/data-deletion/index.html",
-  "public/agent-guide.md", "public/product.json", "public/agents.txt",
+  "public/agent-guide.md", "public/install.sh", "public/product.json", "public/agents.txt",
   "public/llms.txt", "public/mcp.json", "public/help.json",
   "public/openapi.json", "public/docs/operations.md", "public/_headers",
   "public/robots.txt", "public/sitemap.xml", "scripts/smoke-deployment.mjs",
@@ -75,6 +75,18 @@ for (const marker of [
 if (home.includes('/auth/login')) failures.push("public showcase homepage must not link to the private sign-in surface");
 if (!home.includes('href="/workspace/"')) failures.push("public showcase homepage must route workspace actions to the preview");
 if (!home.includes('&lt;POSTSTEWARD_SERVICE_ORIGIN&gt;')) failures.push("homepage machine example must preserve the private service-origin placeholder");
+
+const installer = await text("public/install.sh");
+for (const marker of [
+  "https://github.com/AyobamiH/poststeward-showcase.git",
+  "post-once-runtime-beta",
+  "--no-onboard",
+  "--verify",
+  "--dry-run",
+  "publishing_authority_granted_by_install",
+]) if (!installer.includes(marker)) failures.push(`installer marker missing: ${marker}`);
+if (installer.includes("AyobamiH/post-once-bootstrap"))
+  failures.push("public installer must not require private post-once-bootstrap access");
 
 const onboarding = await text("public/onboarding/index.html");
 for (const marker of ["Four steps to give an agent publishing access", "Connect a publishing account", "Bind a project", "Issue a scoped agent token", "Publish, then read the receipt", "<POSTSTEWARD_SERVICE_ORIGIN>"]) {
