@@ -4,7 +4,7 @@
 
 This repository hosts the public PostSteward launch and documentation surface without publishing the private implementation.
 
-The design goal is **agent-surface parity**: preserve the actual agent-first service UI and contract, then replace only unavailable public effects with clearly marked showcase states.
+The website leads owners into the production application at `https://app.poststeward.com/auth/login`, supplies the branded installer, and explains the agent interfaces. Authentication, credentials and effects stay in the application. The optional workspace demo is clearly labeled sample data; the primary journey uses the real workspace.
 
 ## Product model
 
@@ -53,7 +53,7 @@ The browser JavaScript is deliberately fetch-free. The public site:
 - never mints an agent token;
 - never invokes a provider or private PostSteward service;
 - never creates checkout or payment state;
-- uses `<POSTSTEWARD_SERVICE_ORIGIN>` in executable examples;
+- uses `https://app.poststeward.com` in HTML examples and links to its live operation catalogue;
 - labels the workspace synthetic and non-effectful.
 
 ## Hosting

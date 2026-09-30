@@ -69,15 +69,16 @@ const home = await text("public/index.html");
 for (const marker of [
   "lang=\"en-GB\"", "<main id=\"main\" class=\"home home-organised\"", "Let agents publish.",
   "Keep proof of what happened.", "Receipts, not assumptions",
-  "BUILT TO BE DISCOVERED BY SOFTWARE", "[SHOWCASE MODE]", "CLI via HTTP",
+  "BUILT TO BE DISCOVERED BY SOFTWARE", "Start free", "CLI via HTTP",
   "document.modelContext", `rel=\"canonical\" href=\"${publicOrigin}/\"`
 ]) if (!home.includes(marker)) failures.push(`homepage parity marker missing: ${marker}`);
-if (home.includes('/auth/login')) failures.push("public showcase homepage must not link to the private sign-in surface");
-if (!home.includes('href="/workspace/"')) failures.push("public showcase homepage must route workspace actions to the preview");
-if (!home.includes('&lt;POSTSTEWARD_SERVICE_ORIGIN&gt;')) failures.push("homepage machine example must preserve the private service-origin placeholder");
+if (!home.includes('href="https://app.poststeward.com/auth/login"')) failures.push("homepage must lead to the real production sign-in");
+if (/SHOWCASE MODE|PUBLIC PREVIEW|Workspace preview/.test(home)) failures.push("demo-only labels remain in the production homepage");
+if (!home.includes('href="/install/"')) failures.push("homepage must retain the branded installation guide");
+if (!home.includes('POST https://app.poststeward.com/api/operations/schedule_create')) failures.push("homepage agent example must use the production API origin");
 
 const onboarding = await text("public/onboarding/index.html");
-for (const marker of ["Four steps to give an agent publishing access", "Connect a publishing account", "Bind a project", "Issue a scoped agent token", "Publish, then read the receipt", "<POSTSTEWARD_SERVICE_ORIGIN>"]) {
+for (const marker of ["Four steps to give an agent publishing access", "Connect a publishing account", "Bind a project", "Issue a scoped agent token", "Publish, then read the receipt", "https://app.poststeward.com"]) {
   if (!onboarding.includes(marker)) failures.push(`onboarding parity marker missing: ${marker}`);
 }
 
@@ -87,7 +88,7 @@ for (const marker of ["Everything an agent needs to publish and prove it", "Oper
 }
 
 const workspace = await text("public/workspace/index.html");
-for (const marker of ["[SHOWCASE: NO EXTERNAL EFFECTS]", "Connect an account", "Bind a project", "Submit exact copy", "Delivery receipts", "Agent access", "Advanced", "Token display is intentionally unavailable"]) {
+for (const marker of ["Demo · sample data", "Connect an account", "Bind a project", "Submit exact copy", "Delivery receipts", "Agent access", "Advanced", "Agent tokens are created in your own workspace"]) {
   if (!workspace.includes(marker)) failures.push(`workspace parity marker missing: ${marker}`);
 }
 
@@ -175,7 +176,7 @@ for (const path of [
 
 const app = await text("public/app.js");
 if (/fetch\s*\(/.test(app)) failures.push("showcase JavaScript must remain effect-free and make no network calls");
-if (!app.includes("Showcase preview only")) failures.push("preview actions must keep their non-effectful boundary explicit");
+if (!app.includes("This is a demo")) failures.push("preview actions must keep their non-effectful boundary explicit");
 
 const workerConfig = JSON.parse(await text("wrangler.jsonc"));
 if (workerConfig.name !== workerName) failures.push("workers.dev config must keep the launch Worker name");

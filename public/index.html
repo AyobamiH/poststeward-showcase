@@ -26,7 +26,7 @@
     <link
       rel="alternate"
       type="application/json"
-      href="/help.json"
+      href="https://app.poststeward.com/help.json"
       title="Agent operation catalogue"
     />
   </head>
@@ -43,7 +43,7 @@
           <a href="#agents">For agents</a>
           <a href="#pricing">Pricing</a>
           <a href="/agent-guide/">Docs</a>
-          <a class="button primary" href="/workspace/">Workspace preview</a>
+          <a class="button primary" href="https://app.poststeward.com/auth/login">Open workspace</a>
         </nav>
         <details class="site-menu">
           <summary>Menu</summary>
@@ -53,7 +53,7 @@
             <a href="#agents">For agents</a>
             <a href="#pricing">Pricing</a>
             <a href="/agent-guide/">Agent guide</a>
-            <a href="/workspace/">Workspace preview</a>
+            <a href="https://app.poststeward.com/auth/login">Open workspace</a>
           </div>
         </details>
       </div>
@@ -73,18 +73,18 @@
             consequential write.
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="/workspace/">Explore setup</a>
-            <a class="button" href="/agent-guide/">Connect an agent</a>
+            <a class="button primary" href="https://app.poststeward.com/auth/login">Start free</a>
+            <a class="button" href="https://app.poststeward.com/docs/agent-guide">Connect an agent</a>
           </div>
           <p class="hero-note">
-            [SHOWCASE MODE] · PUBLIC PREVIEW · NO PROVIDER CREDENTIALS OR EXTERNAL EFFECTS
+            Sign in with Google. Connect your accounts and approve what your agents publish.
           </p>
         </div>
 
         <div class="control-map" aria-label="PostSteward publishing control-plane example">
           <div class="control-map-head">
             <div>
-              <p class="machine-label">LIVE CONTRACT</p>
+              <p class="machine-label">EXAMPLE PUBLISHING FLOW</p>
               <p class="operation-name">publish_now</p>
             </div>
             <span class="scope-pill">publish</span>
@@ -303,18 +303,18 @@
               uses document.modelContext when the supporting browser exposes it.
             </p>
             <div class="protocol-row">
-              <a class="protocol" href="/openapi.json">OpenAPI</a>
-              <a class="protocol" href="/help.json">help.json</a>
-              <a class="protocol" href="/llms.txt">llms.txt</a>
-              <a class="protocol" href="/docs/operations.md">operations</a>
+              <a class="protocol" href="https://app.poststeward.com/openapi.json">OpenAPI</a>
+              <a class="protocol" href="https://app.poststeward.com/help.json">help.json</a>
+              <a class="protocol" href="https://app.poststeward.com/llms.txt">llms.txt</a>
+              <a class="protocol" href="https://app.poststeward.com/docs/operations">operations</a>
             </div>
             <p class="muted">
-              This public showcase is non-effectful. Live agent access uses a controlled service
-              origin supplied during authorised access. Provider API fees, if any, are
-              separate from PostSteward.
+              Create your workspace, connect your accounts and issue a scoped agent token.
+              Use https://app.poststeward.com for live HTTP and remote MCP access.
+              Provider API fees, if any, are separate from PostSteward.
             </p>
           </div>
-          <pre class="machine-example">POST &lt;POSTSTEWARD_SERVICE_ORIGIN&gt;/api/operations/schedule_create
+          <pre class="machine-example">POST https://app.poststeward.com/api/operations/schedule_create
 Authorization: Bearer &lt;scoped-agent-token&gt;
 
 {
@@ -359,7 +359,7 @@ Authorization: Bearer &lt;scoped-agent-token&gt;
             </ul>
           </article>
           <article data-plan="advanced">
-            <span class="plan-chip">ADVANCED · $5 / MONTH</span>
+            <span class="plan-chip">ADVANCED · COMING SOON</span>
             <h2>Keep reviewed work moving</h2>
             <p class="plan-price">$5 <span>per workspace / month</span></p>
             <p class="plan-copy">
@@ -373,7 +373,7 @@ Authorization: Bearer &lt;scoped-agent-token&gt;
               <li>Inspectable inventory and category state</li>
             </ul>
             <p id="advanced-state" class="muted">
-              Execution remains gated until the Advanced path completes live validation.
+              Advanced is coming soon. Free publishing and scheduling are available today.
             </p>
             <a href="/product.json">Inspect the product contract →</a>
           </article>
@@ -386,8 +386,8 @@ Authorization: Bearer &lt;scoped-agent-token&gt;
         <span>© 2026 PostSteward · Reliable social publishing for AI agents.</span>
         <span class="site-footer-links">
           <a href="/agent-guide/">Agent guide</a>
-          <a href="/docs/operations.md">Operations</a>
-          <a href="/help.json">Machine help</a>
+          <a href="https://app.poststeward.com/docs/operations">Operations</a>
+          <a href="https://app.poststeward.com/help.json">Machine help</a>
           <a href="/privacy/">Privacy</a>
           <a href="/terms/">Terms</a>
           <a href="/data-deletion/">Data deletion</a>
