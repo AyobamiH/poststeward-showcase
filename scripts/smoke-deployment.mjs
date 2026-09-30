@@ -4,7 +4,42 @@ const origins = rawOrigins.split(",").map((value) => value.trim()).filter(Boolea
 if (!origins.length || origins.some((origin) => !origin.startsWith("https://"))) throw new Error("SHOWCASE_ORIGINS must contain https URLs");
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const requiredHeaders = ["strict-transport-security", "content-security-policy", "x-content-type-options", "referrer-policy", "x-frame-options", "cross-origin-opener-policy", "cross-origin-resource-policy", "permissions-policy"];
-const operationNames = ["workspace_status","accounts_list","account_disconnect","project_put","projects_list","campaign_create","campaign_get","campaign_validate","publish_now","schedule_create","schedule_cancel","schedule_replace","receipt_get","receipts_list","workspace_export","metrics_capture","publishing_pause","automation_configure","automation_inspect","automation_preview","automation_enable","automation_pause","billing_status","billing_quote","billing_checkout","billing_portal"];
+const operationNames = [
+  "workspace_status",
+  "publishing_capabilities",
+  "accounts_list",
+  "account_disconnect",
+  "project_put",
+  "projects_list",
+  "campaign_create",
+  "campaign_get",
+  "campaign_validate",
+  "publish_now",
+  "schedule_create",
+  "schedule_cancel",
+  "delivery_approve",
+  "delivery_reject",
+  "schedule_replace",
+  "receipt_get",
+  "receipt_recheck",
+  "receipts_list",
+  "workspace_export",
+  "metrics_capture",
+  "publishing_pause",
+  "automation_configure",
+  "automation_inspect",
+  "automation_preview",
+  "automation_enable",
+  "automation_pause",
+  "billing_status",
+  "billing_quote",
+  "billing_checkout",
+  "billing_portal",
+  "runtime_inspect",
+  "runtime_schedule_create",
+  "runtime_schedule_cancel",
+  "runtime_command_get"
+];
 const forbidden = /AyobamiH\/poststeward(?!-showcase)|poststeward-staging\.woeinvests\.workers\.dev/i;
 
 async function getText(origin, path) {

@@ -2,11 +2,25 @@
   "schemaVersion": 2,
   "name": "PostSteward",
   "publicOrigin": "https://poststeward.com",
-  "audience": ["AI agents", "developers", "technical founders", "agent operators"],
-  "purpose": "Let an agent keep the product story, engagement and GTM pipeline moving while the builder stays in development.",
+  "audience": [
+    "AI agents",
+    "developers",
+    "technical founders",
+    "agent operators"
+  ],
+  "purpose": "Let agents publish approved social copy, schedule it and inspect receipts under owner-controlled authority.",
   "category": "Agent-first social publishing infrastructure for continuous GTM",
-  "interfaces": ["Remote MCP", "HTTP", "CLI via HTTP", "WebMCP"],
-  "providers": ["X", "Threads", "LinkedIn"],
+  "interfaces": [
+    "Remote MCP",
+    "HTTP",
+    "CLI via HTTP",
+    "WebMCP"
+  ],
+  "providers": {
+    "x": "OAuth available",
+    "threads": "OAuth available",
+    "linkedin": "Page OAuth requires separately approved Community Management application; member readback requires restricted permission"
+  },
   "showcase": {
     "effectfulPublicAccess": false,
     "workspace": "synthetic preview",
@@ -14,8 +28,30 @@
     "billingEnabled": false
   },
   "plans": {
-    "free": {"price": 0, "features": ["publishing", "explicit scheduling", "routing", "receipts", "on-demand metrics", "agent transports"]},
-    "advanced": {"priceUsdPerWorkspaceMonth": 5, "features": ["source monitoring", "replenishment", "rolling allocation", "spacing controls", "scheduled metrics"]}
+    "free": {
+      "price": 0,
+      "features": [
+        "publishing",
+        "explicit scheduling",
+        "routing",
+        "receipts",
+        "on-demand metrics",
+        "agent transports"
+      ]
+    },
+    "advanced": {
+      "features": [
+        "source monitoring",
+        "replenishment",
+        "rolling allocation",
+        "spacing controls",
+        "scheduled metrics"
+      ],
+      "currency": "gbp",
+      "amount": null,
+      "interval": "month",
+      "priceStatus": "not_configured"
+    }
   },
   "discovery": {
     "agentGuide": "/agent-guide.md",
