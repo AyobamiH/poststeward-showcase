@@ -106,7 +106,7 @@ if (!home.includes('href="/install/"')) failures.push("homepage must retain the 
 if (!home.includes('POST https://app.poststeward.com/api/operations/schedule_create')) failures.push("homepage agent example must use the production API origin");
 
 const onboarding = await text("public/onboarding/index.html");
-for (const marker of ["Four steps to give an agent publishing access", "Connect a publishing account", "Bind a project", "Issue a scoped agent token", "Publish, then read the receipt", "https://app.poststeward.com"]) {
+for (const marker of ["Start publishing with PostSteward", "Connect a publishing account", "Create a publishing project", "Optional: connect an agent", "Review, schedule and check the result", "https://app.poststeward.com"]) {
   if (!onboarding.includes(marker)) failures.push(`onboarding parity marker missing: ${marker}`);
 }
 
@@ -116,7 +116,7 @@ for (const marker of ["Everything an agent needs to publish and prove it", "Oper
 }
 
 const workspace = await text("public/workspace/index.html");
-for (const marker of ["Demo · sample data", "Connect an account", "Bind a project", "Submit exact copy", "Delivery receipts", "Agent access", "Advanced", "Agent tokens are created in your own workspace"]) {
+for (const marker of ["Demo · sample data", "Connect an account", "Create a publishing project", "Submit exact copy", "Delivery receipts", "Agent access", "Advanced", "Agent tokens are created in your own workspace"]) {
   if (!workspace.includes(marker)) failures.push(`workspace parity marker missing: ${marker}`);
 }
 

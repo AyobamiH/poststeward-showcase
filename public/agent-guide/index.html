@@ -1,4 +1,24 @@
-<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml"><link rel="stylesheet" href="/home.css"><link rel="stylesheet" href="/public-pages.css"><script src="/app.js" defer></script><link rel="stylesheet" href="/journey.css"><script src="/journey.js" defer></script>
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="index,follow"><link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml"><link rel="stylesheet" href="/home.css"><link rel="stylesheet" href="/public-pages.css"><script src="/app.js" defer></script><link rel="stylesheet" href="/journey.css"><script src="/journey.js" defer></script><script src="/wayfinding.js" defer></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -38,7 +58,7 @@
 <meta name="twitter:description" content="Connect an agent through scoped HTTP, remote MCP or supported browser WebMCP. Understand the 34 operations, owner approval and delivery evidence.">
 <meta name="twitter:image" content="https://poststeward.com/social/poststeward-v2.png">
 <meta name="twitter:image:alt" content="PostSteward — Approved publishing. Clear results. For humans and AI agents.">
-</head><body class="public-page"><a class="skip-link" href="#main">Skip to content</a><header class="public-page-header"><div class="public-page-header-inner"><a class="wordmark" href="/" aria-label="PostSteward home"><img class="brand-mark" src="/favicon.svg?v=2" alt=""><span>PostSteward</span></a><nav aria-label="Primary navigation"><a href="/onboarding/">Connect</a><a aria-current="page" href="/agent-guide/">Guide</a><a href="https://app.poststeward.com/auth/login">Open workspace</a><a href="/privacy/">Privacy</a><a href="/terms/">Terms</a><a href="/data-deletion/">Data deletion</a></nav></div></header><main id="main" class="public-page-main"><section class="public-section"><p class="terminal-label">root@poststeward:~$ man poststeward</p><h1 style="text-transform:none">Everything an agent needs to publish and prove it</h1><p class="lead">One operation catalogue, reachable over remote MCP or plain HTTP, with the same execution rules and durable receipts on both. Browser WebMCP registers the same scoped operations on a connected workspace.</p><div class="notice" style="margin-top:1.5rem"><strong>Connect to your workspace.</strong> Use <code>https://app.poststeward.com</code> with your scoped agent token. The <a href="https://app.poststeward.com/docs/operations">live operation reference</a> includes local-runtime inspection and scheduling.</div></section><section class="public-section"><h2>Connect</h2><p class="small muted">The owner signs in, connects a publishing account, binds a project and issues a scoped token. Store that token in the agent's secret manager. Remote MCP uses a Bearer header; OAuth discovery is not required for this flow.</p><div class="grid" style="margin-top:1.25rem"><div class="code-block"><div class="code-head"><span>┌─ MCP client configuration</span><button class="copy" data-copy="guide-mcp">[COPY]</button></div><pre tabindex="0" id="guide-mcp"><code>{
+</head><body class="public-page"><a class="skip-link" href="#main">Skip to content</a><header class="public-page-header"><div class="public-page-header-inner"><a class="wordmark" href="/" aria-label="PostSteward home"><img class="brand-mark" src="/favicon.svg?v=2" alt=""><span>PostSteward</span></a><nav aria-label="Primary navigation"><a href="/onboarding/">Get started</a><a href="/install/">Install</a><a href="https://app.poststeward.com/docs/">Help &amp; guides</a><a href="https://app.poststeward.com/app">Open workspace</a></nav><details class="site-menu"><summary>Menu</summary><nav class="site-menu-panel" aria-label="Mobile navigation"><a href="/onboarding/">Get started</a><a href="/install/">Install</a><a href="https://app.poststeward.com/docs/">Help &amp; guides</a><a href="https://app.poststeward.com/app">Open workspace</a></nav></details></div></header><main id="main" class="public-page-main"><nav class="page-trail" aria-label="Breadcrumb"><a href="/">Home</a><span aria-hidden="true"> / </span><span>Agent guide</span></nav><section class="public-section"><p class="terminal-label">root@poststeward:~$ man poststeward</p><h1 style="text-transform:none">Everything an agent needs to publish and prove it</h1><p class="lead">One operation catalogue, reachable over remote MCP or plain HTTP, with the same execution rules and durable receipts on both. Browser WebMCP registers the same scoped operations on a connected workspace.</p><div class="notice" style="margin-top:1.5rem"><strong>Connect to your workspace.</strong> Use <code>https://app.poststeward.com</code> with your scoped agent token. The <a href="https://app.poststeward.com/docs/operations">live operation reference</a> includes local-runtime inspection and scheduling.</div></section><section class="public-section"><h2>Connect</h2><p class="small muted">The owner signs in, connects a publishing account, binds a project and issues a scoped token. Store that token in the agent's secret manager. Remote MCP uses a Bearer header; OAuth discovery is not required for this flow.</p><div class="grid" style="margin-top:1.25rem"><div class="code-block"><div class="code-head"><span>┌─ MCP client configuration</span><button class="copy" data-copy="guide-mcp">[COPY]</button></div><pre tabindex="0" id="guide-mcp"><code>{
   "mcpServers": {
     "poststeward": {
       "url": "https://app.poststeward.com/mcp",

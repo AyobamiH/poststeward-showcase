@@ -4,7 +4,7 @@ export const imageAlt = "PostSteward — Approved publishing. Clear results. For
 export const pages = [
   { path: "/", file: "index.html", title: "PostSteward — Approved publishing for AI agents", description: "Give your agents approved copy, connected accounts and a schedule. PostSteward checks their authority and keeps delivery receipts." },
   { path: "/install/", file: "install/index.html", title: "Install PostSteward", description: "Install the Linux runtime, pair your machine with PostSteward Cloud and review activation before local publishing." },
-  { path: "/onboarding/", file: "onboarding/index.html", title: "Connect your agent — PostSteward", description: "Set up your workspace, connect a publishing account and give your agent scoped access. Keep owner approval and inspect delivery receipts." },
+  { path: "/onboarding/", file: "onboarding/index.html", title: "Get started — PostSteward", description: "Set up a workspace, connect an account and review your first post. Add an agent or local runtime when needed; keep control of approval and delivery results." },
   { path: "/agent-guide/", file: "agent-guide/index.html", title: "Agent setup guide — PostSteward", description: "Connect an agent through scoped HTTP, remote MCP or supported browser WebMCP. Understand the 34 operations, owner approval and delivery evidence." },
   { path: "/privacy/", file: "privacy/index.html", title: "Privacy policy — PostSteward", description: "How PostSteward uses, protects, retains and deletes service data, and how to request access or deletion." },
   { path: "/terms/", file: "terms/index.html", title: "Terms of service — PostSteward", description: "Terms for using PostSteward, including agent authority, external providers, subscriptions and service limits." },
