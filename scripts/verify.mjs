@@ -48,7 +48,7 @@ const required = [
   "public/install/index.html", "README.md", "SECURITY.md", "package.json", "wrangler.jsonc",
   "wrangler.domain.jsonc", ".github/workflows/deploy.yml",
   ".github/workflows/verify.yml", "public/index.html", "public/404.html",
-  "public/styles.css", "public/home.css", "public/home-composition.css", "public/public-pages.css", "public/favicon.svg", "public/og-image.svg", "public/app.js", "public/onboarding/index.html",
+  "public/styles.css", "public/home.css", "public/home-composition.css", "public/public-pages.css", "public/favicon.svg", "public/social/poststeward-v2.png", "public/app.js", "public/onboarding/index.html",
   "public/agent-guide/index.html", "public/workspace/index.html", "public/privacy/index.html", "public/terms/index.html", "public/data-deletion/index.html",
   "public/agent-guide.md", "public/product.json", "public/agents.txt",
   "public/llms.txt", "public/mcp.json", "public/help.json",
@@ -59,6 +59,7 @@ const required = [
 ];
 
 const failures = [];
+await (await import("./verify-social-previews.mjs")).verifySocialPreviews();
 const text = async (path) => readFile(join(rootPath, path), "utf8");
 for (const path of required) {
   try { await text(path); } catch { failures.push(`missing required file: ${path}`); }
@@ -240,7 +241,7 @@ const headers = await text("public/_headers");
 for (const marker of ["Strict-Transport-Security", "Content-Security-Policy", "X-Content-Type-Options: nosniff", "Referrer-Policy:", "X-Frame-Options: DENY", "Cross-Origin-Opener-Policy: same-origin", "Cross-Origin-Resource-Policy: same-origin", "Permissions-Policy:"]) if (!headers.includes(marker)) failures.push(`security header missing: ${marker}`);
 
 const robots = await text("public/robots.txt");
-if (!robots.includes("Disallow: /workspace/")) failures.push("robots.txt must keep the synthetic workspace out of search results");
+if (!workspace.includes('name="robots" content="noindex,nofollow"')) failures.push("the inert demo must remain excluded from search indexing while permitting safe metadata fetches");
 if (!robots.includes(`${publicOrigin}/sitemap.xml`)) failures.push("robots.txt must advertise the public sitemap");
 const sitemap = await text("public/sitemap.xml");
 for (const url of [`${publicOrigin}/`, `${publicOrigin}/onboarding/`, `${publicOrigin}/agent-guide/`, `${publicOrigin}/privacy/`, `${publicOrigin}/terms/`, `${publicOrigin}/data-deletion/`]) if (!sitemap.includes(`<loc>${url}</loc>`)) failures.push(`sitemap missing: ${url}`);
