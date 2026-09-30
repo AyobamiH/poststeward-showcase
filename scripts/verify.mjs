@@ -18,7 +18,7 @@ const operationNames = [
 ];
 
 const required = [
-  "README.md", "SECURITY.md", "package.json", "wrangler.jsonc",
+  "public/install/index.html", "README.md", "SECURITY.md", "package.json", "wrangler.jsonc",
   "wrangler.domain.jsonc", ".github/workflows/deploy.yml",
   ".github/workflows/verify.yml", "public/index.html", "public/404.html",
   "public/styles.css", "public/home.css", "public/home-composition.css", "public/public-pages.css", "public/favicon.svg", "public/og-image.svg", "public/app.js", "public/onboarding/index.html",
@@ -240,7 +240,23 @@ for (const file of await walk(rootPath)) {
   const rel = relative(rootPath, file);
   if (rel === "scripts/verify.mjs") continue;
   const content = await readFile(file, "utf8");
-  for (const rule of forbidden) if (rule.pattern.test(content)) failures.push(`${rule.label} exposed in ${rel}`);
+  for (const rule of forbidden) {
+    const releasedArtifact = ["public/install.sh", "public/releases/stable.json", "public/releases/beta.json", "scripts/sync-runtime-release.mjs", "scripts/smoke-deployment.mjs", "tests/runtime-distribution.test.mjs"].includes(rel);
+    if (releasedArtifact && rule.label === "private implementation repository identifier") continue;
+    if (rel === "scripts/sync-runtime-release.mjs" && rule.label === "private staging origin") continue;
+    if (rule.pattern.test(content)) failures.push(`${rule.label} exposed in ${rel}`);
+  }
+}
+
+if (process.env.SHOWCASE_REQUIRE_DISTRIBUTION === "true") {
+  try {
+    const installer = await text("public/install.sh");
+    if (!installer.startsWith("#!/usr/bin/env bash\n") || !installer.includes("https://app.poststeward.com")) failures.push("runtime installer missing or wrong application origin");
+    for (const channel of ["stable", "beta"]) {
+      const manifest = JSON.parse(await text(`public/releases/${channel}.json`));
+      if (manifest.product !== "poststeward" || manifest.channel !== channel || !/^[a-f0-9]{40}$/.test(manifest.revision) || !/^[a-f0-9]{64}$/.test(manifest.runtime_tree_sha256)) failures.push(`invalid ${channel} distribution identity`);
+    }
+  } catch { failures.push("runtime distribution assets are missing"); }
 }
 
 if (failures.length) {

@@ -63,3 +63,7 @@ The launch site remains dependency-light static HTML/CSS/JavaScript on Cloudflar
 ## Source boundary
 
 No private implementation repository identifier, private UI-source identifier, private staging/service origin, provider credential or customer data belongs in this repository. Verification fails if any of those patterns return.
+
+## Public runtime artifacts
+
+Build-time distribution tooling copies the canonical installer and exact live stable/beta metadata into static assets. These artifacts may reference the publicly released runtime archive; that is the only implementation-source exception. The generated installer is byte-for-byte verified against its immutable source revision and the deployed application asset. The browser continues to make no effectful request. Pairing targets the authenticated application, while the branded domain serves installer and channel metadata.

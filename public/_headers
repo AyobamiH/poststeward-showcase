@@ -7,3 +7,9 @@
   Cross-Origin-Resource-Policy: same-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
   Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+
+/install.sh
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: no-cache
+/releases/*
+  Cache-Control: no-cache
