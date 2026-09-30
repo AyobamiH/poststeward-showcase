@@ -22,7 +22,7 @@ async function verifyOrigin(origin) {
     try {
       const root = await getText(origin, "/");
       for (const header of requiredHeaders) if (!root.response.headers.get(header)) throw new Error(`root missing ${header}`);
-      for (const marker of ["Let agents publish.", "Keep proof of what happened.", "[SHOWCASE MODE]", '<link rel="canonical" href="https://poststeward.com/"']) if (!root.body.includes(marker)) throw new Error(`root HTML missing marker: ${marker}`);
+      for (const marker of ["Let agents publish.", "Keep proof of what happened.", "Start free", 'href="https://app.poststeward.com/auth/login"', '<link rel="canonical" href="https://poststeward.com/"']) if (!root.body.includes(marker)) throw new Error(`root HTML missing marker: ${marker}`);
 
       const installer = await getText(origin, "/install.sh");
       if (!installer.body.startsWith("#!/usr/bin/env bash\n") || !installer.body.includes("https://app.poststeward.com")) throw new Error("canonical installer missing/wrong application origin");
@@ -41,7 +41,7 @@ async function verifyOrigin(origin) {
       for (const marker of ["Everything an agent needs to publish and prove it", "Operation catalogue", "Browser WebMCP", "ambiguous_effect"]) if (!guide.body.includes(marker)) throw new Error(`agent guide missing marker: ${marker}`);
 
       const workspace = await getText(origin, "/workspace/");
-      for (const marker of ["[SHOWCASE: NO EXTERNAL EFFECTS]", "Delivery receipts", "Agent access", "Advanced"]) if (!workspace.body.includes(marker)) throw new Error(`workspace preview missing marker: ${marker}`);
+      for (const marker of ["Demo · sample data", "Delivery receipts", "Agent access", "Advanced"]) if (!workspace.body.includes(marker)) throw new Error(`workspace preview missing marker: ${marker}`);
 
 
       const privacy = await getText(origin, "/privacy/");

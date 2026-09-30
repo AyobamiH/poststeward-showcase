@@ -23,13 +23,13 @@ The public launch surface preserves the actual agent contract:
 
 The agent guide, Markdown guide, `agents.txt`, `llms.txt`, `mcp.json`, help metadata, OpenAPI and operation reference describe one 26-operation contract.
 
-## Showcase boundary
+## Production entry points and optional demo
 
-`poststeward.com` is the public Product Hunt / showcase surface. It deliberately does **not** accept provider credentials, issue live agent tokens, create payments or execute social posts.
+`poststeward.com` is the public product and installation website. Its primary buttons lead to Google sign-in at `https://app.poststeward.com/auth/login`; owner approval, OAuth, agent tokens and publishing happen in that authenticated application.
 
-Where the real product has an effectful capability, the showcase preserves its UI and usage documentation but labels the action as preview-only. Examples use `<POSTSTEWARD_SERVICE_ORIGIN>` rather than exposing a private service origin.
+Homepage and onboarding copy describe the real product. Executable HTML examples use `https://app.poststeward.com`. The homepage links to the live application operation reference and help for the complete runtime catalogue; legacy static machine files remain documentation-only.
 
-The synthetic workspace at `/workspace/` mirrors the operator panels without creating external effects.
+The optional workspace demo at `/workspace/` uses sample records and inert controls and directs users to sign in for real work. It is not the primary workspace journey. Advanced is shown as coming soon.
 
 ## Public routes
 
