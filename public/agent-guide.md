@@ -104,7 +104,7 @@ All mutations require an `idempotencyKey`; retry transport with the same key and
 
 ### Billing
 
-- `billing_quote` — scope `billing`, `STATE_WRITE` — exact USD 5 workspace quote.
+- `billing_quote` — scope `billing`, `STATE_WRITE` — exact configured GBP price workspace quote.
 - `billing_checkout` — scope `billing`, `FINANCIAL_EFFECT` — hosted subscription checkout; checkout itself does not grant access.
 - `billing_portal` — scope `billing`, `STATE_WRITE` — hosted billing portal.
 
@@ -150,3 +150,11 @@ To recover safely, inspect the receipt and provider account before acting. Never
 - Machine help: https://poststeward.com/help.json
 - OpenAPI: https://poststeward.com/openapi.json
 - Operation reference: https://poststeward.com/docs/operations.md
+
+## Owner approval and local runtime
+
+Every agent-created delivery waits for owner review of exact content, account and time. Only the signed-in owner can approve it; the original grant is checked again at dispatch. Billing permission does not waive publishing approval.
+
+The current 34-operation catalogue is at https://app.poststeward.com/help.json. For a local executor, use `runtime_inspect`, `runtime_schedule_create`, `runtime_schedule_cancel` and `runtime_command_get` under read/schedule scopes. Commands bind the active installation and authority generation; inspect receipts after a lost response and reuse the original key. Local lifecycle and executor changes retain owner review.
+
+For Advanced purchasing, inspect `billing_status`, request a server `billing_quote` and call `billing_checkout` using the same idempotency key on retry. Currency is GBP; the launch amount is intentionally unconfigured. The returned quote fixes the exact total and currency before payer consent. MPP direct payment remains unavailable until merchant/wallet validation; owning a wallet does not confer workspace billing authority.

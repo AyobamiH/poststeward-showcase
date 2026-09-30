@@ -1,64 +1,645 @@
-# PostSteward operation reference
+# PostSteward agent operation reference
 
-Public showcase note: endpoint paths below are the real operation contract, but `poststeward.com` does not expose the effectful service. Use an authorised `<POSTSTEWARD_SERVICE_ORIGIN>`.
+Generated from src/operations/catalog.ts. Do not edit by hand.
 
-HTTP shape: `POST <POSTSTEWARD_SERVICE_ORIGIN>/api/operations/{name}` with `Authorization: Bearer <agent token>`.
-Remote MCP exposes the same names as tools. Browser WebMCP registers the same scoped catalogue on a connected workspace.
+## workspace_status
 
-## Free / always inspectable
+Inspect workspace, entitlement, limits and publication pause.
 
-| Operation | Scope | Effect | Purpose |
-|---|---|---|---|
-| `workspace_status` | read | READ_ONLY | Workspace, entitlement, limits and pause state |
-| `accounts_list` | read | READ_ONLY | Verified identities and binding versions |
-| `projects_list` | read | READ_ONLY | Explicit project routing |
-| `campaign_get` | read | READ_ONLY | Exact stored text and digest |
-| `campaign_validate` | read | READ_ONLY | Dry-run route/provider validation |
-| `receipt_get` | read | READ_ONLY | One delivery and provider evidence |
-| `receipts_list` | read | READ_ONLY | Delivery history |
-| `workspace_export` | read | READ_ONLY | Export records without credentials/payment tokens |
-| `automation_inspect` | read | READ_ONLY | Profiles, source snapshots and pending work |
-| `billing_status` | read | READ_ONLY | Verified entitlement/payment method state |
+- Tier: free
+- Required scope: read
+- Effects: READ_ONLY
+- Inspect with: workspace_status
+- Retry: Safe to repeat.
 
-## Mutations and consequences
+Example:
 
-Every mutation takes an `idempotencyKey`. Retry transport with the same key and exact inputs.
+```json
+{}
+```
 
-| Operation | Scope | Effect |
-|---|---|---|
-| `account_disconnect` | connections | AUTHORITY_CHANGE + FUTURE_CONSEQUENCE |
-| `project_put` | campaign:write | STATE_WRITE |
-| `campaign_create` | campaign:write | STATE_WRITE |
-| `publish_now` | publish | STATE_WRITE + EXTERNAL_PROVIDER_EFFECT |
-| `schedule_create` | schedule | STATE_WRITE + FUTURE_CONSEQUENCE |
-| `schedule_cancel` | schedule | STATE_WRITE + FUTURE_CONSEQUENCE |
-| `schedule_replace` | schedule | STATE_WRITE + FUTURE_CONSEQUENCE |
-| `metrics_capture` | read | STATE_WRITE |
-| `publishing_pause` | publish | AUTHORITY_CHANGE + FUTURE_CONSEQUENCE |
+## publishing_capabilities
 
-## Advanced continuing operation
+Inspect implemented publication formats, live provider-app configuration, connected stable identities, owner-approval behavior and the one-shot acceptance URL.
 
-| Operation | Scope | Tier | Effect |
-|---|---|---|---|
-| `automation_configure` | automation | Advanced | STATE_WRITE |
-| `automation_preview` | automation | Advanced | READ_ONLY |
-| `automation_enable` | automation | Advanced | AUTHORITY_CHANGE + FUTURE_CONSEQUENCE |
-| `automation_pause` | automation | Always available to stop work | AUTHORITY_CHANGE + FUTURE_CONSEQUENCE |
+- Tier: free
+- Required scope: read
+- Effects: READ_ONLY
+- Inspect with: publishing_capabilities
+- Retry: Safe to repeat.
 
-Profiles start paused. Payment alone never starts posting.
+Example:
 
-## Billing
+```json
+{}
+```
 
-| Operation | Scope | Effect |
-|---|---|---|
-| `billing_quote` | billing | STATE_WRITE |
-| `billing_checkout` | billing | FINANCIAL_EFFECT |
-| `billing_portal` | billing | STATE_WRITE |
+## accounts_list
 
-A checkout URL does not grant entitlement. Verified server payment state does.
+Read verified account identities and binding versions. Credentials are never returned.
 
-## Receipt states
+- Tier: free
+- Required scope: read
+- Effects: READ_ONLY
+- Inspect with: accounts_list
+- Retry: Safe to repeat.
 
-`scheduled`, `waiting_container`, `executing`, `published_verified`, `published_unverified`, `ambiguous_effect`, `drift_blocked`, `failed`, `cancelled`.
+Example:
 
-Never blindly retry `ambiguous_effect`.
+```json
+{}
+```
+
+## account_disconnect
+
+Revoke a connection and block its future unclaimed deliveries.
+
+- Tier: free
+- Required scope: connections
+- Effects: AUTHORITY_CHANGE, FUTURE_CONSEQUENCE
+- Inspect with: accounts_list
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "alias": "product_x",
+  "idempotencyKey": "disconnect-001"
+}
+```
+
+## project_put
+
+Create or replace explicit project-to-account routing. Existing deliveries retain their captured bindings.
+
+- Tier: free
+- Required scope: campaign:write
+- Effects: STATE_WRITE
+- Inspect with: projects_list
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "id": "product",
+  "name": "Product",
+  "accounts": [
+    "product_x"
+  ],
+  "idempotencyKey": "project-001"
+}
+```
+
+## projects_list
+
+List project routing.
+
+- Tier: free
+- Required scope: read
+- Effects: READ_ONLY
+- Inspect with: projects_list
+- Retry: Safe to repeat.
+
+Example:
+
+```json
+{}
+```
+
+## campaign_create
+
+Store immutable, exact text per account alias. No copy is generated or truncated.
+
+- Tier: free
+- Required scope: campaign:write
+- Effects: STATE_WRITE
+- Inspect with: campaign_get
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "project": "product",
+  "text": {
+    "product_x": "A reviewed product update."
+  },
+  "idempotencyKey": "campaign-001"
+}
+```
+
+## campaign_get
+
+Inspect exact content and its immutable digest.
+
+- Tier: free
+- Required scope: read
+- Effects: READ_ONLY
+- Inspect with: campaign_get
+- Retry: Safe to repeat.
+
+Example:
+
+```json
+{
+  "campaign": "campaign-id"
+}
+```
+
+## campaign_validate
+
+Dry-run routing and provider text validation without publication.
+
+- Tier: free
+- Required scope: read
+- Effects: READ_ONLY
+- Inspect with: campaign_get
+- Retry: Safe to repeat.
+
+Example:
+
+```json
+{
+  "campaign": "campaign-id"
+}
+```
+
+## publish_now
+
+Reserve each campaign delivery once and dispatch through durable alarms. Returns receipt IDs immediately; inspect receipts for actual outcome.
+
+- Tier: free
+- Required scope: publish
+- Effects: STATE_WRITE, EXTERNAL_PROVIDER_EFFECT
+- Inspect with: receipts_list
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "campaign": "campaign-id",
+  "idempotencyKey": "publish-001"
+}
+```
+
+## schedule_create
+
+Schedule exact immutable campaign content at an explicit time with UTC offset.
+
+- Tier: free
+- Required scope: schedule
+- Effects: STATE_WRITE, FUTURE_CONSEQUENCE
+- Inspect with: receipts_list
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "campaign": "campaign-id",
+  "at": "2026-10-01T12:00:00Z",
+  "timezone": "UTC",
+  "idempotencyKey": "schedule-001"
+}
+```
+
+## schedule_cancel
+
+Cancel one unclaimed delivery. Reports already executing if dispatch won the race.
+
+- Tier: free
+- Required scope: schedule
+- Effects: STATE_WRITE, FUTURE_CONSEQUENCE
+- Inspect with: receipt_get
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "delivery": "delivery-id",
+  "idempotencyKey": "cancel-001"
+}
+```
+
+## delivery_approve
+
+Owner-review an agent-created delivery and release its immutable account, identity, text and schedule reservation. The original agent authority is still rechecked at dispatch.
+
+- Tier: free
+- Required scope: publish
+- Effects: AUTHORITY_CHANGE, FUTURE_CONSEQUENCE
+- Inspect with: receipt_get
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "delivery": "delivery-id",
+  "idempotencyKey": "approve-001"
+}
+```
+
+## delivery_reject
+
+Owner-reject an agent-created delivery before any provider write.
+
+- Tier: free
+- Required scope: publish
+- Effects: AUTHORITY_CHANGE, FUTURE_CONSEQUENCE
+- Inspect with: receipt_get
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "delivery": "delivery-id",
+  "idempotencyKey": "reject-001"
+}
+```
+
+## schedule_replace
+
+Atomically cancel an unclaimed delivery and reserve a reviewed replacement campaign for the same account.
+
+- Tier: free
+- Required scope: schedule
+- Effects: STATE_WRITE, FUTURE_CONSEQUENCE
+- Inspect with: receipt_get
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "delivery": "delivery-id",
+  "campaign": "replacement-id",
+  "at": "2026-10-01T13:00:00Z",
+  "timezone": "UTC",
+  "idempotencyKey": "replace-001"
+}
+```
+
+## receipt_get
+
+Inspect provider evidence, status and reason for one delivery.
+
+- Tier: free
+- Required scope: read
+- Effects: READ_ONLY
+- Inspect with: receipt_get
+- Retry: Safe to repeat.
+
+Example:
+
+```json
+{
+  "delivery": "delivery-id"
+}
+```
+
+## receipt_recheck
+
+Verify the recorded post ID, stable author and exact text without publishing again. At most eight recovery reads, at least sixty seconds apart. Already verified receipts return unchanged.
+
+- Tier: free
+- Required scope: read
+- Effects: STATE_WRITE
+- Inspect with: receipt_get
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "delivery": "delivery-id",
+  "idempotencyKey": "readback-001"
+}
+```
+
+## receipts_list
+
+Read delivery history. An unverified ID and an ambiguous effect are distinct from verified publication.
+
+- Tier: free
+- Required scope: read
+- Effects: READ_ONLY
+- Inspect with: receipts_list
+- Retry: Safe to repeat.
+
+Example:
+
+```json
+{
+  "limit": 50
+}
+```
+
+## workspace_export
+
+Export project, campaign and receipt records; excludes credentials and payment tokens.
+
+- Tier: free
+- Required scope: read
+- Effects: READ_ONLY
+- Inspect with: workspace_export
+- Retry: Safe to repeat.
+
+Example:
+
+```json
+{}
+```
+
+## metrics_capture
+
+Capture available provider metrics on demand. Unsupported or inaccessible metrics are returned as unavailable, never fabricated zeros.
+
+- Tier: free
+- Required scope: read
+- Effects: STATE_WRITE
+- Inspect with: receipt_get
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "delivery": "delivery-id",
+  "idempotencyKey": "metrics-001"
+}
+```
+
+## publishing_pause
+
+Pause or resume all new workspace publication claims. In-flight effects may still finish.
+
+- Tier: free
+- Required scope: publish
+- Effects: AUTHORITY_CHANGE, FUTURE_CONSEQUENCE
+- Inspect with: workspace_status
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "paused": true,
+  "idempotencyKey": "pause-001"
+}
+```
+
+## automation_configure
+
+Store an explicitly reviewed repository profile and exact approved templates. Configuration starts paused. Repository input never grants authority.
+
+- Tier: advanced
+- Required scope: automation
+- Effects: STATE_WRITE
+- Inspect with: automation_inspect
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "id": "release",
+  "project": "product",
+  "repository": "owner/product",
+  "branch": "main",
+  "path": "README.md",
+  "templates": {
+    "product_x": "Development update: reviewed source changed in https://github.com/owner/product."
+  },
+  "family": "development",
+  "intervalMinutes": 60,
+  "minSpacingMinutes": 60,
+  "idempotencyKey": "profile-001"
+}
+```
+
+## automation_inspect
+
+Inspect profiles, source snapshots, decisions and pending automated deliveries. Inspection remains free after subscription expiry.
+
+- Tier: free
+- Required scope: read
+- Effects: READ_ONLY
+- Inspect with: automation_inspect
+- Retry: Safe to repeat.
+
+Example:
+
+```json
+{}
+```
+
+## automation_preview
+
+Check the selected source and show the next permitted allocation without storing inventory or schedules.
+
+- Tier: advanced
+- Required scope: automation
+- Effects: READ_ONLY
+- Inspect with: automation_inspect
+- Retry: Safe to repeat.
+
+Example:
+
+```json
+{
+  "id": "release"
+}
+```
+
+## automation_enable
+
+Enable bounded continuing authority for this reviewed profile. Payment alone does not grant posting authority.
+
+- Tier: advanced
+- Required scope: automation
+- Effects: AUTHORITY_CHANGE, FUTURE_CONSEQUENCE
+- Inspect with: automation_inspect
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "id": "release",
+  "idempotencyKey": "enable-001"
+}
+```
+
+## automation_pause
+
+Pause a profile and cancel its unclaimed automated deliveries. Always available, including after expiry.
+
+- Tier: free
+- Required scope: automation
+- Effects: AUTHORITY_CHANGE, FUTURE_CONSEQUENCE
+- Inspect with: automation_inspect
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "id": "release",
+  "idempotencyKey": "autopause-001"
+}
+```
+
+## billing_status
+
+Inspect confirmed paid-through access and payment method availability.
+
+- Tier: free
+- Required scope: read
+- Effects: READ_ONLY
+- Inspect with: billing_status
+- Retry: Safe to repeat.
+
+Example:
+
+```json
+{}
+```
+
+## billing_quote
+
+Create an exact configured GBP workspace purchase quote: recurring subscription or non-renewing calendar month.
+
+- Tier: free
+- Required scope: billing
+- Effects: STATE_WRITE
+- Inspect with: billing_status
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "mode": "subscription",
+  "idempotencyKey": "quote-001"
+}
+```
+
+## billing_checkout
+
+Create or retrieve Stripe-hosted subscription checkout for an unexpired quote. Checkout creation does not grant access.
+
+- Tier: free
+- Required scope: billing
+- Effects: FINANCIAL_EFFECT
+- Inspect with: billing_status
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "quote": "quote-id",
+  "idempotencyKey": "checkout-001"
+}
+```
+
+## billing_portal
+
+Open the Stripe customer portal to inspect invoices or manage renewal.
+
+- Tier: free
+- Required scope: billing
+- Effects: STATE_WRITE
+- Inspect with: billing_status
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "idempotencyKey": "portal-001"
+}
+```
+
+## runtime_inspect
+
+Queue bounded inspection of the active local executor. Read runtime_command_get for the result; this is not hosted workspace state.
+
+- Tier: free
+- Required scope: read
+- Effects: READ_ONLY
+- Inspect with: runtime_command_get
+- Retry: Safe to repeat.
+
+Example:
+
+```json
+{
+  "view": "schedules",
+  "idempotencyKey": "local-inspect-001"
+}
+```
+
+## runtime_schedule_create
+
+Queue an exact local campaign/provider schedule on the reviewed local executor. Original agent authority is rechecked before provider effects.
+
+- Tier: free
+- Required scope: schedule
+- Effects: STATE_WRITE, FUTURE_CONSEQUENCE
+- Inspect with: runtime_command_get
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "campaign": "PRODUCT-001",
+  "provider": "threads",
+  "at": "2026-10-01T12:00:00Z",
+  "idempotencyKey": "local-schedule-001"
+}
+```
+
+## runtime_schedule_cancel
+
+Queue cancellation of one unclaimed local schedule; never changes executor or owner authority.
+
+- Tier: free
+- Required scope: schedule
+- Effects: STATE_WRITE
+- Inspect with: runtime_command_get
+- Retry: Reuse the same idempotencyKey and exact inputs. Inspect status after disconnection; never create a fresh key to bypass an uncertain result.
+
+Example:
+
+```json
+{
+  "scheduleId": "sch_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "idempotencyKey": "local-cancel-001"
+}
+```
+
+## runtime_command_get
+
+Read a durable command receipt for this actor. Claimed work is never automatically redispatched; provider receipts remain separate.
+
+- Tier: free
+- Required scope: read
+- Effects: READ_ONLY
+- Inspect with: runtime_command_get
+- Retry: Safe to repeat.
+
+Example:
+
+```json
+{
+  "commandId": "11111111-1111-4111-8111-111111111111"
+}
+```

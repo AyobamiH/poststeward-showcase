@@ -28,4 +28,4 @@ poststeward.com is documentation and UI showcase only. It does not accept provid
 ## Plans
 
 Free: publishing, explicit scheduling, routing, receipts, on-demand metrics and all agent transports.
-Advanced: USD 5/workspace/month for source monitoring, replenishment, rolling allocation, spacing controls and scheduled metrics.
+Advanced: configured GBP price/workspace/month for source monitoring, replenishment, rolling allocation, spacing controls and scheduled metrics.

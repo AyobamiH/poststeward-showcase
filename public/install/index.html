@@ -5,16 +5,16 @@
   <meta name="description" content="Install the full PostSteward runtime, pair your machine and choose one publishing executor.">
   <link rel="canonical" href="https://poststeward.com/install/"><title>Install PostSteward</title>
   <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml"><link rel="stylesheet" href="/home.css"><link rel="stylesheet" href="/public-pages.css">
-</head>
+<link rel="stylesheet" href="/journey.css"><script src="/journey.js" defer></script></head>
 <body class="public-page">
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="public-page-header"><div class="public-page-header-inner"><a class="wordmark" href="/">PostSteward</a><nav aria-label="Primary navigation"><a aria-current="page" href="/install/">Install</a><a href="/agent-guide/">Agent guide</a><a href="/privacy/">Privacy</a></nav></div></header>
   <main id="main" class="public-page-main">
     <section class="public-section">
-      <p class="terminal-label">root@poststeward:~$ install</p>
+      <p class="terminal-label">INSTALL POSTSTEWARD</p>
       <h1 style="text-transform:none">Install the full PostSteward runtime</h1>
       <p class="lead">Keep planning and schedules on your machine, with social account credentials held by PostSteward Cloud. Choose local or hosted execution for the workspace.</p>
-      <div class="code-block"><pre><code>curl -fsSL --proto '=https' --tlsv1.2 https://poststeward.com/install.sh | bash</code></pre></div>
+      <div class="install-command"><pre id="install-command" tabindex="0" aria-label="PostSteward Linux installation command"><code>curl -fsSL --proto '=https' --tlsv1.2 https://poststeward.com/install.sh | bash</code></pre><button class="button" type="button" data-copy="install-command" data-copy-feedback="install-feedback">Copy install command</button><p id="install-feedback" class="copy-feedback" role="status" aria-live="polite"></p><a href="https://poststeward.com/install.sh">Read the PostSteward installer at poststeward.com/install.sh</a><p class="install-prerequisites">Linux · Bash · Python 3.10 or newer. Installation starts inactive; review pairing and activation in your workspace. WSL and macOS acceptance is still pending. <a href="https://poststeward.com/install/">Full installation guide</a>.</p></div>
       <p class="small muted">Requires Python 3.10 or newer and Bash. Linux is the current verified installation platform. Create a free workspace with Google, then pair your machine from the owner workspace.</p>
       <p class="small">To install and inspect before pairing, append <code>bash -s -- --no-onboard</code> in place of <code>bash</code>. Review <a href="/install.sh">the installer</a> and <a href="/releases/stable.json">stable release metadata</a>.</p>
     </section>

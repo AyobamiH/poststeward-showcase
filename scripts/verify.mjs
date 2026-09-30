@@ -8,13 +8,40 @@ const workerName = "poststeward-showcase";
 const wranglerVersion = "4.130.0";
 const cloudflareAccountId = "6ddcbcb8474f1a7e460b2f0aabec0e2f";
 const operationNames = [
-  "workspace_status", "accounts_list", "account_disconnect", "project_put",
-  "projects_list", "campaign_create", "campaign_get", "campaign_validate",
-  "publish_now", "schedule_create", "schedule_cancel", "schedule_replace",
-  "receipt_get", "receipts_list", "workspace_export", "metrics_capture",
-  "publishing_pause", "automation_configure", "automation_inspect",
-  "automation_preview", "automation_enable", "automation_pause",
-  "billing_status", "billing_quote", "billing_checkout", "billing_portal"
+  "workspace_status",
+  "publishing_capabilities",
+  "accounts_list",
+  "account_disconnect",
+  "project_put",
+  "projects_list",
+  "campaign_create",
+  "campaign_get",
+  "campaign_validate",
+  "publish_now",
+  "schedule_create",
+  "schedule_cancel",
+  "delivery_approve",
+  "delivery_reject",
+  "schedule_replace",
+  "receipt_get",
+  "receipt_recheck",
+  "receipts_list",
+  "workspace_export",
+  "metrics_capture",
+  "publishing_pause",
+  "automation_configure",
+  "automation_inspect",
+  "automation_preview",
+  "automation_enable",
+  "automation_pause",
+  "billing_status",
+  "billing_quote",
+  "billing_checkout",
+  "billing_portal",
+  "runtime_inspect",
+  "runtime_schedule_create",
+  "runtime_schedule_cancel",
+  "runtime_command_get"
 ];
 
 const required = [
@@ -67,9 +94,9 @@ if (!String(product.sourceDisclosure ?? "").includes("implementation source is n
 
 const home = await text("public/index.html");
 for (const marker of [
-  "lang=\"en-GB\"", "<main id=\"main\" class=\"home home-organised\"", "Let agents publish.",
+  "lang=\"en-GB\"", "<main tabindex=\"-1\" id=\"main\" class=\"home home-organised\"", "Let agents publish.",
   "Keep proof of what happened.", "Receipts, not assumptions",
-  "BUILT TO BE DISCOVERED BY SOFTWARE", "Start free", "CLI via HTTP",
+  "CONNECT AN AGENT", "Start free", "CLI via HTTP",
   "document.modelContext", `rel=\"canonical\" href=\"${publicOrigin}/\"`
 ]) if (!home.includes(marker)) failures.push(`homepage parity marker missing: ${marker}`);
 if (!home.includes('href="https://app.poststeward.com/auth/login"')) failures.push("homepage must lead to the real production sign-in");
@@ -126,7 +153,7 @@ const openapi = JSON.parse(await text("public/openapi.json"));
 if (openapi.openapi !== "3.1.0") failures.push("OpenAPI document must use 3.1.0");
 if (openapi["x-poststeward-showcase"]?.effectfulPublicServer !== false) failures.push("OpenAPI must not imply a live public effectful server");
 const operationEnum = openapi.paths?.["/api/operations/{operation}"]?.post?.parameters?.find((item) => item.name === "operation")?.schema?.enum ?? [];
-if (operationEnum.length !== operationNames.length) failures.push("OpenAPI operation enum must match the 26-operation catalogue");
+if (operationEnum.length !== operationNames.length) failures.push("OpenAPI operation enum must match the current operation catalogue");
 for (const name of operationNames) if (!operationEnum.includes(name)) failures.push(`OpenAPI operation missing: ${name}`);
 
 const agentMarkdown = await text("public/agent-guide.md");
