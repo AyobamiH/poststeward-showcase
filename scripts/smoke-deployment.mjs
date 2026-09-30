@@ -71,7 +71,7 @@ async function verifyOrigin(origin) {
       const installGuide = await getText(origin, "/install/");
       for (const marker of ["Install the full PostSteward runtime", "poststeward cloud bridge", "poststeward cloud recovery-review"]) if (!installGuide.body.includes(marker)) throw new Error(`installation guide missing ${marker}`);
       const onboarding = await getText(origin, "/onboarding/");
-      for (const marker of ["Four steps to give an agent publishing access", "Issue a scoped agent token", "Publish, then read the receipt"]) if (!onboarding.body.includes(marker)) throw new Error(`onboarding missing marker: ${marker}`);
+      for (const marker of ["Start publishing with PostSteward", "Connect a publishing account", "Create a publishing project", "Review, schedule and check the result", "Optional: connect an agent", "Owner approval comes before agent publication"]) if (!onboarding.body.includes(marker)) throw new Error(`onboarding missing marker: ${marker}`);
 
       const guide = await getText(origin, "/agent-guide/");
       for (const marker of ["Everything an agent needs to publish and prove it", "Operation catalogue", "Browser WebMCP", "ambiguous_effect"]) if (!guide.body.includes(marker)) throw new Error(`agent guide missing marker: ${marker}`);
