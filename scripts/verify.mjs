@@ -18,7 +18,7 @@ const operationNames = [
 ];
 
 const required = [
-  "README.md", "SECURITY.md", "package.json", "wrangler.jsonc",
+  "public/install/index.html", "README.md", "SECURITY.md", "package.json", "wrangler.jsonc",
   "wrangler.domain.jsonc", ".github/workflows/deploy.yml",
   ".github/workflows/verify.yml", "public/index.html", "public/404.html",
   "public/styles.css", "public/home.css", "public/home-composition.css", "public/public-pages.css", "public/favicon.svg", "public/og-image.svg", "public/app.js", "public/onboarding/index.html",

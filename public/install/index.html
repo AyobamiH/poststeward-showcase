@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Install the full PostSteward runtime, pair your machine and choose one publishing executor.">
+  <link rel="canonical" href="https://poststeward.com/install/"><title>Install PostSteward</title>
+  <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml"><link rel="stylesheet" href="/home.css"><link rel="stylesheet" href="/public-pages.css">
+</head>
+<body class="public-page">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="public-page-header"><div class="public-page-header-inner"><a class="wordmark" href="/">PostSteward</a><nav aria-label="Primary navigation"><a aria-current="page" href="/install/">Install</a><a href="/agent-guide/">Agent guide</a><a href="/privacy/">Privacy</a></nav></div></header>
+  <main id="main" class="public-page-main">
+    <section class="public-section">
+      <p class="terminal-label">root@poststeward:~$ install</p>
+      <h1 style="text-transform:none">Install the full PostSteward runtime</h1>
+      <p class="lead">Keep planning and schedules on your machine, with social account credentials held by PostSteward Cloud. Choose local or hosted execution for the workspace.</p>
+      <div class="code-block"><pre><code>curl -fsSL --proto '=https' --tlsv1.2 https://poststeward.com/install.sh | bash</code></pre></div>
+      <p class="small muted">Requires Python 3.10 or newer and Bash. Linux is the current verified installation platform. Owner workspace access remains restricted; public signup is a separate launch milestone.</p>
+      <p class="small">To install and inspect before pairing, append <code>bash -s -- --no-onboard</code> in place of <code>bash</code>. Review <a href="/install.sh">the installer</a> and <a href="/releases/stable.json">stable release metadata</a>.</p>
+    </section>
+    <section class="public-section">
+      <h2>Pair, configure, then activate</h2>
+      <ol>
+        <li>Run the installer and open its pairing link. Sign in and approve the exact machine details.</li>
+        <li>Connect or select your verified X and Threads accounts in the owner workspace. LinkedIn Page access requires its separately approved application and provider permissions.</li>
+        <li>Run <code>poststeward configure --help</code> to configure your local projects and reviewed campaign content, then <code>poststeward doctor</code> to inspect readiness.</li>
+        <li>Review the switch to your paired local executor in the owner workspace. Preview and apply <code>poststeward activate</code> using its exact review digest.</li>
+        <li>Inspect scheduled work and provider receipts. A reservation or successful command acknowledgement is distinct from verified publication.</li>
+      </ol>
+      <p class="small muted">An installation starts with automation inactive. The owner reviews executor handoff and activation before unattended local publishing.</p>
+    </section>
+    <section class="public-section">
+      <h2>Let a remote agent work with the local runtime</h2>
+      <p class="small">Give the agent an owner-issued token with explicit read/schedule scopes. Remote MCP exposes <code>runtime_inspect</code>, <code>runtime_schedule_create</code>, <code>runtime_schedule_cancel</code> and <code>runtime_command_get</code> when the workspace executes locally.</p>
+      <p class="small">The active run-due service polls commands outbound. For one manual poll use <code>poststeward cloud bridge</code>. Inspect the command receipt after a lost response; reuse the original key and avoid blind retries.</p>
+      <p class="small">For migration or dead-machine recovery, pair the target as a new installation. After local verification run <code>poststeward cloud recovery-review</code>, then approve its digest and new target in the owner workspace.</p>
+    </section>
+  </main>
+  <footer class="public-page-footer"><div class="public-page-footer-inner"><span>PostSteward · Reliable social publishing for AI agents.</span><nav><a href="/terms/">Terms</a><a href="/data-deletion/">Data deletion</a></nav></div></footer>
+</body>
+</html>

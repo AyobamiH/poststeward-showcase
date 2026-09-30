@@ -32,6 +32,8 @@ async function verifyOrigin(origin) {
         const value = await response.json();
         if (value.product !== "poststeward" || value.channel !== channel || !/^[a-f0-9]{40}$/.test(value.revision) || !/^[a-f0-9]{64}$/.test(value.runtime_tree_sha256) || Date.parse(value.expires_at) <= Date.now()) throw new Error(`${channel} distribution metadata invalid`);
       }
+      const installGuide = await getText(origin, "/install/");
+      for (const marker of ["Install the full PostSteward runtime", "poststeward cloud bridge", "poststeward cloud recovery-review"]) if (!installGuide.body.includes(marker)) throw new Error(`installation guide missing ${marker}`);
       const onboarding = await getText(origin, "/onboarding/");
       for (const marker of ["Four steps to give an agent publishing access", "Issue a scoped agent token", "Publish, then read the receipt"]) if (!onboarding.body.includes(marker)) throw new Error(`onboarding missing marker: ${marker}`);
 
