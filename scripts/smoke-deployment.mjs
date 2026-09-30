@@ -11,7 +11,8 @@ async function getText(origin, path) {
   const response = await fetch(new URL(path, origin), { headers: { "cache-control": "no-cache" }, redirect: "follow" });
   if (!response.ok) throw new Error(`${path} returned ${response.status}`);
   const body = await response.text();
-  if (forbidden.test(body)) throw new Error(`${path} exposes a private-source identifier`);
+  const boundaryBody = path === "/install.sh" ? body.replaceAll("AyobamiH/poststeward", "released-runtime") : body;
+  if (forbidden.test(boundaryBody)) throw new Error(`${path} exposes a private-source identifier`);
   return { response, body };
 }
 
@@ -23,6 +24,14 @@ async function verifyOrigin(origin) {
       for (const header of requiredHeaders) if (!root.response.headers.get(header)) throw new Error(`root missing ${header}`);
       for (const marker of ["Let agents publish.", "Keep proof of what happened.", "[SHOWCASE MODE]", '<link rel="canonical" href="https://poststeward.com/"']) if (!root.body.includes(marker)) throw new Error(`root HTML missing marker: ${marker}`);
 
+      const installer = await getText(origin, "/install.sh");
+      if (!installer.body.startsWith("#!/usr/bin/env bash\n") || !installer.body.includes("https://app.poststeward.com")) throw new Error("canonical installer missing/wrong application origin");
+      for (const channel of ["stable", "beta"]) {
+        const response = await fetch(new URL(`/releases/${channel}.json`, origin), { headers: { "cache-control": "no-cache" } });
+        if (!response.ok) throw new Error(`${channel} metadata returned ${response.status}`);
+        const value = await response.json();
+        if (value.product !== "poststeward" || value.channel !== channel || !/^[a-f0-9]{40}$/.test(value.revision) || !/^[a-f0-9]{64}$/.test(value.runtime_tree_sha256) || Date.parse(value.expires_at) <= Date.now()) throw new Error(`${channel} distribution metadata invalid`);
+      }
       const onboarding = await getText(origin, "/onboarding/");
       for (const marker of ["Four steps to give an agent publishing access", "Issue a scoped agent token", "Publish, then read the receipt"]) if (!onboarding.body.includes(marker)) throw new Error(`onboarding missing marker: ${marker}`);
 

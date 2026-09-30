@@ -47,7 +47,7 @@ The synthetic workspace at `/workspace/` mirrors the operator panels without cre
 
 ## Public/private boundary
 
-This repository contains only the launch surface. It must not contain or link to private product implementation source, private UI-source locations, provider credentials, customer data or private service origins.
+This repository contains the launch surface and canonical public runtime distribution. Its release artifacts may reference the exact publicly released runtime archive. Other pages must not contain or link to private product implementation source, private UI-source locations, provider credentials, customer data or private service origins.
 
 CI rejects those identifiers and also rejects drift in the agent UI, machine-readable operation catalogue or showcase safety boundary.
 
@@ -73,3 +73,9 @@ Production is served by Cloudflare Workers Static Assets at:
 - `https://www.poststeward.com`
 
 Every `main` deployment verifies both hostnames, security headers, the homepage, onboarding, agent guide, workspace preview and machine-readable agent contract.
+
+## Runtime distribution
+
+The deploy workflow prepares `/install.sh` and `/releases/stable.json` and `/releases/beta.json` from verified deployed releases. The installer is compared byte-for-byte with its immutable GitHub source and the deployed application asset. Stable metadata must match the live production health revision. Missing, stale or mismatched metadata blocks deployment.
+
+The branded domain distributes installation artifacts; pairing and cloud coordination target the authenticated application domain. Public preview controls remain inert. `scripts/sync-runtime-release.mjs` is build-time tooling; browser JavaScript stays fetch-free.

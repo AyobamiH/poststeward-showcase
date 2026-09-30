@@ -12,6 +12,10 @@ on:
       - .github/workflows/deploy.yml
   workflow_dispatch:
     inputs:
+      runtime_revision:
+        description: Expected exact production runtime SHA (blank selects the live verified release)
+        required: false
+        type: string
       target:
         description: Deployment target
         required: true
@@ -96,6 +100,18 @@ jobs:
             echo "origins=https://poststeward.com,https://www.poststeward.com" >> "$GITHUB_OUTPUT"
           fi
           echo "mode=$mode" >> "$GITHUB_OUTPUT"
+
+      - name: Publish canonical runtime distribution assets
+        if: steps.credentials.outputs.ready == 'true'
+        env:
+          POSTSTEWARD_RELEASE_REVISION: ${{ inputs.runtime_revision }}
+        run: node scripts/sync-runtime-release.mjs
+
+      - name: Verify prepared distribution
+        if: steps.credentials.outputs.ready == 'true'
+        env:
+          SHOWCASE_REQUIRE_DISTRIBUTION: "true"
+        run: npm run verify
 
       - name: Deploy exact Wrangler version
         if: steps.credentials.outputs.ready == 'true'
