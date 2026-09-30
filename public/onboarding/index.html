@@ -5,7 +5,7 @@
       "headers": { "Authorization": "Bearer &lt;agent token&gt;" }
     }
   }
-}</code></pre></div><div class="actions"><a class="button outline" href="/workspace/#agent-access">Preview token controls</a></div></div></li><li class="step"><span class="step-number">[04]</span><div><h2>Publish, then read the receipt</h2><p class="small muted">The agent submits exact copy as an immutable campaign, validates it, then publishes now or on an explicit schedule. Every attempt returns a durable receipt the agent must read instead of retrying blindly.</p><div class="code-block" style="margin-top:1rem"><div class="code-head"><span>┌─ Create and publish</span><button class="copy" data-copy="onboard-publish">[COPY]</button></div><pre tabindex="0" id="onboard-publish"><code>curl -X POST https://app.poststeward.com/api/operations/campaign_create \
+}</code></pre></div><div class="actions"><a class="button outline" href="https://app.poststeward.com/app#grant">Create agent token</a></div></div></li><li class="step"><span class="step-number">[04]</span><div><h2>Publish, then read the receipt</h2><p class="small muted">The agent submits exact copy as an immutable campaign, validates it, then publishes now or on an explicit schedule. Every attempt returns a durable receipt the agent must read instead of retrying blindly.</p><div class="code-block" style="margin-top:1rem"><div class="code-head"><span>┌─ Create and publish</span><button class="copy" data-copy="onboard-publish">[COPY]</button></div><pre tabindex="0" id="onboard-publish"><code>curl -X POST https://app.poststeward.com/api/operations/campaign_create \
   -H "Authorization: Bearer &lt;agent token&gt;" \
   -H "Content-Type: application/json" \
   -d '{
