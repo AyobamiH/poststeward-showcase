@@ -3,6 +3,12 @@ import {pages, origin as canonicalOrigin, imagePath} from "./social-previews.mjs
 import {verifyPage, verifyPng} from "./verify-social-previews.mjs";
 export async function verifySocialOrigin(origin, send = fetch) {
   const get = (path, type) => send(new URL(path, origin), {redirect:"manual",signal:AbortSignal.timeout(20000),headers:{"User-Agent":"Twitterbot/1.0","Accept":type,"Cache-Control":"no-cache"}});
+  if (["poststeward.com", "www.poststeward.com"].includes(new URL(origin).hostname)) {
+    const http = new URL(origin); http.protocol = "http:";
+    const upgrade = await send(http, {redirect:"manual",signal:AbortSignal.timeout(20000)});
+    assert.equal(upgrade.status, 301, "HTTP public aliases must upgrade to HTTPS");
+    assert.equal(new URL(upgrade.headers.get("location"), http).href, origin + "/");
+  }
   for (const page of pages) {
     const response = await get(page.path, "text/html");
     assert.equal(response.status, 200, page.path + " must be directly retrievable");

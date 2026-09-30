@@ -1,6 +1,6 @@
 /** HTTPS upgrade only; every HTTPS request retains the static asset service. */
 export default {
-  /** @param {Request} request @param {import('../worker-configuration').Env} env */
+  /** @param {Request} request @param {Env} env */
   fetch(request, env) {
     const url = new URL(request.url);
     if (url.protocol === "http:") {

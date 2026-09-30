@@ -21,6 +21,7 @@ test("missing metadata, duplicate identities, SVG images, private canaries and c
 test("live verifier refuses login redirects, missing/corrupt images and foreign legacy redirects", async () => {
   const png = await readFile(new URL("../public/social/poststeward-v2.png", import.meta.url));
   const send = overrides => async url => {
+    if (new URL(url).protocol === "http:") return new Response(null, {status:301,headers:{Location:"https://poststeward.com/"}});
     const path = new URL(url).pathname;
     if (path === "/social/poststeward-v2.png") return overrides.image || new Response(png, {headers:{"Content-Type":"image/png"}});
     if (path.endsWith(".svg")) return new Response(null, {status:301,headers:{Location:overrides.location || "/social/poststeward-v2.png"}});
