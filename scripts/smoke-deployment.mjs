@@ -1,4 +1,5 @@
 const rawOrigins = process.env.SHOWCASE_ORIGINS;
+const { verifySocialOrigin } = await import("./smoke-social-previews.mjs");
 if (!rawOrigins) throw new Error("SHOWCASE_ORIGINS is required");
 const origins = rawOrigins.split(",").map((value) => value.trim()).filter(Boolean);
 if (!origins.length || origins.some((origin) => !origin.startsWith("https://"))) throw new Error("SHOWCASE_ORIGINS must contain https URLs");
@@ -116,5 +117,8 @@ async function verifyOrigin(origin) {
   }
   throw lastError;
 }
-for (const origin of origins) await verifyOrigin(origin);
+for (const origin of origins) {
+  await verifyOrigin(origin);
+  await verifySocialOrigin(origin);
+}
 console.log(`Hosted PostSteward agent-surface verification passed for ${origins.length} origin(s).`);

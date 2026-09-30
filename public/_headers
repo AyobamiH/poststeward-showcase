@@ -13,3 +13,6 @@
   Cache-Control: no-cache
 /releases/*
   Cache-Control: no-cache
+
+/social/poststeward-v2.png
+  Cache-Control: public, max-age=86400
