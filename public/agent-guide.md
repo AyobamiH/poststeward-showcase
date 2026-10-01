@@ -162,9 +162,8 @@ For Advanced purchasing, inspect `billing_status`, request a server `billing_quo
 
 ## Workspace-funded release preparation
 
-The owner connects the workspace's own OpenAI API account at
-https://app.poststeward.com/app#release-preparation. That account pays the model
-provider directly; a ChatGPT subscription is separate. PostSteward encrypts the key
+The owner connects the workspace's own OpenAI or Cloudflare model account at
+https://app.poststeward.com/app#release-preparation. That customer account funds the configured model route; a ChatGPT subscription is separate. PostSteward encrypts the key
 and never gives it to agents. Campaign-writing agents need explicit owner consent
 to spend the workspace's bounded allowance.
 
@@ -182,3 +181,5 @@ retaining immutable campaigns, receipts, spending and existing operation history
 In local executor mode, use the reviewed poststeward preparation import command
 before explicit local scheduling; cloud editorial context is not local execution
 truth. Read https://app.poststeward.com/docs/install.md for exact commands.
+
+Cloudflare owner settings separate Workers AI billing from prepaid AI Gateway Unified Billing, with a reviewed model catalogue, bounded job/day USD allowances, optional fallback off by default and payload-free logging choices. Credit routing requires a dedicated key-free gateway, retry suppression and a positive gateway-wide spend rule. Connection validation never purchases credits or calls a model. Live customer billing and human quality acceptance remain pending.
