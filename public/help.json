@@ -4,7 +4,7 @@
   "showcase": true,
   "showcaseNote": "Documentation and UI only; poststeward.com does not expose effectful publishing endpoints.",
   "summary": "Scoped agent publishing over MCP/HTTP/WebMCP with exact copy, explicit routing and durable receipts.",
-  "operationCount": 34,
+  "operationCount": 46,
   "scopes": [
     "read",
     "campaign:write",
@@ -47,5 +47,12 @@
       "interval": "month",
       "priceStatus": "not_configured"
     }
+  },
+  "preparation": {
+    "funding": "workspace_model_account",
+    "provider": "openai",
+    "companyModelKey": false,
+    "ownerReviewRequired": true,
+    "automaticPublication": false
   }
 }

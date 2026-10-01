@@ -155,6 +155,30 @@ To recover safely, inspect the receipt and provider account before acting. Never
 
 Every agent-created delivery waits for owner review of exact content, account and time. Only the signed-in owner can approve it; the original grant is checked again at dispatch. Billing permission does not waive publishing approval.
 
-The current 34-operation catalogue is at https://app.poststeward.com/help.json. For a local executor, use `runtime_inspect`, `runtime_schedule_create`, `runtime_schedule_cancel` and `runtime_command_get` under read/schedule scopes. Commands bind the active installation and authority generation; inspect receipts after a lost response and reuse the original key. Local lifecycle and executor changes retain owner review.
+The current 46-operation catalogue is at https://app.poststeward.com/help.json. For a local executor, use `runtime_inspect`, `runtime_schedule_create`, `runtime_schedule_cancel` and `runtime_command_get` under read/schedule scopes. Commands bind the active installation and authority generation; inspect receipts after a lost response and reuse the original key. Local lifecycle and executor changes retain owner review.
 
 For Advanced purchasing, inspect `billing_status`, request a server `billing_quote` and call `billing_checkout` using the same idempotency key on retry. Currency is GBP; the launch amount is intentionally unconfigured. The returned quote fixes the exact total and currency before payer consent. MPP direct payment remains unavailable until merchant/wallet validation; owning a wallet does not confer workspace billing authority.
+
+
+## Workspace-funded release preparation
+
+The owner connects the workspace's own OpenAI API account at
+https://app.poststeward.com/app#release-preparation. That account pays the model
+provider directly; a ChatGPT subscription is separate. PostSteward encrypts the key
+and never gives it to agents. Campaign-writing agents need explicit owner consent
+to spend the workspace's bounded allowance.
+
+Preparation reads a bounded pinned release, optional comparison/documents and
+approved audience/context, then proposes strategy, original drafts and a
+model-assisted editorial check. Inspect exact source support, edit/regenerate
+individual variants and approve the exact saved revision. Approval does not publish
+or schedule. Uncertain paid calls are not retried automatically. Private/unreleased
+disclosure needs separate owner consent. GBP service pricing is separate.
+
+See the current operation catalogue for model_status/model_connect/model_disconnect,
+preparation_project_put, preparations_list, preparation_create/edit/regenerate/reject/
+approve/export/archive. Owners can export and remove terminal preparations while
+retaining immutable campaigns, receipts, spending and existing operation history.
+In local executor mode, use the reviewed poststeward preparation import command
+before explicit local scheduling; cloud editorial context is not local execution
+truth. Read https://app.poststeward.com/docs/install.md for exact commands.

@@ -22,8 +22,106 @@
       "registration": "same scoped operation catalogue"
     }
   },
-  "operationCount": 34,
+  "operationCount": 46,
   "operations": [
+    {
+      "name": "model_status",
+      "scope": "read",
+      "tier": "free",
+      "effects": [
+        "READ_ONLY"
+      ]
+    },
+    {
+      "name": "model_connect",
+      "scope": "admin",
+      "tier": "free",
+      "effects": [
+        "AUTHORITY_CHANGE"
+      ]
+    },
+    {
+      "name": "model_disconnect",
+      "scope": "admin",
+      "tier": "free",
+      "effects": [
+        "AUTHORITY_CHANGE"
+      ]
+    },
+    {
+      "name": "preparations_list",
+      "scope": "read",
+      "tier": "free",
+      "effects": [
+        "READ_ONLY"
+      ]
+    },
+    {
+      "name": "preparation_export",
+      "scope": "read",
+      "tier": "free",
+      "effects": [
+        "READ_ONLY"
+      ]
+    },
+    {
+      "name": "preparation_archive",
+      "scope": "admin",
+      "tier": "free",
+      "effects": [
+        "STATE_WRITE"
+      ]
+    },
+    {
+      "name": "preparation_project_put",
+      "scope": "campaign:write",
+      "tier": "free",
+      "effects": [
+        "STATE_WRITE"
+      ]
+    },
+    {
+      "name": "preparation_create",
+      "scope": "campaign:write",
+      "tier": "free",
+      "effects": [
+        "STATE_WRITE",
+        "FINANCIAL_EFFECT"
+      ]
+    },
+    {
+      "name": "preparation_edit",
+      "scope": "campaign:write",
+      "tier": "free",
+      "effects": [
+        "STATE_WRITE"
+      ]
+    },
+    {
+      "name": "preparation_regenerate",
+      "scope": "campaign:write",
+      "tier": "free",
+      "effects": [
+        "STATE_WRITE",
+        "FINANCIAL_EFFECT"
+      ]
+    },
+    {
+      "name": "preparation_reject",
+      "scope": "campaign:write",
+      "tier": "free",
+      "effects": [
+        "STATE_WRITE"
+      ]
+    },
+    {
+      "name": "preparation_approve",
+      "scope": "admin",
+      "tier": "free",
+      "effects": [
+        "STATE_WRITE"
+      ]
+    },
     {
       "name": "workspace_status",
       "scope": "read",

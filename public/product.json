@@ -62,5 +62,13 @@
     "openapi": "/openapi.json",
     "operations": "/docs/operations.md"
   },
-  "sourceDisclosure": "The public launch repository contains only the showcase surface. Product implementation source is not published here."
+  "sourceDisclosure": "The public launch repository contains only the showcase surface. Product implementation source is not published here.",
+  "preparation": {
+    "provider": "openai",
+    "funding": "workspace_model_account",
+    "sourceGrounding": "bounded pinned release evidence and explicit context",
+    "review": "owner exact revision before immutable handoff",
+    "publication": "separate explicit action",
+    "qualityAcceptance": "real model outputs require owner-connected account"
+  }
 }
