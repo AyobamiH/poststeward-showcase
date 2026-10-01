@@ -177,7 +177,7 @@
       <section class="agent-surface" aria-labelledby="install-runtime-title">
         <h2 id="install-runtime-title">Run PostSteward on your machine.</h2>
         <p>Install the full runtime, pair it with your owner workspace and choose one publishing executor.</p>
-        <p class="small muted">Need original release copy? <a href="https://app.poststeward.com/app#release-preparation">Connect your own OpenAI API account</a> to prepare strategy and channel drafts from release evidence, then review and approve exact copy before delivery. Your model account pays for generation directly.</p>
+        <p class="small muted">Need original release copy? <a href="https://app.poststeward.com/app#release-preparation">Connect your own model account</a> to prepare strategy and channel drafts from release evidence, then review and approve exact copy before delivery. Your selected customer account pays for generation; PostSteward subscription charges are separate.</p>
         <div class="install-inline"><a class="button primary" href="/install/">Install PostSteward</a><div class="install-command"><pre id="install-command" tabindex="0" aria-label="PostSteward installation command"><code>curl -fsSL --proto '=https' --tlsv1.2 https://poststeward.com/install.sh | bash</code></pre><button class="button" type="button" data-copy="install-command" data-copy-feedback="install-feedback">Copy install command</button><p id="install-feedback" class="copy-feedback" role="status" aria-live="polite"></p><a href="https://poststeward.com/install.sh">Read the PostSteward installer at poststeward.com/install.sh</a><p class="install-prerequisites">Linux, macOS 15/26 and WSL 2 (Ubuntu 24.04) · Bash · Python 3.10 or newer. Native installation and guarded lifecycle checks passed. Review owner pairing and provider publication on your own machine before activating. <a href="https://poststeward.com/install/">Full installation guide</a>.</p></div></div>
       </section>
 
@@ -427,7 +427,7 @@ Authorization: Bearer &lt;scoped-agent-token&gt;
           </article>
         </div>
       </section>
-    </main>
+    <section class="public-section"><h2>Choose model and funding deliberately</h2><p>Owner settings support Cloudflare Workers AI and OpenAI through prepaid Cloudflare AI Gateway Unified Billing, plus existing direct OpenAI. Choose a reviewed model, job/day budgets and optional fallback. Saving validates metadata without generating content or changing billing. Credits and provider charges belong to your account; PostSteward supplies no hidden company-funded fallback.</p><p>Live customer billing and human quality acceptance are pending. Check private model status and attempt evidence before relying on a route. Approval still creates exact reviewed copy for a separate delivery action.</p></section></main>
 
     <footer class="site-footer">
       <div class="site-footer-inner">
