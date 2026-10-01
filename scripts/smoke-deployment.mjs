@@ -1,11 +1,20 @@
-const rawOrigins = process.env.SHOWCASE_ORIGINS;
+import { fileURLToPath } from "node:url";
 const { verifySocialOrigin } = await import("./smoke-social-previews.mjs");
-if (!rawOrigins) throw new Error("SHOWCASE_ORIGINS is required");
-const origins = rawOrigins.split(",").map((value) => value.trim()).filter(Boolean);
-if (!origins.length || origins.some((origin) => !origin.startsWith("https://"))) throw new Error("SHOWCASE_ORIGINS must contain https URLs");
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const requiredHeaders = ["strict-transport-security", "content-security-policy", "x-content-type-options", "referrer-policy", "x-frame-options", "cross-origin-opener-policy", "cross-origin-resource-policy", "permissions-policy"];
 const operationNames = [
+  "model_status",
+  "model_connect",
+  "model_disconnect",
+  "preparations_list",
+  "preparation_export",
+  "preparation_archive",
+  "preparation_project_put",
+  "preparation_create",
+  "preparation_edit",
+  "preparation_regenerate",
+  "preparation_reject",
+  "preparation_approve",
   "workspace_status",
   "publishing_capabilities",
   "accounts_list",
@@ -43,8 +52,8 @@ const operationNames = [
 ];
 const forbidden = /AyobamiH\/poststeward(?!-showcase)|poststeward-staging\.woeinvests\.workers\.dev/i;
 
-async function getText(origin, path) {
-  const response = await fetch(new URL(path, origin), { headers: { "cache-control": "no-cache" }, redirect: "follow" });
+async function getTextWithClient(origin, path, send) {
+  const response = await send(new URL(path, origin), { headers: { "cache-control": "no-cache" }, redirect: "follow" });
   if (!response.ok) throw new Error(`${path} returned ${response.status}`);
   const body = await response.text();
   const boundaryBody = path === "/install.sh" ? body.replaceAll("AyobamiH/poststeward", "released-runtime") : body;
@@ -52,9 +61,10 @@ async function getText(origin, path) {
   return { response, body };
 }
 
-async function verifyOrigin(origin) {
+export async function verifyOrigin(origin, { send = fetch, wait = sleep, attempts = 12 } = {}) {
+  const getText = (origin, path) => getTextWithClient(origin, path, send);
   let lastError;
-  for (let attempt = 1; attempt <= 12; attempt += 1) {
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
       const root = await getText(origin, "/");
       for (const header of requiredHeaders) if (!root.response.headers.get(header)) throw new Error(`root missing ${header}`);
@@ -63,7 +73,7 @@ async function verifyOrigin(origin) {
       const installer = await getText(origin, "/install.sh");
       if (!installer.body.startsWith("#!/usr/bin/env bash\n") || !installer.body.includes("https://app.poststeward.com")) throw new Error("canonical installer missing/wrong application origin");
       for (const channel of ["stable", "beta"]) {
-        const response = await fetch(new URL(`/releases/${channel}.json`, origin), { headers: { "cache-control": "no-cache" } });
+        const response = await send(new URL(`/releases/${channel}.json`, origin), { headers: { "cache-control": "no-cache" } });
         if (!response.ok) throw new Error(`${channel} metadata returned ${response.status}`);
         const value = await response.json();
         if (value.product !== "poststeward" || value.channel !== channel || !/^[a-f0-9]{40}$/.test(value.revision) || !/^[a-f0-9]{64}$/.test(value.runtime_tree_sha256) || Date.parse(value.expires_at) <= Date.now()) throw new Error(`${channel} distribution metadata invalid`);
@@ -96,7 +106,7 @@ async function verifyOrigin(origin) {
       const llms = await getText(origin, "/llms.txt");
       if (!llms.body.includes("CLI: shell/cURL calls") || !llms.body.includes("WebMCP")) throw new Error("llms.txt lost agent transport discovery");
 
-      const mcpResponse = await fetch(new URL("/mcp.json", origin), { headers: { "cache-control": "no-cache" } });
+      const mcpResponse = await send(new URL("/mcp.json", origin), { headers: { "cache-control": "no-cache" } });
       if (!mcpResponse.ok) throw new Error(`mcp.json returned ${mcpResponse.status}`);
       const mcpText = await mcpResponse.text();
       if (forbidden.test(mcpText)) throw new Error("mcp.json exposes a private-source identifier");
@@ -107,18 +117,22 @@ async function verifyOrigin(origin) {
       for (const name of operationNames) if (!names.has(name)) throw new Error(`mcp.json missing ${name}`);
 
       for (const path of ["/help.json", "/openapi.json", "/docs/operations.md"]) await getText(origin, path);
+      await verifySocialOrigin(origin, send);
       console.log(`Hosted PostSteward agent surface verified at ${origin} on attempt ${attempt}; final URL ${root.response.url}.`);
       return;
     } catch (error) {
       lastError = error;
-      console.log(`Hosted verification ${origin} attempt ${attempt}/12 did not converge: ${error.message}`);
-      if (attempt < 12) await sleep(10_000);
+      console.log(`Hosted verification ${origin} attempt ${attempt}/${attempts} did not converge: ${error.message}`);
+      if (attempt < attempts) await wait(10_000);
     }
   }
   throw lastError;
 }
-for (const origin of origins) {
-  await verifyOrigin(origin);
-  await verifySocialOrigin(origin);
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  const rawOrigins = process.env.SHOWCASE_ORIGINS;
+  if (!rawOrigins) throw new Error("SHOWCASE_ORIGINS is required");
+  const origins = rawOrigins.split(",").map((value) => value.trim()).filter(Boolean);
+  if (!origins.length || origins.some((origin) => !origin.startsWith("https://"))) throw new Error("SHOWCASE_ORIGINS must contain https URLs");
+  for (const origin of origins) await verifyOrigin(origin);
+  console.log(`Hosted PostSteward agent-surface verification passed for ${origins.length} origin(s).`);
 }
-console.log(`Hosted PostSteward agent-surface verification passed for ${origins.length} origin(s).`);
