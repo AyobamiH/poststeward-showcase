@@ -45,14 +45,34 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <title>Install PostSteward</title>
 <link rel="canonical" href="https://poststeward.com/install/">
-<meta name="description" content="Install the Linux runtime, pair your machine with PostSteward Cloud and review activation before local publishing.">
+<meta name="description" content="Install on Linux, macOS 15/26 or WSL 2/Ubuntu 24.04. Pair your machine and review activation before local publishing.">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="PostSteward">
 <meta property="og:locale" content="en_GB">
 <meta property="og:title" content="Install PostSteward">
-<meta property="og:description" content="Install the Linux runtime, pair your machine with PostSteward Cloud and review activation before local publishing.">
+<meta property="og:description" content="Install on Linux, macOS 15/26 or WSL 2/Ubuntu 24.04. Pair your machine and review activation before local publishing.">
 <meta property="og:url" content="https://poststeward.com/install/">
 <meta property="og:image" content="https://poststeward.com/social/poststeward-v2.png">
 <meta property="og:image:secure_url" content="https://poststeward.com/social/poststeward-v2.png">
@@ -62,7 +82,7 @@
 <meta property="og:image:alt" content="PostSteward — Approved publishing. Clear results. For humans and AI agents.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Install PostSteward">
-<meta name="twitter:description" content="Install the Linux runtime, pair your machine with PostSteward Cloud and review activation before local publishing.">
+<meta name="twitter:description" content="Install on Linux, macOS 15/26 or WSL 2/Ubuntu 24.04. Pair your machine and review activation before local publishing.">
 <meta name="twitter:image" content="https://poststeward.com/social/poststeward-v2.png">
 <meta name="twitter:image:alt" content="PostSteward — Approved publishing. Clear results. For humans and AI agents.">
 </head>
@@ -74,10 +94,11 @@
       <p class="terminal-label">INSTALL POSTSTEWARD</p>
       <h1 style="text-transform:none">Install the full PostSteward runtime</h1>
       <p class="lead">Keep planning and schedules on your machine, with social account credentials held by PostSteward Cloud. Choose local or hosted execution for the workspace.</p>
-      <div class="install-command"><pre id="install-command" tabindex="0" aria-label="PostSteward Linux installation command"><code>curl -fsSL --proto '=https' --tlsv1.2 https://poststeward.com/install.sh | bash</code></pre><button class="button" type="button" data-copy="install-command" data-copy-feedback="install-feedback">Copy install command</button><p id="install-feedback" class="copy-feedback" role="status" aria-live="polite"></p><a href="https://poststeward.com/install.sh">Read the PostSteward installer at poststeward.com/install.sh</a><p class="install-prerequisites">Linux · Bash · Python 3.10 or newer. Installation starts inactive; review pairing and activation in your workspace. WSL and macOS acceptance is still pending. <a href="https://poststeward.com/install/">Full installation guide</a>.</p></div>
-      <p class="small muted">Requires Python 3.10 or newer and Bash. Linux is the current verified installation platform. Create a free workspace with Google, then pair your machine from the owner workspace.</p>
+      <div class="install-command"><pre id="install-command" tabindex="0" aria-label="PostSteward installation command"><code>curl -fsSL --proto '=https' --tlsv1.2 https://poststeward.com/install.sh | bash</code></pre><button class="button" type="button" data-copy="install-command" data-copy-feedback="install-feedback">Copy install command</button><p id="install-feedback" class="copy-feedback" role="status" aria-live="polite"></p><a href="https://poststeward.com/install.sh">Read the PostSteward installer at poststeward.com/install.sh</a><p class="install-prerequisites">Linux, macOS 15/26 and WSL 2 (Ubuntu 24.04) · Bash · Python 3.10 or newer. Native installation and guarded lifecycle checks passed. Review owner pairing and provider publication on your own machine before activating. <a href="https://poststeward.com/install/">Full installation guide</a>.</p></div>
+      <p class="small muted">Requires Python 3.10 or newer and Bash. Native installation and guarded lifecycle checks passed on macOS 15/26 (Intel and Apple Silicon) and WSL 2/Ubuntu 24.04 alongside Linux. Create a free workspace with Google, then pair your machine from the owner workspace.</p>
       <p class="small">To install and inspect before pairing, append <code>bash -s -- --no-onboard</code> in place of <code>bash</code>. Review <a href="/install.sh">the installer</a> and <a href="/releases/stable.json">stable release metadata</a>.</p>
     </section>
+    <section class="public-section"><h2>Background operation and lifecycle</h2><p>macOS uses private user launchd agents while logged in and awake; there is no promise of execution during sleep. WSL uses systemd user timers; Windows or distro shutdown stops them. Keep private data in the Linux filesystem.</p><p>Native tests covered fresh/repeat installation, guarded service start/stop/restart, upgrade, reviewed rollback, failed downloads, interruption repair, expired-token fencing and retain/delete-data uninstall. Real owner/provider publication acceptance on these platforms remains unverified. Earlier macOS versions and other WSL distributions have not been established.</p><p>Read the <a href="https://app.poststeward.com/docs/install.md">full platform and lifecycle guide</a> for reviewed rollback, uninstall and approved AI-copy import. Uninstall does not revoke cloud or provider authority.</p></section>
     <section class="public-section">
       <h2>Pair, configure, then activate</h2>
       <ol>

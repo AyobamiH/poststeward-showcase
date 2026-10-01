@@ -28,6 +28,18 @@
             "schema": {
               "type": "string",
               "enum": [
+                "model_status",
+                "model_connect",
+                "model_disconnect",
+                "preparations_list",
+                "preparation_export",
+                "preparation_archive",
+                "preparation_project_put",
+                "preparation_create",
+                "preparation_edit",
+                "preparation_regenerate",
+                "preparation_reject",
+                "preparation_approve",
                 "workspace_status",
                 "publishing_capabilities",
                 "accounts_list",

@@ -8,6 +8,18 @@ const workerName = "poststeward-showcase";
 const wranglerVersion = "4.130.0";
 const cloudflareAccountId = "6ddcbcb8474f1a7e460b2f0aabec0e2f";
 const operationNames = [
+  "model_status",
+  "model_connect",
+  "model_disconnect",
+  "preparations_list",
+  "preparation_export",
+  "preparation_archive",
+  "preparation_project_put",
+  "preparation_create",
+  "preparation_edit",
+  "preparation_regenerate",
+  "preparation_reject",
+  "preparation_approve",
   "workspace_status",
   "publishing_capabilities",
   "accounts_list",
