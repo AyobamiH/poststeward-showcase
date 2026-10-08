@@ -86,6 +86,47 @@
 <meta name="twitter:description" content="Give your agents approved copy, connected accounts and a schedule. PostSteward checks their authority and keeps delivery receipts.">
 <meta name="twitter:image" content="https://poststeward.com/social/poststeward-v2.png">
 <meta name="twitter:image:alt" content="PostSteward — Approved publishing. Clear results. For humans and AI agents.">
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://poststeward.com/#organization",
+      "name": "PostSteward",
+      "url": "https://poststeward.com/",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://poststeward.com/icon-512.png",
+        "width": 512,
+        "height": 512
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://poststeward.com/#website",
+      "name": "PostSteward",
+      "url": "https://poststeward.com/",
+      "publisher": {
+        "@id": "https://poststeward.com/#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://poststeward.com/#application",
+      "name": "PostSteward",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web, Linux, macOS, WSL",
+      "url": "https://poststeward.com/",
+      "description": "Agent-operated social publishing with owner-scoped account access, explicit schedules and delivery receipts.",
+      "image": "https://poststeward.com/social/poststeward-v2.png",
+      "publisher": {
+        "@id": "https://poststeward.com/#organization"
+      }
+    }
+  ]
+}
+    </script>
 </head>
   <body><a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
