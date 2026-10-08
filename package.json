@@ -8,7 +8,8 @@
     "check": "node scripts/verify.mjs",
     "dev": "python3 -m http.server 4173 -d public",
     "deploy": "npx --yes wrangler@4.130.0 deploy --config wrangler.jsonc",
-    "deploy:domain": "npx --yes wrangler@4.130.0 deploy --config wrangler.domain.jsonc"
+    "deploy:domain": "npx --yes wrangler@4.130.0 deploy --config wrangler.domain.jsonc",
+    "verify:live-catalogue": "node scripts/verify-live-operation-contract.mjs"
   },
   "engines": {
     "node": ">=24"

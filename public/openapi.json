@@ -28,6 +28,10 @@
             "schema": {
               "type": "string",
               "enum": [
+                "autonomy_request",
+                "autonomy_list",
+                "autonomy_configure",
+                "autonomy_pause",
                 "model_status",
                 "model_connect",
                 "model_disconnect",

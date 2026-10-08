@@ -22,8 +22,46 @@
       "registration": "same scoped operation catalogue"
     }
   },
-  "operationCount": 46,
+  "operationCount": 50,
   "operations": [
+    {
+      "name": "autonomy_request",
+      "scope": "campaign:write",
+      "tier": "advanced",
+      "effects": [
+        "STATE_WRITE",
+        "FINANCIAL_EFFECT",
+        "FUTURE_CONSEQUENCE"
+      ]
+    },
+    {
+      "name": "autonomy_list",
+      "scope": "read",
+      "tier": "free",
+      "effects": [
+        "READ_ONLY"
+      ]
+    },
+    {
+      "name": "autonomy_configure",
+      "scope": "admin",
+      "tier": "advanced",
+      "effects": [
+        "STATE_WRITE",
+        "AUTHORITY_CHANGE",
+        "FUTURE_CONSEQUENCE",
+        "FINANCIAL_EFFECT"
+      ]
+    },
+    {
+      "name": "autonomy_pause",
+      "scope": "admin",
+      "tier": "free",
+      "effects": [
+        "STATE_WRITE",
+        "AUTHORITY_CHANGE"
+      ]
+    },
     {
       "name": "model_status",
       "scope": "read",

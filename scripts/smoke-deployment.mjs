@@ -3,6 +3,10 @@ const { verifySocialOrigin } = await import("./smoke-social-previews.mjs");
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const requiredHeaders = ["strict-transport-security", "content-security-policy", "x-content-type-options", "referrer-policy", "x-frame-options", "cross-origin-opener-policy", "cross-origin-resource-policy", "permissions-policy"];
 const operationNames = [
+  "autonomy_request",
+  "autonomy_list",
+  "autonomy_configure",
+  "autonomy_pause",
   "model_status",
   "model_connect",
   "model_disconnect",

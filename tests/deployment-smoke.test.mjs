@@ -29,7 +29,7 @@ function client({ omitOperation, wrongCount, staleOnce = false } = {}) {
     return new Response(body, { headers: { ...securityHeaders, "content-type": path.endsWith(".png") ? "image/png" : "text/html" } });
   };
 }
-test("deployment verifies the complete 46-operation catalogue and all social routes", async () => {
+test("deployment verifies the complete 50-operation catalogue and all social routes", async () => {
   await verifyOrigin(origin, { send: client(), attempts: 1 });
   for (const overrides of [{ omitOperation: "preparation_approve" }, { wrongCount: true }]) {
     await assert.rejects(verifyOrigin(origin, { send: client(overrides), attempts: 1 }), /mcp\.json/);
