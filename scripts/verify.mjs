@@ -106,6 +106,21 @@ if (product.showcase?.billingEnabled !== false) failures.push("showcase billing 
 if (!String(product.sourceDisclosure ?? "").includes("implementation source is not published")) failures.push("product metadata must preserve the public/private source boundary");
 
 const home = await text("public/index.html");
+const canonicalLogo = await readFile(join(rootPath, "public/icon-512.png"));
+if (!canonicalLogo.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])))
+  failures.push("canonical 512px PostSteward logo is not a PNG");
+const schemaBlock = home.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+if (!schemaBlock) failures.push("homepage is missing public Schema.org JSON-LD");
+else {
+  try {
+    const graph = JSON.parse(schemaBlock[1])["@graph"];
+    const entities = Object.fromEntries(graph.map((entity) => [entity["@type"], entity]));
+    if (entities.Organization?.logo?.url !== "https://poststeward.com/icon-512.png") failures.push("Organization logo URL drifted");
+    if (entities.WebSite?.publisher?.["@id"] !== entities.Organization?.["@id"]) failures.push("WebSite publisher ID drifted");
+    if (entities.SoftwareApplication?.publisher?.["@id"] !== entities.Organization?.["@id"]) failures.push("SoftwareApplication publisher ID drifted");
+    if ("offers" in (entities.SoftwareApplication || {})) failures.push("unverified billing offers must not be published");
+  } catch { failures.push("homepage JSON-LD is invalid"); }
+}
 for (const marker of [
   "lang=\"en-GB\"", "<main tabindex=\"-1\" id=\"main\" class=\"home home-organised\"", "Let agents publish.",
   "Keep proof of what happened.", "Receipts, not assumptions",

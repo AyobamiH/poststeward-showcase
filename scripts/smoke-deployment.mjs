@@ -70,6 +70,19 @@ export async function verifyOrigin(origin, { send = fetch, wait = sleep, attempt
       for (const header of requiredHeaders) if (!root.response.headers.get(header)) throw new Error(`root missing ${header}`);
       for (const marker of ["Let agents publish.", "Keep proof of what happened.", "Start free", 'href="https://app.poststeward.com/auth/login"', '<link rel="canonical" href="https://poststeward.com/"']) if (!root.body.includes(marker)) throw new Error(`root HTML missing marker: ${marker}`);
 
+      const graphText = root.body.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)?.[1];
+      if (!graphText) throw new Error("root missing structured application metadata");
+      const graph = JSON.parse(graphText)["@graph"];
+      const entities = Object.fromEntries(graph.map((entity) => [entity["@type"], entity]));
+      if (entities.Organization?.logo?.url !== "https://poststeward.com/icon-512.png" ||
+          entities.SoftwareApplication?.publisher?.["@id"] !== entities.Organization?.["@id"])
+        throw new Error("root Organization and SoftwareApplication metadata drifted");
+      const logo = await send(new URL("/icon-512.png", origin), { headers: { "cache-control": "no-cache" } });
+      if (logo.status !== 200 || !(logo.headers.get("content-type") || "").includes("image/png"))
+        throw new Error("canonical logo must be public PNG 200");
+      const logoData = new Uint8Array(await logo.arrayBuffer());
+      if (logoData.length < 512 || logoData[0] !== 137 || logoData[1] !== 80)
+        throw new Error("canonical logo image is invalid");
       const installer = await getText(origin, "/install.sh");
       if (!installer.body.startsWith("#!/usr/bin/env bash\n") || !installer.body.includes("https://app.poststeward.com")) throw new Error("canonical installer missing/wrong application origin");
       for (const channel of ["stable", "beta"]) {
