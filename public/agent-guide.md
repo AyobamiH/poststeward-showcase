@@ -153,9 +153,9 @@ To recover safely, inspect the receipt and provider account before acting. Never
 
 ## Owner approval and local runtime
 
-Every agent-created delivery waits for owner review of exact content, account and time. Only the signed-in owner can approve it; the original grant is checked again at dispatch. Billing permission does not waive publishing approval.
+Manually requested agent deliveries require owner review of exact copy, account and time. Separately, an owner may configure bounded standing authority with `autonomy_configure`: only the reviewed project, selected sources, context, account routing and limits may proceed without per-copy approval when checks remain clean. Revoked authority, changed sources or routing, editorial holds and ambiguous effects stop further consequences. The owner can inspect with `autonomy_list` and revoke with `autonomy_pause`. Agent requests through `autonomy_request` reuse the same durable idempotency key; model spending remains owner-controlled. Billing access never grants publication authority.
 
-The current 46-operation catalogue is at https://app.poststeward.com/help.json. For a local executor, use `runtime_inspect`, `runtime_schedule_create`, `runtime_schedule_cancel` and `runtime_command_get` under read/schedule scopes. Commands bind the active installation and authority generation; inspect receipts after a lost response and reuse the original key. Local lifecycle and executor changes retain owner review.
+The current 50-operation catalogue is at https://app.poststeward.com/help.json. For a local executor, use `runtime_inspect`, `runtime_schedule_create`, `runtime_schedule_cancel` and `runtime_command_get` under read/schedule scopes. Commands bind the active installation and authority generation; inspect receipts after a lost response and reuse the original key. Local lifecycle and executor changes retain owner review.
 
 For Advanced purchasing, inspect `billing_status`, request a server `billing_quote` and call `billing_checkout` using the same idempotency key on retry. Currency is GBP; the launch amount is intentionally unconfigured. The returned quote fixes the exact total and currency before payer consent. MPP direct payment remains unavailable until merchant/wallet validation; owning a wallet does not confer workspace billing authority.
 

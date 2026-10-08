@@ -21,6 +21,8 @@ jobs:
           node-version: 24
       - name: Verify public boundary and launch contract
         run: npm run verify
+      - name: Verify public operation catalogue against live application
+        run: npm run verify:live-catalogue
       - name: Verify distribution provenance and failure cases
         run: node --test tests/*.test.mjs
       - name: Check browser JavaScript syntax

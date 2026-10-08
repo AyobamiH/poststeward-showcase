@@ -21,7 +21,7 @@ The public launch surface preserves the actual agent contract:
 - scoped agent grants;
 - Advanced continuing operation for reviewed source monitoring and spaced allocation.
 
-The agent guide, Markdown guide, `agents.txt`, `llms.txt`, `mcp.json`, help metadata, OpenAPI and operation reference describe one 26-operation contract.
+The agent guide, Markdown guide, `agents.txt`, `llms.txt`, `mcp.json`, help metadata, OpenAPI and operation reference describe one 50-operation contract.
 
 ## Production entry points and optional demo
 
@@ -40,7 +40,7 @@ The optional workspace demo at `/workspace/` uses sample records and inert contr
 - `/agent-guide.md` — Markdown manual
 - `/agents.txt` — autonomous-caller rules
 - `/llms.txt` — LLM discovery index
-- `/mcp.json` — transport and 26-operation metadata
+- `/mcp.json` — transport and 50-operation metadata
 - `/help.json` — machine-readable help summary
 - `/openapi.json` — generic HTTP operation contract
 - `/docs/operations.md` — operation reference

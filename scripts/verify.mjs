@@ -8,6 +8,10 @@ const workerName = "poststeward-showcase";
 const wranglerVersion = "4.130.0";
 const cloudflareAccountId = "6ddcbcb8474f1a7e460b2f0aabec0e2f";
 const operationNames = [
+  "autonomy_request",
+  "autonomy_list",
+  "autonomy_configure",
+  "autonomy_pause",
   "model_status",
   "model_connect",
   "model_disconnect",
@@ -165,10 +169,19 @@ for (const page of [privacy, terms, deletion]) {
   if (page.includes("/mark.svg")) failures.push("legal page must not use legacy green favicon");
 }
 
+const publicCatalogue = JSON.parse(await text("public/catalog.json"));
+if (!Array.isArray(publicCatalogue) || JSON.stringify(publicCatalogue.map((item) => item.name)) !== JSON.stringify(operationNames))
+  failures.push("catalogue order/names must match the reviewed hosted operation contract");
+const operationReference = await text("public/docs/operations.md");
+for (const name of operationNames)
+  if (!operationReference.includes(`## ${name}\n`)) failures.push(`public operation reference missing ${name}`);
 const mcp = JSON.parse(await text("public/mcp.json"));
 if (mcp.effectfulPublicEndpoint !== false) failures.push("mcp metadata must remain documentation-only on the showcase");
 if (mcp.operationCount !== operationNames.length) failures.push(`mcp operationCount must be ${operationNames.length}`);
 const mcpNames = new Set((mcp.operations ?? []).map((operation) => operation.name));
+for (const item of publicCatalogue)
+  if (!mcp.operations.some((row) => row.name === item.name && row.scope === item.scope && row.tier === item.tier && JSON.stringify(row.effects) === JSON.stringify(item.effects)))
+    failures.push(`MCP public contract metadata drifted: ${item.name}`);
 for (const name of operationNames) if (!mcpNames.has(name)) failures.push(`mcp operation missing: ${name}`);
 if (mcp.transports?.cli?.kind !== "shell over HTTP") failures.push("CLI must be described accurately as shell over HTTP");
 if (!String(mcp.transports?.webMcp?.api ?? "").includes("document.modelContext")) failures.push("WebMCP metadata must expose the browser API surface");
@@ -182,6 +195,7 @@ if (openapi.openapi !== "3.1.0") failures.push("OpenAPI document must use 3.1.0"
 if (openapi["x-poststeward-showcase"]?.effectfulPublicServer !== false) failures.push("OpenAPI must not imply a live public effectful server");
 const operationEnum = openapi.paths?.["/api/operations/{operation}"]?.post?.parameters?.find((item) => item.name === "operation")?.schema?.enum ?? [];
 if (operationEnum.length !== operationNames.length) failures.push("OpenAPI operation enum must match the current operation catalogue");
+if (JSON.stringify(operationEnum) !== JSON.stringify(operationNames)) failures.push("OpenAPI operation order/names drifted from the current catalogue");
 for (const name of operationNames) if (!operationEnum.includes(name)) failures.push(`OpenAPI operation missing: ${name}`);
 
 const agentMarkdown = await text("public/agent-guide.md");
