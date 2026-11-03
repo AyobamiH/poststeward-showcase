@@ -23,7 +23,7 @@ Use a dedicated, least-privilege token for this launch Worker. Do not reuse unre
 
 On a deployment-relevant push to `main`:
 
-1. checkout uses a pinned action SHA with persisted Git credentials disabled;
+1. the repository-scoped, isolated `poststeward-showcase` runner accepts the trusted main job, then checkout uses a pinned action SHA with persisted Git credentials disabled;
 2. Node 24 runs the repository verifier;
 3. browser JavaScript and the hosted smoke verifier receive syntax checks;
 4. exact Wrangler `4.130.0` deploys `wrangler.domain.jsonc`;
@@ -40,6 +40,32 @@ Hosted acceptance requires:
 
 ## Failure policy
 
-A missing token produces a safe no-op rather than an unauthenticated deploy attempt. A configured token that cannot deploy is a real failure and should be diagnosed at the failing Cloudflare layer.
+A missing dedicated token fails the job before deployment; a skipped deployment is not accepted as a successful release. A configured token that cannot deploy is a real failure and should be diagnosed at the failing Cloudflare layer.
 
 Workers.dev can be selected manually only for diagnostic isolation. It is not the Product Hunt origin.
+
+## Self-hosted execution
+
+The workflow keeps the existing GitHub Actions checks and the dedicated `showcase`
+environment secret. Each job receives a fresh repository-scoped JIT runner in an
+ephemeral container. The runner has no host mount, Docker socket, SSH agent or
+user credential store. A separate network namespace rejects private and metadata
+address ranges. The registration credential is piped into the container and is
+not persisted to a file.
+
+Trusted main jobs and owner-authored pull requests from this repository use the
+`poststeward-showcase` label. Fork pull requests and other actors retain the hosted
+runner path. They never enter the owner machine. The container is discarded after
+each job, including between verification and environment-secret deployment.
+
+The listener implementation is in `ops/actions-runner/`. It reuses the already
+verified PostSteward Node 24 runner and egress images, pinned to their installed
+image IDs. Its service, network, containers and repository registration are
+separate from the product release and monitoring runners.
+
+For an app release refresh, dispatch `Deploy showcase` on reviewed `main` with
+`runtime_revision` equal to the accepted app production SHA and `target` equal
+to `custom-domain`. The existing preparation script compares app health, stable
+and beta manifests, immutable installer source and deployed installer bytes
+before preparing assets. The subsequent verifier and both-hostname smoke checks
+remain required. Routine main pushes retain their existing deployment behaviour.

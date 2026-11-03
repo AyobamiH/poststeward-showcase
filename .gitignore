@@ -1,3 +1,4 @@
 
 /public/install.sh
 /public/releases/*.json
+/.wrangler/
