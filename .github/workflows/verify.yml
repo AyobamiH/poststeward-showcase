@@ -10,7 +10,9 @@ permissions:
 
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    # Owner-authored same-repository changes use the isolated one-job runner.
+    # Forks and other actors never receive work on the owner's machine.
+    runs-on: ${{ github.repository == 'AyobamiH/poststeward-showcase' && (github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'pull_request' && github.actor == 'AyobamiH' && github.event.pull_request.head.repo.full_name == github.repository) && 'poststeward-showcase' || 'ubuntu-latest' }}
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
