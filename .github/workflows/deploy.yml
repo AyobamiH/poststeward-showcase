@@ -17,6 +17,10 @@ on:
         description: Expected exact production runtime SHA (blank selects the live verified release)
         required: false
         type: string
+      beta_revision:
+        description: Optional exact verified staging beta SHA; fail if it changes before deployment
+        required: false
+        type: string
       target:
         description: Deployment target
         required: true
@@ -107,6 +111,7 @@ jobs:
         if: steps.credentials.outputs.ready == 'true'
         env:
           POSTSTEWARD_RELEASE_REVISION: ${{ inputs.runtime_revision }}
+          POSTSTEWARD_BETA_REVISION: ${{ inputs.beta_revision }}
         run: node scripts/sync-runtime-release.mjs
 
       - name: Verify prepared distribution
