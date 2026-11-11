@@ -1,0 +1,7 @@
+[Unit]
+Description=Bounded cleanup of expired offline PostSteward Showcase JIT registrations
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 %h/.local/share/poststeward-showcase-runner/cleanup-stale-runners.py --apply --max-delete 5 --minimum-age-seconds 3600
+NoNewPrivileges=true
+PrivateTmp=true

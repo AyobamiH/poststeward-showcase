@@ -22,3 +22,29 @@ job uses a new container and JIT registration. `CLOUDFLARE_API_TOKEN` remains
 within the existing GitHub `showcase` environment and is delivered only to
 the deployment job. Stop this service only when its active job has been
 reconciled. Do not print the JIT configuration or process arguments.
+
+## Guarded lifecycle recovery (11 November 2026)
+
+The dedicated listener's systemd `active` state is **not** evidence of an online
+GitHub runner. GitHub can report the JIT registration offline while the
+container is still alive; job acquire, TLS handshake and result upload can
+fail independently of a successful TCP 443 probe. The release channel must
+remain unchanged when that occurs.
+
+`recover-offline-listener.py` is run by the five-minute timer. It requires a
+complete authenticated GitHub runner registry, no online showcase runner, a
+listener older than ten minutes, and two checks showing no active runner
+worker. It rechecks GitHub before restarting only the dedicated showcase
+service. An API error fails closed. Do not use it to terminate an active job.
+
+`cleanup-stale-runners.py` runs hourly, deletes at most five registrations per
+run, and only deletes exact-prefix, offline, non-busy JIT registrations older
+than an hour. Each is individually re-read before deletion. The default is
+read-only dry-run. It never removes online, busy, foreign or recent runners.
+
+These are host-private owner-operated controls. Install their service/timer
+files under `~/.config/systemd/user/` and Python scripts under
+`~/.local/share/poststeward-showcase-runner/`, then `systemctl --user
+daemon-reload` and enable the two timers. The GitHub Actions workflows and
+Cloudflare production deployment gates remain authoritative. Do not mistake
+recovery timers for an independently verified successful release.

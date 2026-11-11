@@ -1,0 +1,7 @@
+[Unit]
+Description=Fail-closed recovery of idle offline PostSteward Showcase JIT listener
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 %h/.local/share/poststeward-showcase-runner/recover-offline-listener.py
+NoNewPrivileges=true
+PrivateTmp=true
