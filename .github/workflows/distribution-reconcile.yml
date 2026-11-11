@@ -13,9 +13,7 @@ concurrency:
 jobs:
   reconcile:
     if: github.repository == 'AyobamiH/poststeward-showcase' && github.ref == 'refs/heads/main'
-    # Independent controller: must still detect drift and raise an incident if
-    # the dedicated deployment runner cannot accept jobs.
-    runs-on: ubuntu-latest
+    runs-on: poststeward-showcase
     timeout-minutes: 22
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -30,29 +28,16 @@ jobs:
       - name: Require exact staged source CI acceptance
         if: steps.inspect.outputs.drift == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
           BETA: ${{ steps.inspect.outputs.beta }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          # Do not treat healthy staging as evidence of successful source CI.
-          prs=$(gh api "repos/AyobamiH/poststeward/commits/$BETA/pulls" --jq '.[] | select(.merged_at != null) | [.number,.merge_commit_sha] | @tsv' | awk -v sha="$BETA" '$2 == sha { print $1 }')
-          [[ -n "$prs" ]] || { echo "::error::No merged source PR for exact staged beta"; exit 1; }
-          while read -r pr; do
-            gh pr view "$pr" -R AyobamiH/poststeward --json statusCheckRollup --jq '[.statusCheckRollup[] | select(.conclusion != "SUCCESS")] | length' | grep -qx 0 || { echo "::error::Staged source PR #$pr has incomplete or failed checks"; exit 1; }
-          done <<< "$prs"
+        run: node scripts/github-release-control.mjs check
       - name: Dispatch existing protected release workflow
         if: steps.inspect.outputs.drift == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
           STABLE: ${{ steps.inspect.outputs.stable }}
           BETA: ${{ steps.inspect.outputs.beta }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          # This is a request to the existing environment-protected release path,
-          # not an unreviewed deployment or a staging-to-stable promotion.
-          gh workflow run deploy.yml --ref main -f runtime_revision="$STABLE" -f beta_revision="$BETA" -f target=custom-domain
+        run: node scripts/github-release-control.mjs dispatch
       - name: Await verified public convergence
         if: steps.inspect.outputs.drift == 'true'
         shell: bash
@@ -68,27 +53,10 @@ jobs:
         run: node scripts/distribution-reconcile.mjs confirm
       - name: Resolve prior drift incident only after convergence
         env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          number=$(gh issue list --state open --limit 100 --json number,title --jq '.[] | select(.title == "Distribution reconciliation failed") | .number' | head -1)
-          if [[ -n "$number" ]]; then
-            gh issue comment "$number" --body "Recovered: public beta matches staging, stable remains pinned. Verified by workflow run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID."
-            gh issue close "$number" --reason completed
-          fi
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/github-release-control.mjs resolve
       - name: Open or update persistent failure incident
         if: failure()
         env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          title='Distribution reconciliation failed'
-          url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          number=$(gh issue list --state open --limit 100 --json number,title --jq '.[] | select(.title == "Distribution reconciliation failed") | .number' | head -1)
-          if [[ -n "$number" ]]; then
-            gh issue comment "$number" --body "Automatic reconciliation failed; no successful promotion confirmed. Investigate $url."
-          else
-            gh issue create --title "$title" --body "Automatic reconciliation failed or was blocked; the public beta has NOT been confirmed current. Investigate $url. No stable release is automatically promoted."
-          fi
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/github-release-control.mjs alert
