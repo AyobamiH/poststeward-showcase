@@ -12,10 +12,19 @@ REPO = 'repos/AyobamiH/poststeward-showcase/actions/runners'
 PREFIX = 'poststeward-showcase-web-'
 
 def gh(*args):
-    p = subprocess.run(['gh', 'api', *args], capture_output=True, text=True, timeout=25)
-    if p.returncode:
-        raise RuntimeError('GitHub API failed; no further deletion')
-    return p.stdout
+    # Only read-only API requests are retried; DELETE is never replayed after
+    # an uncertain network result. A later scheduled run re-reads the runner.
+    read_only = '--method' not in args
+    for attempt in range(3 if read_only else 1):
+        try:
+            p = subprocess.run(['gh', 'api', *args], capture_output=True, text=True, timeout=25)
+        except subprocess.TimeoutExpired:
+            p = None
+        if p is not None and p.returncode == 0:
+            return p.stdout
+        if attempt < 2 and read_only:
+            time.sleep(attempt + 1)
+    raise RuntimeError('GitHub API failed; no further deletion')
 
 def candidates(now, runners, age):
     result = []
