@@ -1,0 +1,8 @@
+[Unit]
+Description=Five-minute guarded PostSteward Showcase runner recovery check
+[Timer]
+OnBootSec=3min
+OnUnitInactiveSec=5min
+Unit=poststeward-showcase-offline-recovery.service
+[Install]
+WantedBy=timers.target

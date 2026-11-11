@@ -1,0 +1,9 @@
+[Unit]
+Description=Hourly bounded cleanup of stale PostSteward Showcase JIT registrations
+[Timer]
+OnCalendar=hourly
+RandomizedDelaySec=300
+Persistent=true
+Unit=poststeward-showcase-stale-runner-cleanup.service
+[Install]
+WantedBy=timers.target
