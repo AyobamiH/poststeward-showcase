@@ -13,7 +13,9 @@ concurrency:
 jobs:
   reconcile:
     if: github.repository == 'AyobamiH/poststeward-showcase' && github.ref == 'refs/heads/main'
-    runs-on: poststeward-showcase
+    # Independent controller: must still detect drift and raise an incident if
+    # the dedicated deployment runner cannot accept jobs.
+    runs-on: ubuntu-latest
     timeout-minutes: 22
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
