@@ -12,15 +12,26 @@ const sha = /^[0-9a-f]{40}$/;
 const digest = value => createHash('sha256').update(value).digest('hex');
 
 async function bounded(send, url, limit = 128 * 1024) {
-  const response = await send(url, { redirect: 'error', signal: AbortSignal.timeout(20000), headers: { 'Cache-Control': 'no-cache' } });
-  if (!response.ok) throw new Error(`Release endpoint ${new URL(url).pathname} returned HTTP ${response.status}`);
-  const chunks = []; let length = 0;
-  for await (const chunk of response.body) {
-    length += chunk.byteLength;
-    if (length > limit) throw new Error('Release endpoint exceeded bounded response size');
-    chunks.push(Buffer.from(chunk));
+  let lastError;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const response = await send(url, { redirect: 'error', signal: AbortSignal.timeout(20000), headers: { 'Cache-Control': 'no-cache' } });
+      if (!response.ok) throw new Error(`Release endpoint ${new URL(url).pathname} returned HTTP ${response.status}`);
+      const chunks = []; let length = 0;
+      for await (const chunk of response.body) {
+        length += chunk.byteLength;
+        if (length > limit) throw new Error('Release endpoint exceeded bounded response size');
+        chunks.push(Buffer.from(chunk));
+      }
+      return Buffer.concat(chunks);
+    } catch (error) {
+      // Retry transport faults only; malformed/expired/foreign manifests fail closed.
+      if (error.message.startsWith('Release endpoint')) throw error;
+      lastError = error;
+      if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 500 * (attempt + 1)));
+    }
   }
-  return Buffer.concat(chunks);
+  throw lastError;
 }
 
 function validateManifest(bytes, channel) {
