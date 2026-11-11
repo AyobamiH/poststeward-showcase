@@ -12,7 +12,16 @@ PREFIX = 'poststeward-showcase-web-'
 MIN_AGE = 600
 
 def run(*cmd, timeout=25):
-    return subprocess.run(cmd, text=True, capture_output=True, timeout=timeout, check=True).stdout
+    # Retry read-only GitHub API calls, never restart commands or effects.
+    read_only = len(cmd) >= 2 and cmd[0:2] == ('gh', 'api')
+    for attempt in range(3 if read_only else 1):
+        try:
+            return subprocess.run(cmd, text=True, capture_output=True, timeout=timeout, check=True).stdout
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            if not read_only or attempt == 2:
+                raise
+            time.sleep(attempt + 1)
+
 
 def has_worker():
     # ps comm never exposes runner JIT configuration or environment.
