@@ -87,5 +87,9 @@ stable, beta and installer bytes. A failed or incomplete run opens or updates th
 GitHub issue **Distribution reconciliation failed**; only confirmed convergence closes it.
 No failed source checks are waived, no production stable promotion occurs, and no provider
 publishing or customer pairing is part of this workflow. A queued workflow is not proof of a
-successful deployment. GitHub schedule execution depends on the repository's Actions scheduler
-and the dedicated self-hosted runner; missed schedules must be detected by separate monitoring.
+successful deployment. GitHub schedule execution depends on the repository's Actions scheduler. The
+read-only controller runs on GitHub-hosted Linux independently of the dedicated
+self-hosted deployment runner, so an offline deployment runner cannot silence
+its incident reporting. The protected deployment job still uses the dedicated
+self-hosted runner. Missed GitHub schedules themselves require an external
+heartbeat monitor.
