@@ -21,8 +21,9 @@ async function boundedText(response) {
   return Buffer.concat(chunks).toString("utf8");
 }
 
-export async function syncRuntimeRelease({ send = fetch, output = new URL("../public/", import.meta.url), expected = process.env.POSTSTEWARD_RELEASE_REVISION } = {}) {
+export async function syncRuntimeRelease({ send = fetch, output = new URL("../public/", import.meta.url), expected = process.env.POSTSTEWARD_RELEASE_REVISION, expectedBeta = process.env.POSTSTEWARD_BETA_REVISION } = {}) {
   if (expected && !/^[a-f0-9]{40}$/.test(expected)) throw new Error("Expected release must be an exact SHA");
+  if (expectedBeta && !/^[a-f0-9]{40}$/.test(expectedBeta)) throw new Error("Expected beta release must be an exact SHA");
   const get = async url => boundedText(await send(url, { redirect: "error", signal: AbortSignal.timeout(15000), headers: { "Cache-Control": "no-cache", "User-Agent": "poststeward-distribution" } }));
   const health = JSON.parse(await get(app + "/health"));
   const manifests = [];
@@ -35,6 +36,7 @@ export async function syncRuntimeRelease({ send = fetch, output = new URL("../pu
     if (channel === "stable" && (health.status !== "ok" || health.release !== manifest.revision || (expected && expected !== manifest.revision)))
       throw new Error("Stable metadata does not match the expected live production release");
     if (channel === "beta") {
+      if (expectedBeta && manifest.revision !== expectedBeta) throw new Error("Staged beta changed after independent release verification");
       const betaHealth = JSON.parse(await get(origin + "/health"));
       if (betaHealth.status !== "ok" || betaHealth.release !== manifest.revision) throw new Error("Beta metadata does not match its live release");
     }

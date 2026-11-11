@@ -38,3 +38,9 @@ test("distribution rejects release drift, expiry, foreign archives and changed d
     }finally{await rm(root,{recursive:true,force:true});}
   }
 });
+
+test("distribution refuses a changed beta after the independently checked candidate",async()=>{
+  const root=await mkdtemp(join(tmpdir(),"poststeward-dist-"));
+  try{await assert.rejects(syncRuntimeRelease({send:fixture(),output:pathToFileURL(root+"/"),expected:revision,expectedBeta:"c".repeat(40)}),/Staged beta changed/);}
+  finally{await rm(root,{recursive:true,force:true});}
+});

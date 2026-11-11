@@ -27,6 +27,8 @@ jobs:
         run: npm run verify:live-catalogue
       - name: Verify distribution provenance and failure cases
         run: node --test tests/*.test.mjs
+      - name: Check distribution reconciler syntax
+        run: node --check scripts/distribution-reconcile.mjs
       - name: Check browser JavaScript syntax
         run: node --check public/app.js
       - name: Check hosted smoke verifier syntax

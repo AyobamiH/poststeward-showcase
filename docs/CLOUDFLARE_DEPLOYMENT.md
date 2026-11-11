@@ -69,3 +69,23 @@ to `custom-domain`. The existing preparation script compares app health, stable
 and beta manifests, immutable installer source and deployed installer bytes
 before preparing assets. The subsequent verifier and both-hostname smoke checks
 remain required. Routine main pushes retain their existing deployment behaviour.
+
+## Automatic beta distribution reconciliation
+
+`distribution-reconcile.yml` runs every three hours and can be dispatched manually. It checks
+staging beta against both public hostnames **byte-for-byte** while requiring the public stable
+manifest to match production and all four installers to match. A healthy staging deployment
+alone does not authorise promotion: if beta differs, the job requires successful source PR
+checks on the exact merged staging SHA, performs a clean isolated beta installation from the
+staging channel (including the installer's runtime-tree digest verification, version and JSON
+help smoke), and dispatches the existing `showcase`-environment-protected `deploy.yml`.
+The dispatch pins both the accepted production stable SHA and the independently checked beta
+SHA. If staging changes between preflight and deployment, preparation fails closed.
+
+The reconciliation job waits for both public hosts to converge, then independently rechecks
+stable, beta and installer bytes. A failed or incomplete run opens or updates the persistent
+GitHub issue **Distribution reconciliation failed**; only confirmed convergence closes it.
+No failed source checks are waived, no production stable promotion occurs, and no provider
+publishing or customer pairing is part of this workflow. A queued workflow is not proof of a
+successful deployment. GitHub schedule execution depends on the repository's Actions scheduler
+and the dedicated self-hosted runner; missed schedules must be detected by separate monitoring.

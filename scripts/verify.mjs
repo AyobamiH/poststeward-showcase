@@ -311,9 +311,9 @@ for (const file of await walk(rootPath)) {
   if (rel === "scripts/verify.mjs") continue;
   const content = await readFile(file, "utf8");
   for (const rule of forbidden) {
-    const releasedArtifact = ["public/install.sh", "public/releases/stable.json", "public/releases/beta.json", "scripts/sync-runtime-release.mjs", "scripts/smoke-deployment.mjs", "tests/runtime-distribution.test.mjs"].includes(rel);
+    const releasedArtifact = ["public/install.sh", "public/releases/stable.json", "public/releases/beta.json", "scripts/sync-runtime-release.mjs", "scripts/distribution-reconcile.mjs", ".github/workflows/distribution-reconcile.yml", "scripts/smoke-deployment.mjs", "tests/runtime-distribution.test.mjs", "tests/distribution-reconcile.test.mjs"].includes(rel);
     if (releasedArtifact && rule.label === "private implementation repository identifier") continue;
-    if (rel === "scripts/sync-runtime-release.mjs" && rule.label === "private staging origin") continue;
+    if (["scripts/sync-runtime-release.mjs", "scripts/distribution-reconcile.mjs"].includes(rel) && rule.label === "private staging origin") continue;
     if (rule.pattern.test(content)) failures.push(`${rule.label} exposed in ${rel}`);
   }
 }
