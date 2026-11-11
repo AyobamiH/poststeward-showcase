@@ -31,23 +31,10 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           BETA: ${{ steps.inspect.outputs.beta }}
         run: node scripts/github-release-control.mjs check
-      - name: Dispatch existing protected release workflow
+      - name: Block unapproved automatic promotion and report drift
         if: steps.inspect.outputs.drift == 'true'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          STABLE: ${{ steps.inspect.outputs.stable }}
-          BETA: ${{ steps.inspect.outputs.beta }}
-        run: node scripts/github-release-control.mjs dispatch
-      - name: Await verified public convergence
-        if: steps.inspect.outputs.drift == 'true'
-        shell: bash
         run: |
-          set -euo pipefail
-          for attempt in $(seq 1 60); do
-            if node scripts/distribution-reconcile.mjs confirm; then exit 0; fi
-            sleep 12
-          done
-          echo '::error::Public beta did not converge after protected release dispatch'
+          echo '::error::Public beta drift detected. Protected deployment requires a separate authorised release; scheduled reconciliation cannot dispatch or promote.'
           exit 1
       - name: Confirm exact public channel bytes
         run: node scripts/distribution-reconcile.mjs confirm

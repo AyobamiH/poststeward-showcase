@@ -17,11 +17,10 @@ test('exact merged source requires every mandatory check to pass', async () => {
   const good = fixture(); assert.equal((await requireAcceptedBeta(sha, good.get)).pr, 42);
   const bad = fixture('browser'); await assert.rejects(requireAcceptedBeta(sha, bad.get), /browser/);
 });
-test('dispatch pins both channels and uses protected main deployment workflow', async () => {
-  const { calls, get } = fixture(); await dispatch(sha, 'c'.repeat(40), get);
-  assert.equal(calls[0].options.body.inputs.runtime_revision, sha);
-  assert.equal(calls[0].options.body.inputs.beta_revision, 'c'.repeat(40));
-  assert.equal(calls[0].options.body.ref, 'main');
+test('scheduled reconciliation cannot dispatch a release even with valid revisions', async () => {
+  const { calls, get } = fixture();
+  await assert.rejects(dispatch(sha, 'c'.repeat(40), get), /Automatic release dispatch is prohibited/);
+  assert.deepEqual(calls, []);
 });
 test('incident writes an issue on failure and never claims a successful deployment', async () => {
   const { calls, get } = fixture(); await incident('alert', get);

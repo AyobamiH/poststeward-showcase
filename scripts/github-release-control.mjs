@@ -32,9 +32,10 @@ export async function requireAcceptedBeta(revision, get = api) {
   return { pr: merged[0].number, revision };
 }
 
-export async function dispatch(stable, beta, get = api) {
-  if (!/^[0-9a-f]{40}$/.test(stable) || !/^[0-9a-f]{40}$/.test(beta)) throw new Error('Exact stable and beta revisions required');
-  await get(`repos/${showcase}/actions/workflows/deploy.yml/dispatches`, { method: 'POST', body: { ref: 'main', inputs: { runtime_revision: stable, beta_revision: beta, target: 'custom-domain' } } });
+// Scheduled reconciliation is read-only. A release must be authorised and
+// dispatched separately through the protected deployment workflow.
+export async function dispatch() {
+  throw new Error('Automatic release dispatch is prohibited; use the protected manual deployment workflow');
 }
 
 export async function incident(mode, get = api) {
