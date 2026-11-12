@@ -2,6 +2,8 @@ import importlib.util
 import pathlib
 import unittest
 from unittest.mock import patch
+import subprocess
+import json
 
 ROOT = pathlib.Path(__file__).parent
 
@@ -34,6 +36,36 @@ class LifecycleTests(unittest.TestCase):
     def test_idle_detection(self):
         with patch.object(recover, 'run', return_value='Runner.Listener\n'):
             self.assertFalse(recover.has_worker())
+
+    def test_missing_container_does_not_restart(self):
+        registry = json.dumps({'total_count': 0, 'runners': []})
+        def fake_run(*args, **kwargs):
+            if args[:2] == ('gh', 'api'):
+                return registry
+            if args[:2] == ('docker', 'inspect'):
+                raise subprocess.CalledProcessError(1, args)
+            self.fail('unexpected side effect: ' + repr(args))
+        with patch.object(recover, 'run', side_effect=fake_run):
+            recover.main()
+
+    def test_disappearing_container_does_not_restart(self):
+        registry = json.dumps({'total_count': 0, 'runners': []})
+        state = json.dumps({'Running': True, 'StartedAt': '2020-01-01T00:00:00Z'})
+        calls = [0]
+        def fake_run(*args, **kwargs):
+            if args[:2] == ('gh', 'api'):
+                return registry
+            if args[:2] == ('docker', 'inspect'):
+                calls[0] += 1
+                if calls[0] == 1:
+                    return state
+                raise subprocess.CalledProcessError(1, args)
+            if args[:2] == ('docker', 'exec'):
+                return 'Runner.Listener\n'
+            self.fail('unexpected side effect: ' + repr(args))
+        with patch.object(recover, 'run', side_effect=fake_run), patch.object(recover.time, 'sleep'):
+            recover.main()
+        self.assertEqual(calls[0], 2)
 
     def test_api_error_is_not_swallowed(self):
         with patch.object(recover, 'run', side_effect=RuntimeError('API down')):
