@@ -1,0 +1,9 @@
+[Unit]
+Description=Independent Showcase distribution readback every three hours
+[Timer]
+OnCalendar=*-*-* 00/3:22:00 UTC
+Persistent=true
+AccuracySec=1s
+Unit=poststeward-showcase-clock@distribution.service
+[Install]
+WantedBy=timers.target

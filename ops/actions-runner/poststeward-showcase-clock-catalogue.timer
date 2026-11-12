@@ -1,0 +1,9 @@
+[Unit]
+Description=Independent Showcase daily catalogue readback
+[Timer]
+OnCalendar=*-*-* 07:34:00 UTC
+Persistent=true
+AccuracySec=1s
+Unit=poststeward-showcase-clock@catalogue.service
+[Install]
+WantedBy=timers.target
