@@ -1,0 +1,8 @@
+[Unit]
+Description=Independent read-only Showcase %i slot reconciliation
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 %h/.local/share/poststeward-showcase-runner/showcase-clock.py %i
+TimeoutStartSec=110
+NoNewPrivileges=true
+PrivateTmp=true
