@@ -70,6 +70,21 @@ class WatchTests(unittest.TestCase):
         self.assertEqual(actual["slot"], "2026-11-12T00:17:00+00:00")
         self.assertEqual(actual["state"], "missing")
 
+    def test_late_schedule_run_does_not_satisfy_expired_grace(self):
+        # At 00:40 UTC the 00:17 slot is still inside grace, so the
+        # watchdog checks 21:17. A 23:10 creation is 113 minutes late;
+        # it cannot count as a healthy 21:17 natural cycle.
+        actual = watch.assess(dt.datetime(2026, 11, 12, 0, 40, tzinfo=UTC),
+                              [run(created="2026-11-11T23:10:00Z")])
+        self.assertEqual(actual["state"], "missing")
+        self.assertEqual(actual["slot"], "2026-11-11T21:17:00+00:00")
+        self.assertIsNone(actual["run_id"])
+
+    def test_schedule_delivery_within_grace_is_accepted(self):
+        actual = watch.assess(dt.datetime(2026, 11, 12, 0, 40, tzinfo=UTC),
+                              [run(created="2026-11-11T22:31:59Z")])
+        self.assertEqual(actual["state"], "passed")
+
     def test_latest_run_failure_is_not_hidden_by_older_success(self):
         actual = watch.assess(dt.datetime(2026, 11, 12, 0, 40, tzinfo=UTC),
                               [run(), run(created="2026-11-11T22:03:00Z", conclusion="failure", number=456)])

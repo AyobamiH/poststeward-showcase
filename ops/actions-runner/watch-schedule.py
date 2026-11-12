@@ -40,7 +40,10 @@ def assess(now, runs):
     slot -= dt.timedelta(hours=slot.hour % 3)
     if slot > now - GRACE:
         slot -= dt.timedelta(hours=3)
-    window_end = slot + dt.timedelta(hours=3)
+    # A run created after the watchdog grace deadline is late, even if
+    # GitHub queues it before the next three-hour schedule slot. Do not
+    # misclassify it as timely natural reconciliation evidence.
+    window_end = slot + GRACE
     matching = [
         r for r in runs
         if r.get("event") == "schedule"
