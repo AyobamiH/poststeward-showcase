@@ -23,6 +23,18 @@ def run(*cmd, timeout=25):
             time.sleep(attempt + 1)
 
 
+def container_state():
+    """Missing JIT containers are transient; never restart on an uncertain state."""
+    try:
+        return json.loads(run('docker', 'inspect', 'poststeward-showcase-job',
+                              '--format', '{{json .State}}'))
+    except subprocess.CalledProcessError:
+        # Docker inspect can fail while a JIT container is being removed.
+        # An absent container is not proof that its listener may be restarted.
+        print('JIT container absent or inaccessible; no restart')
+        return None
+
+
 def has_worker():
     # ps comm never exposes runner JIT configuration or environment.
     processes = run('docker', 'exec', 'poststeward-showcase-job', 'ps', '-eo', 'comm')
@@ -35,7 +47,11 @@ def main():
     if any(r['status'] == 'online' and r['name'].startswith(PREFIX) for r in data['runners']):
         print('online runner exists; no restart')
         return
-    started = json.loads(run('docker', 'inspect', 'poststeward-showcase-job', '--format', '{{json .State}}'))['StartedAt']
+    state = container_state()
+    if state is None or not state.get('Running'):
+        print('no running JIT container; no restart')
+        return
+    started = state['StartedAt']
     from datetime import datetime, timezone
     age = (datetime.now(timezone.utc) - datetime.fromisoformat(started.replace('Z', '+00:00'))).total_seconds()
     if age < MIN_AGE:
@@ -45,6 +61,9 @@ def main():
         print('worker executing; no restart')
         return
     time.sleep(2)
+    if container_state() is None:
+        print('JIT container disappeared during check; no restart')
+        return
     if has_worker():
         print('worker started during check; no restart')
         return
