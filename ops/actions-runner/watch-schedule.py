@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Read-only scheduled reconciliation watchdog; fails closed, never dispatches releases."""
 import datetime as dt
+from concurrent.futures import ThreadPoolExecutor
+import hashlib
 import json
 import os
 import re
@@ -16,6 +18,9 @@ CATALOGUE_WORKFLOW = "live-catalogue-drift.yml"
 GRACE = dt.timedelta(minutes=75)
 STATE_PATH = Path.home() / ".local/state/poststeward-showcase/schedule-watch-last.json"
 READBACK_SCRIPT = Path.home() / ".local/share/poststeward-showcase-runner/distribution-reconcile.mjs"
+CATALOGUE_READBACK_SCRIPT = Path.home() / ".local/share/poststeward-showcase-runner/scripts/verify-live-operation-contract.mjs"
+CATALOGUE_CHECKER_SHA256 = "ad184abc5726eae621f4f89e39c46b69d5a104f0ebfc918f008ac46720d60b22"
+CATALOGUE_SNAPSHOT_SHA256 = "830672e6d957d75eb836f7ac31fc09108c8023fdb36d56524f0269b484892db8"
 REVISION = re.compile(r"^[0-9a-f]{40}$")
 
 
@@ -106,6 +111,43 @@ def inspect_public_distribution(script=READBACK_SCRIPT):
         return {"state": "unknown"}
 
 
+def inspect_public_catalogue(script=CATALOGUE_READBACK_SCRIPT):
+    """Verify the hosted catalogue using the existing GET-only source checker.
+
+    This is independent operational readback, never a natural GitHub run.
+    The installed checker and sibling public/catalog.json are pinned together
+    to the reviewed Showcase source. No owner tokens reach the subprocess.
+    """
+    catalogue = script.parent.parent / "public/catalog.json"
+    if (not script.is_file() or script.is_symlink()
+            or not catalogue.is_file() or catalogue.is_symlink()):
+        return {"state": "unknown"}
+    try:
+        # A source/fixture mismatch cannot be silently interpreted as public
+        # contract acceptance. These exact hashes are reviewed in Git.
+        if (hashlib.sha256(script.read_bytes()).hexdigest() != CATALOGUE_CHECKER_SHA256
+                or hashlib.sha256(catalogue.read_bytes()).hexdigest() != CATALOGUE_SNAPSHOT_SHA256):
+            return {"state": "unknown"}
+        result = subprocess.run(
+            ["/usr/bin/node", str(script)], capture_output=True, text=True,
+            timeout=18, check=True,
+            env={"PATH": "/usr/bin:/bin", "HOME": str(Path.home())},
+        )
+        lines = result.stdout.splitlines()
+        if len(lines) != 1:
+            raise ValueError("unexpected catalogue checker output")
+        payload = json.loads(lines[0])
+        operations = payload.get("operations")
+        if (payload.get("status") != "PASS"
+                or payload.get("contract") != "PostSteward public operation catalogue"
+                or payload.get("origin") != "https://app.poststeward.com/help.json"
+                or type(operations) is not int or not 0 < operations <= 500):
+            raise ValueError("invalid catalogue checker proof")
+        return {"state": "passed", "operations": operations}
+    except (subprocess.SubprocessError, OSError, ValueError, TypeError, KeyError):
+        return {"state": "unknown"}
+
+
 def save_state(outcome, path=STATE_PATH):
     """Atomic, owner-private state file for systemd OnFailure delivery."""
     path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -125,6 +167,7 @@ def save_state(outcome, path=STATE_PATH):
 
 def main():
     now = dt.datetime.now(dt.timezone.utc)
+    catalogue = None
     try:
         # One GET covers both existing schedules without a new monitor,
         # workflow dispatch, deployment executor or publishing authority.
@@ -138,8 +181,23 @@ def main():
         outcome = {"state": "unknown", "reason": type(error).__name__}
     outcome["checked_at"] = now.isoformat()
     if outcome["state"] != "passed":
-        # Independent public evidence does not change the missing-run verdict.
-        outcome["public_readback"] = inspect_public_distribution()
+        # Independent GET-only evidence never changes the natural-schedule verdict.
+        # Parallel checks keep both fallbacks inside the existing 90s oneshot
+        # deadline even after bounded GitHub transport retries.
+        if catalogue is not None and catalogue["state"] != "passed":
+            try:
+                with ThreadPoolExecutor(max_workers=2) as pool:
+                    distribution = pool.submit(inspect_public_distribution)
+                    operations = pool.submit(inspect_public_catalogue)
+                    outcome["public_readback"] = distribution.result()
+                    outcome["catalogue_public_readback"] = operations.result()
+            except Exception:
+                # An unexpected local checker failure must not prevent the
+                # original missing-run state from reaching the incident handler.
+                outcome["public_readback"] = {"state": "unknown"}
+                outcome["catalogue_public_readback"] = {"state": "unknown"}
+        else:
+            outcome["public_readback"] = inspect_public_distribution()
     try:
         save_state(outcome)
     except OSError as error:

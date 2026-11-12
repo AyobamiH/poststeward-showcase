@@ -59,6 +59,21 @@ def prepare(state, now):
                 f"Independent public release readback: **{readback_state}** "
                 f"(stable {stable[:12]}, beta {beta[:12]})."
             )
+    catalogue_proof = state.get("catalogue_public_readback")
+    catalogue_proof_line = ""
+    if catalogue_proof is not None:
+        valid = isinstance(catalogue_proof, dict) and catalogue_proof.get("state") == "passed"
+        count = catalogue_proof.get("operations") if valid else None
+        if type(count) is int and 0 < count <= 500:
+            catalogue_proof_line = (
+                f"Independent hosted operation catalogue (GET-only): **passed** "
+                f"({count} operations). Not a natural scheduled-run receipt.\n"
+            )
+        else:
+            catalogue_proof_line = (
+                "Independent hosted operation catalogue (GET-only): **unknown**. "
+                "Not a natural scheduled-run receipt.\n"
+            )
     catalogue_line = ""
     other = state.get("catalogue")
     if workflow == "reconcile" and isinstance(other, dict):
@@ -83,6 +98,7 @@ def prepare(state, now):
         f"Observed state: **{status}**. Expected slot: **{slot}**. {run_part}.\n"
         f"Checked: {checked.astimezone(dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}.\n\n"
         f"{catalogue_line}"
+        f"{catalogue_proof_line}"
         f"{readback_line} This does not satisfy scheduled-run acceptance.\n\n"
         "This is a read-only watchdog observation, not permission to dispatch, deploy or promote. "
         "Verify the GitHub schedule-event run and independent public readback before closing incident #29."
@@ -116,6 +132,7 @@ def prepare_all(state, now):
     distinct = dict(catalogue)
     distinct["checked_at"] = state["checked_at"]
     distinct["public_readback"] = state.get("public_readback", {})
+    distinct["catalogue_public_readback"] = state.get("catalogue_public_readback")
     alerts.append(prepare(distinct, now))
     return alerts
 
