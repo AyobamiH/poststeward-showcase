@@ -42,7 +42,32 @@ def prepare(state, now):
     run_id = state.get("run_id")
     if run_id is not None and (not isinstance(run_id, int) or run_id < 1):
         raise ValueError("invalid run")
-    run_part = f"Run: https://github.com/{REPO}/actions/runs/{run_id}" if run_id else "No confirmed run"
+    run_part = (f"Run: https://github.com/{REPO}/actions/runs/{run_id}"
+                if run_id else "No qualifying timely GitHub schedule event")
+    # Out-of-window arrivals are diagnostic only: the GitHub schedule event
+    # provides no authoritative intended-slot timestamp. Strictly validate
+    # all fields before interpolating them into a GitHub incident comment.
+    observation_line = ""
+    observation = state.get("out_of_window_observation")
+    if observation is not None:
+        if not isinstance(observation, dict) or "slot" not in state:
+            raise ValueError("invalid out-of-window observation")
+        observed_id = observation.get("run_id")
+        if not isinstance(observed_id, int) or isinstance(observed_id, bool) or observed_id < 1:
+            raise ValueError("invalid out-of-window run")
+        observed_time = dt.datetime.fromisoformat(observation["created_at"].replace("Z", "+00:00"))
+        nominal_slot = dt.datetime.fromisoformat(state["slot"].replace("Z", "+00:00"))
+        interval = dt.timedelta(days=1) if workflow == "catalogue" else dt.timedelta(hours=3)
+        if (observed_time.tzinfo is None or nominal_slot.tzinfo is None
+                or not nominal_slot + dt.timedelta(minutes=75) <= observed_time < nominal_slot + interval
+                or observed_time > checked):
+            raise ValueError("invalid out-of-window timestamp")
+        observation_line = (
+            f"Out-of-window natural event observed: https://github.com/{REPO}/actions/runs/{observed_id} "
+            f"at {observed_time.astimezone(dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}. "
+            "GitHub does not attest which nominal slot caused this event; "
+            "it is not timely acceptance evidence.\n\n"
+        )
     independent = state.get("public_readback", {})
     readback_state = independent.get("state", "not-checked") if isinstance(independent, dict) else "unknown"
     if readback_state not in {"converged", "drift", "unknown", "not-checked"}:
@@ -97,6 +122,7 @@ def prepare(state, now):
         f"PostSteward Showcase scheduled-{kind} watchdog alert.\n\n"
         f"Observed state: **{status}**. Expected slot: **{slot}**. {run_part}.\n"
         f"Checked: {checked.astimezone(dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}.\n\n"
+        f"{observation_line}"
         f"{catalogue_line}"
         f"{catalogue_proof_line}"
         f"{readback_line} This does not satisfy scheduled-run acceptance.\n\n"

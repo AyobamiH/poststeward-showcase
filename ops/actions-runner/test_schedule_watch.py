@@ -81,6 +81,30 @@ class WatchTests(unittest.TestCase):
         self.assertEqual(actual["state"], "missing")
         self.assertEqual(actual["slot"], "2026-11-11T21:17:00+00:00")
         self.assertIsNone(actual["run_id"])
+        # An event happened after the permitted window; do not relabel it
+        # as timely, but do preserve its independently observed provenance.
+        self.assertEqual(actual["out_of_window_observation"]["run_id"], 123)
+        self.assertEqual(actual["out_of_window_observation"]["created_at"],
+                         "2026-11-11T23:10:00+00:00")
+
+    def test_unrelated_or_manual_event_is_not_out_of_window_proof(self):
+        now = dt.datetime(2026, 11, 12, 0, 40, tzinfo=UTC)
+        samples = [
+            dict(run(created="2026-11-11T23:10:00Z"), event="workflow_dispatch"),
+            run(created="2026-11-11T23:10:00Z", workflow="live-catalogue-drift.yml"),
+            run(created="2026-11-12T00:20:00Z"),
+        ]
+        result = watch.assess(now, samples)
+        self.assertEqual(result["state"], "missing")
+        self.assertNotIn("out_of_window_observation", result)
+
+    def test_out_of_window_catalogue_is_not_scheduled_catalogue_success(self):
+        now = dt.datetime(2026, 11, 12, 17, 42, tzinfo=UTC)
+        actual = watch.assess_catalogue(
+            now, [run(created="2026-11-12T16:06:10Z",
+                      workflow="live-catalogue-drift.yml", number=43254976169)])
+        self.assertEqual(actual["state"], "missing")
+        self.assertEqual(actual["out_of_window_observation"]["run_id"], 43254976169)
 
     def test_schedule_delivery_within_grace_is_accepted(self):
         actual = watch.assess(dt.datetime(2026, 11, 12, 0, 40, tzinfo=UTC),
@@ -194,6 +218,23 @@ class AlertTests(unittest.TestCase):
         self.assertEqual(marker, "<!-- ps-showcase-watch:2026-11-11T21:17Z:failed -->")
         self.assertIn("https://github.com/AyobamiH/poststeward-showcase/actions/runs/123", body)
         self.assertIn("not permission to dispatch, deploy or promote", body)
+
+    def test_out_of_window_alert_does_not_assert_a_matching_intended_slot(self):
+        state = {**self.state(), "state": "missing", "run_id": None,
+                 "out_of_window_observation": {
+                     "run_id": 43271256711,
+                     "created_at": "2026-11-11T23:10:00+00:00"}}
+        _, body = alert.prepare(state, self.now)
+        self.assertIn("No qualifying timely GitHub schedule event", body)
+        self.assertIn("actions/runs/43271256711", body)
+        self.assertIn("does not attest which nominal slot", body)
+
+    def test_invalid_out_of_window_provenance_fails_closed(self):
+        state = {**self.state(), "state": "missing", "run_id": None,
+                 "out_of_window_observation": {
+                     "run_id": "secrets", "created_at": "2026-11-11T23:10:00+00:00"}}
+        with self.assertRaises(ValueError):
+            alert.prepare(state, self.now)
 
     def test_unknown_state_never_contains_exception_text(self):
         marker, body = alert.prepare({"state": "unknown", "reason": "unsafe text",
