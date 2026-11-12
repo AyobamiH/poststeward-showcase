@@ -2,6 +2,7 @@
 """Deliver a deduplicated, sanitised GitHub issue alert from the existing watchdog."""
 import datetime as dt
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -37,12 +38,29 @@ def prepare(state, now):
     if run_id is not None and (not isinstance(run_id, int) or run_id < 1):
         raise ValueError("invalid run")
     run_part = f"Run: https://github.com/{REPO}/actions/runs/{run_id}" if run_id else "No confirmed run"
+    independent = state.get("public_readback", {})
+    readback_state = independent.get("state", "not-checked") if isinstance(independent, dict) else "unknown"
+    if readback_state not in {"converged", "drift", "unknown", "not-checked"}:
+        readback_state = "unknown"
+    readback_line = f"Independent public release readback: **{readback_state}**."
+    if readback_state in {"converged", "drift"}:
+        beta, stable = independent.get("beta"), independent.get("stable")
+        if not all(isinstance(v, str) and re.fullmatch(r"[0-9a-f]{40}", v)
+                   for v in (beta, stable)):
+            readback_state = "unknown"
+            readback_line = "Independent public release readback: **unknown**."
+        else:
+            readback_line = (
+                f"Independent public release readback: **{readback_state}** "
+                f"(stable {stable[:12]}, beta {beta[:12]})."
+            )
     marker = f"<!-- ps-showcase-watch:{slot}:{status} -->"
     body = (
         f"{marker}\n"
         f"PostSteward Showcase scheduled-reconciliation watchdog alert.\n\n"
         f"Observed state: **{status}**. Expected slot: **{slot}**. {run_part}.\n"
         f"Checked: {checked.astimezone(dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}.\n\n"
+        f"{readback_line} This does not satisfy scheduled-run acceptance.\n\n"
         "This is a read-only watchdog observation, not permission to dispatch, deploy or promote. "
         "Verify the GitHub schedule-event run and independent public readback before closing incident #29."
     )
