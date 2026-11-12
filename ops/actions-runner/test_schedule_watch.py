@@ -2,6 +2,7 @@
 import datetime as dt
 import importlib.util
 import json
+import subprocess
 import tempfile
 import unittest
 from pathlib import Path
@@ -125,6 +126,20 @@ class AlertTests(unittest.TestCase):
             self.assertIn("issuecomment-1", alert.deliver("MARK", "body MARK"))
             self.assertEqual(mocked.call_count, 4)
 
+    def test_uncertain_post_is_deduplicated_on_bounded_retry(self):
+        # The first network effect is unknown; a subsequent service retry must
+        # discover the original comment before attempting a second POST.
+        lost_reply = subprocess.CalledProcessError(1, ["gh", "api", "POST"])
+        with patch.object(alert, "gh", side_effect=[
+            "open\n", "unrelated\n", lost_reply,
+            "open\n", "existing comment with MARK\n",
+        ]) as mocked:
+            with self.assertRaises(subprocess.CalledProcessError):
+                alert.deliver("MARK", "body MARK")
+            self.assertEqual(alert.deliver("MARK", "body MARK"), "already-delivered")
+            posts = [call for call in mocked.call_args_list if "POST" in call.args]
+            self.assertEqual(len(posts), 1)
+
     def test_failed_readback_is_not_success(self):
         with patch.object(alert, "gh", side_effect=[
             "open\n", "unrelated\n", '{"html_url":"https://example.com/comment"}', "missing\n"
@@ -144,6 +159,11 @@ class AlertTests(unittest.TestCase):
         timer = (HERE / "poststeward-showcase-schedule-watch.timer").read_text()
         self.assertIn("OnFailure=poststeward-showcase-schedule-alert.service", watchdog)
         self.assertIn("alert-schedule.py", notifier)
+        self.assertIn("Restart=on-failure", notifier)
+        self.assertIn("RestartSec=60s", notifier)
+        self.assertIn("StartLimitIntervalSec=600", notifier)
+        self.assertIn("StartLimitBurst=4", notifier)
+        self.assertNotIn("Restart=always", notifier)
         self.assertIn("*:42:00 UTC", timer)
         self.assertNotIn("OnSuccess=", watchdog)
         self.assertNotIn("OnCalendar", notifier)

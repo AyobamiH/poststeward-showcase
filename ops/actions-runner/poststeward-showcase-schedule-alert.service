@@ -1,8 +1,13 @@
 [Unit]
 Description=Deduplicated incident evidence for PostSteward Showcase watchdog failure
+StartLimitIntervalSec=600
+StartLimitBurst=4
 
 [Service]
 Type=oneshot
+# The delivery script reads before writing: retrying an ambiguous POST cannot duplicate an owner comment.
+Restart=on-failure
+RestartSec=60s
 ExecStart=/usr/bin/python3 %h/.local/share/poststeward-showcase-runner/alert-schedule.py
 NoNewPrivileges=true
 PrivateTmp=true
