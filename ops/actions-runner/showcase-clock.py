@@ -5,6 +5,7 @@ No GitHub dispatch, provider credentials, channel promotion, or runner lifecycle
 Receipts are isolated from the product's operational clock and natural GitHub runs.
 """
 import fcntl
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -19,11 +20,26 @@ ORIGIN = 'independent_local_readback'
 
 ROOT = Path.home() / '.local/state/poststeward-showcase/clock'
 SCRIPTS = Path.home() / '.local/share/poststeward-showcase-runner'
+CATALOGUE_CHECKER_SHA256 = 'ad184abc5726eae621f4f89e39c46b69d5a104f0ebfc918f008ac46720d60b22'
+CATALOGUE_SNAPSHOT_SHA256 = '830672e6d957d75eb836f7ac31fc09108c8023fdb36d56524f0269b484892db8'
+CATALOGUE_CONTRACT = 'PostSteward public operation catalogue'
+CATALOGUE_ORIGIN = 'https://app.poststeward.com/help.json'
 SLOTS = {'distribution': (10800, 17 * 60), 'catalogue': (86400, 7 * 3600 + 29 * 60)}
 COMMANDS = {
     'distribution': [ '/usr/bin/node', str(SCRIPTS / 'distribution-reconcile.mjs'), 'confirm'],
     'catalogue': ['/usr/bin/node', str(SCRIPTS / 'scripts/verify-live-operation-contract.mjs')],
 }
+
+def require_catalogue_assets(base=SCRIPTS):
+    """Never accept a catalogue proof from unreviewed local checker bytes."""
+    for asset, expected in (
+        (base / 'scripts/verify-live-operation-contract.mjs', CATALOGUE_CHECKER_SHA256),
+        (base / 'public/catalog.json', CATALOGUE_SNAPSHOT_SHA256),
+    ):
+        if (not asset.is_file() or asset.is_symlink()
+                or hashlib.sha256(asset.read_bytes()).hexdigest() != expected):
+            raise ValueError('catalogue source provenance not verified')
+
 
 def execute(kind, now=None, root=ROOT, commands=None):
     if kind not in SLOTS:
@@ -71,6 +87,8 @@ def execute(kind, now=None, root=ROOT, commands=None):
         save('running')
         command = (commands or COMMANDS)[kind]
         try:
+            if kind == 'catalogue':
+                require_catalogue_assets()
             result = subprocess.run(command, check=True, capture_output=True, text=True,
                                     timeout=75, env={'HOME': str(Path.home()), 'PATH': '/usr/bin:/bin'})
             if kind == 'distribution':
@@ -78,9 +96,18 @@ def execute(kind, now=None, root=ROOT, commands=None):
                 if len(lines) != 1 or json.loads(lines[0].split(' ', 1)[1]).get('drift') is not False:
                     raise ValueError('distribution convergence not proven')
             else:
-                lines = [x for x in result.stdout.splitlines() if x.startswith('{')]
-                if not any(json.loads(x).get('status') == 'PASS' for x in lines):
-                    raise ValueError('catalogue parity not proven')
+                lines = result.stdout.splitlines()
+                if len(lines) != 1:
+                    raise ValueError('catalogue proof must be a single JSON object')
+                proof = json.loads(lines[0])
+                operations = proof.get('operations') if isinstance(proof, dict) else None
+                if not (isinstance(proof, dict)
+                        and set(proof) == {'status', 'contract', 'origin', 'operations'}
+                        and proof['status'] == 'PASS'
+                        and proof['contract'] == CATALOGUE_CONTRACT
+                        and proof['origin'] == CATALOGUE_ORIGIN
+                        and type(operations) is int and 0 < operations <= 500):
+                    raise ValueError('catalogue origin, contract or operation count not proven')
         except Exception:
             save('failed')
             raise

@@ -28,9 +28,88 @@ class ClockTests(unittest.TestCase):
                 self.assertEqual(run.call_count, 1)
     def test_catalogue_requires_actual_pass(self):
         with tempfile.TemporaryDirectory() as folder:
-            class Result: stdout = '{"status":"PASS","operations":50}\n'
-            with patch.object(clock.subprocess, 'run', return_value=Result()):
+            class Result:
+                stdout = json.dumps({
+                    'status': 'PASS', 'operations': 50,
+                    'contract': clock.CATALOGUE_CONTRACT,
+                    'origin': clock.CATALOGUE_ORIGIN,
+                }) + '\n'
+            with patch.object(clock, 'require_catalogue_assets') as assets, \
+                    patch.object(clock.subprocess, 'run', return_value=Result()) as run:
                 self.assertEqual(clock.execute('catalogue', now=7*3600+34*60, root=Path(folder))['state'], 'passed')
+                assets.assert_called_once_with()
+                self.assertEqual(set(run.call_args.kwargs['env']), {'HOME', 'PATH'})
+
+    def test_catalogue_rejects_success_shaped_incomplete_evidence(self):
+        # Previously accepted by the clock despite missing contract and origin.
+        with tempfile.TemporaryDirectory() as folder:
+            class Result: stdout = '{"status":"PASS"}\n'
+            with patch.object(clock, 'require_catalogue_assets'), \
+                    patch.object(clock.subprocess, 'run', return_value=Result()):
+                with self.assertRaises(ValueError):
+                    clock.execute('catalogue', now=7*3600+34*60, root=Path(folder))
+            receipt = json.loads(next(Path(folder).glob('catalogue-*.json')).read_text())
+            self.assertEqual(receipt['state'], 'failed')
+
+    def test_catalogue_rejects_wrong_origin_contract_or_ambiguous_evidence(self):
+        good = {'status': 'PASS', 'operations': 50,
+                'contract': clock.CATALOGUE_CONTRACT, 'origin': clock.CATALOGUE_ORIGIN}
+        bad = [
+            {**good, 'origin': 'https://attacker.example/help.json'},
+            {**good, 'contract': 'unreviewed contract'},
+            {**good, 'operations': True},
+            {**good, 'operations': 0},
+            {**good, 'operations': 501},
+            {**good, 'unexpected': 'unreviewed'},
+            ['PASS'],
+        ]
+        outputs = [json.dumps(item) + '\n' for item in bad]
+        outputs += [json.dumps(good) + '\n' + json.dumps(good) + '\n', 'not-json']
+        for output in outputs:
+            with self.subTest(output=output[:75]), tempfile.TemporaryDirectory() as folder:
+                class Result: stdout = output
+                with patch.object(clock, 'require_catalogue_assets'), \
+                        patch.object(clock.subprocess, 'run', return_value=Result()) as run:
+                    with self.assertRaises(ValueError):
+                        clock.execute('catalogue', now=7*3600+34*60, root=Path(folder))
+                run.assert_called_once()
+                receipt = json.loads(next(Path(folder).glob('catalogue-*.json')).read_text())
+                self.assertEqual(receipt['state'], 'failed')
+
+    def test_catalogue_requires_exact_reviewed_checker_and_snapshot_bytes(self):
+        repository = Path(__file__).resolve().parents[2]
+        with tempfile.TemporaryDirectory() as folder:
+            base = Path(folder)
+            (base / 'scripts').mkdir()
+            (base / 'public').mkdir()
+            script = base / 'scripts/verify-live-operation-contract.mjs'
+            snapshot = base / 'public/catalog.json'
+            script.write_bytes((repository / 'scripts/verify-live-operation-contract.mjs').read_bytes())
+            snapshot.write_bytes((repository / 'public/catalog.json').read_bytes())
+            clock.require_catalogue_assets(base)
+            script.write_bytes(b'{"status":"PASS"}')
+            with self.assertRaisesRegex(ValueError, 'provenance'):
+                clock.require_catalogue_assets(base)
+            script.unlink()
+            script.symlink_to(repository / 'scripts/verify-live-operation-contract.mjs')
+            with self.assertRaisesRegex(ValueError, 'provenance'):
+                clock.require_catalogue_assets(base)
+            script.unlink()
+            script.write_bytes((repository / 'scripts/verify-live-operation-contract.mjs').read_bytes())
+            snapshot.write_bytes(b'tampered')
+            with self.assertRaisesRegex(ValueError, 'provenance'):
+                clock.require_catalogue_assets(base)
+    def test_unreviewed_catalogue_assets_fail_before_running_a_checker(self):
+        with tempfile.TemporaryDirectory() as folder:
+            with patch.object(clock, 'require_catalogue_assets',
+                              side_effect=ValueError('catalogue source provenance not verified')), \
+                    patch.object(clock.subprocess, 'run') as invoked:
+                with self.assertRaisesRegex(ValueError, 'provenance'):
+                    clock.execute('catalogue', now=7*3600+34*60, root=Path(folder))
+                invoked.assert_not_called()
+            receipt = json.loads(next(Path(folder).glob('catalogue-*.json')).read_text())
+            self.assertEqual(receipt['state'], 'failed')
+
     def test_late_catchup_cannot_approve_old_distribution_or_catalogue(self):
         with tempfile.TemporaryDirectory() as folder:
             for kind, now in (('distribution', 12*3600+51*60),
