@@ -185,11 +185,17 @@ def main():
         # Parallel checks keep both fallbacks inside the existing 90s oneshot
         # deadline even after bounded GitHub transport retries.
         if catalogue is not None and catalogue["state"] != "passed":
-            with ThreadPoolExecutor(max_workers=2) as pool:
-                distribution = pool.submit(inspect_public_distribution)
-                operations = pool.submit(inspect_public_catalogue)
-                outcome["public_readback"] = distribution.result()
-                outcome["catalogue_public_readback"] = operations.result()
+            try:
+                with ThreadPoolExecutor(max_workers=2) as pool:
+                    distribution = pool.submit(inspect_public_distribution)
+                    operations = pool.submit(inspect_public_catalogue)
+                    outcome["public_readback"] = distribution.result()
+                    outcome["catalogue_public_readback"] = operations.result()
+            except Exception:
+                # An unexpected local checker failure must not prevent the
+                # original missing-run state from reaching the incident handler.
+                outcome["public_readback"] = {"state": "unknown"}
+                outcome["catalogue_public_readback"] = {"state": "unknown"}
         else:
             outcome["public_readback"] = inspect_public_distribution()
     try:

@@ -115,6 +115,21 @@ class HostedCatalogueFallbackTests(unittest.TestCase):
             distribution.assert_called_once()
             catalogue.assert_called_once()
 
+    def test_unexpected_checker_failure_still_saves_missing_slot(self):
+        with patch.object(watch, "get_runs", return_value=[]), \
+                patch.object(watch, "inspect_public_distribution",
+                             return_value={"state": "converged"}), \
+                patch.object(watch, "inspect_public_catalogue",
+                             side_effect=RuntimeError("untrusted local failure")), \
+                patch.object(watch, "save_state") as saved:
+            self.assertEqual(watch.main(), 1)
+            outcome = saved.call_args.args[0]
+            self.assertEqual(outcome["state"], "missing")
+            self.assertEqual(outcome["catalogue"]["state"], "missing")
+            self.assertEqual(outcome["catalogue_public_readback"], {"state": "unknown"})
+            self.assertEqual(outcome["public_readback"], {"state": "unknown"})
+            self.assertNotIn("untrusted local failure", json.dumps(outcome))
+
     def test_both_natural_schedules_pass_and_do_not_trigger_fallback(self):
         with patch.object(watch, "get_runs", return_value=[]), \
                 patch.object(watch, "assess", return_value={"state": "passed"}), \
