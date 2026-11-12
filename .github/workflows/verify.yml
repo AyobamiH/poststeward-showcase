@@ -35,6 +35,8 @@ jobs:
         run: node --check scripts/distribution-reconcile.mjs
       - name: Check GitHub release controller syntax
         run: node --check scripts/github-release-control.mjs
+      - name: Verify bounded JIT runner cleanup safety (no GitHub effects)
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
       - name: Check browser JavaScript syntax
         run: node --check public/app.js
       - name: Check hosted smoke verifier syntax
