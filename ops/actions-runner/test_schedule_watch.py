@@ -24,9 +24,11 @@ watch = load("watch_schedule", "watch-schedule.py")
 alert = load("alert_schedule", "alert-schedule.py")
 
 
-def run(created="2026-11-11T21:58:54Z", status="completed", conclusion="success", number=123):
+def run(created="2026-11-11T21:58:54Z", status="completed", conclusion="success",
+        number=123, workflow="distribution-reconcile.yml"):
     return {"event": "schedule", "created_at": created, "status": status,
-            "conclusion": conclusion, "id": number}
+            "conclusion": conclusion, "id": number,
+            "path": f".github/workflows/{workflow}"}
 
 
 class WatchTests(unittest.TestCase):
@@ -171,6 +173,7 @@ class PublicFallbackTests(unittest.TestCase):
 
     def test_passed_schedule_does_not_repeat_public_readback(self):
         with patch.object(watch, "assess", return_value={"state": "passed"}), \
+             patch.object(watch, "assess_catalogue", return_value={"state": "passed"}), \
              patch.object(watch, "get_runs", return_value=[]), \
              patch.object(watch, "inspect_public_distribution") as inspector, \
              patch.object(watch, "save_state"):

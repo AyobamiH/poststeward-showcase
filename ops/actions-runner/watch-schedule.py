@@ -12,6 +12,7 @@ from pathlib import Path
 
 REPO = "AyobamiH/poststeward-showcase"
 WORKFLOW = "distribution-reconcile.yml"
+CATALOGUE_WORKFLOW = "live-catalogue-drift.yml"
 GRACE = dt.timedelta(minutes=75)
 STATE_PATH = Path.home() / ".local/state/poststeward-showcase/schedule-watch-last.json"
 READBACK_SCRIPT = Path.home() / ".local/share/poststeward-showcase-runner/distribution-reconcile.mjs"
@@ -25,7 +26,7 @@ def get_runs():
     when each gh process reaches its own 20-second timeout. Schema errors are
     not retried and all unresolved failures remain fail-closed/unknown.
     """
-    command = ["gh", "api", f"repos/{REPO}/actions/workflows/{WORKFLOW}/runs?event=schedule&per_page=30"]
+    command = ["gh", "api", f"repos/{REPO}/actions/runs?event=schedule&per_page=100"]
     for attempt in range(3):
         try:
             result = subprocess.run(
@@ -38,19 +39,13 @@ def get_runs():
             time.sleep(attempt + 1)
 
 
-def assess(now, runs):
-    slot = now.replace(minute=17, second=0, microsecond=0)
-    slot -= dt.timedelta(hours=slot.hour % 3)
-    if slot > now - GRACE:
-        slot -= dt.timedelta(hours=3)
-    # A run created after the watchdog grace deadline is late, even if
-    # GitHub queues it before the next three-hour schedule slot. Do not
-    # misclassify it as timely natural reconciliation evidence.
-    window_end = slot + GRACE
+def assess_slot(runs, slot, workflow):
+    """Accept only this exact workflow's on-time natural GitHub event."""
     matching = [
         r for r in runs
         if r.get("event") == "schedule"
-        and slot <= dt.datetime.fromisoformat(r["created_at"].replace("Z", "+00:00")) < window_end
+        and r.get("path") == f".github/workflows/{workflow}"
+        and slot <= dt.datetime.fromisoformat(r["created_at"].replace("Z", "+00:00")) < slot + GRACE
     ]
     if not matching:
         return {"state": "missing", "slot": slot.isoformat(), "run_id": None}
@@ -60,10 +55,24 @@ def assess(now, runs):
         else "pending" if latest.get("status") != "completed"
         else "failed"
     )
-    return {
-        "state": state, "slot": slot.isoformat(),
-        "run_id": latest["id"], "conclusion": latest.get("conclusion"),
-    }
+    return {"state": state, "slot": slot.isoformat(), "run_id": latest["id"],
+            "conclusion": latest.get("conclusion")}
+
+
+def assess(now, runs):
+    slot = now.replace(minute=17, second=0, microsecond=0)
+    slot -= dt.timedelta(hours=slot.hour % 3)
+    if slot > now - GRACE:
+        slot -= dt.timedelta(hours=3)
+    return assess_slot(runs, slot, WORKFLOW)
+
+
+def assess_catalogue(now, runs):
+    """Inspect the existing daily 07:29 catalogue job after its grace window."""
+    slot = now.replace(hour=7, minute=29, second=0, microsecond=0)
+    if slot > now - GRACE:
+        slot -= dt.timedelta(days=1)
+    return {**assess_slot(runs, slot, CATALOGUE_WORKFLOW), "workflow": "catalogue"}
 
 
 def inspect_public_distribution(script=READBACK_SCRIPT):
@@ -117,7 +126,14 @@ def save_state(outcome, path=STATE_PATH):
 def main():
     now = dt.datetime.now(dt.timezone.utc)
     try:
-        outcome = assess(now, get_runs())
+        # One GET covers both existing schedules without a new monitor,
+        # workflow dispatch, deployment executor or publishing authority.
+        runs = get_runs()
+        reconcile = assess(now, runs)
+        catalogue = assess_catalogue(now, runs)
+        outcome = {**reconcile, "catalogue": catalogue}
+        if reconcile["state"] == "passed" and catalogue["state"] != "passed":
+            outcome = {**catalogue, "reconciliation": reconcile}
     except Exception as error:
         outcome = {"state": "unknown", "reason": type(error).__name__}
     outcome["checked_at"] = now.isoformat()
