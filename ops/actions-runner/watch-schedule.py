@@ -53,7 +53,28 @@ def assess_slot(runs, slot, workflow):
         and slot <= dt.datetime.fromisoformat(r["created_at"].replace("Z", "+00:00")) < slot + GRACE
     ]
     if not matching:
-        return {"state": "missing", "slot": slot.isoformat(), "run_id": None}
+        result = {"state": "missing", "slot": slot.isoformat(), "run_id": None}
+        # GitHub's schedule payload does not attest the *intended* clock slot.
+        # Keep the missed/timely verdict unchanged, but expose a same-workflow
+        # natural event observed after this slot's acceptance window and before
+        # the next nominal slot. Never attribute it definitively to this slot.
+        interval = dt.timedelta(days=1) if workflow == CATALOGUE_WORKFLOW else dt.timedelta(hours=3)
+        candidates = [
+            r for r in runs
+            if r.get("event") == "schedule"
+            and r.get("path") == f".github/workflows/{workflow}"
+            and isinstance(r.get("id"), int) and r["id"] > 0
+            and slot + GRACE <= dt.datetime.fromisoformat(r["created_at"].replace("Z", "+00:00"))
+            < slot + interval
+        ]
+        if candidates:
+            latest_late = max(candidates, key=lambda r: r["created_at"])
+            created = dt.datetime.fromisoformat(latest_late["created_at"].replace("Z", "+00:00"))
+            result["out_of_window_observation"] = {
+                "run_id": latest_late["id"],
+                "created_at": created.astimezone(dt.timezone.utc).isoformat(),
+            }
+        return result
     latest = max(matching, key=lambda r: r["created_at"])
     state = (
         "passed" if latest.get("status") == "completed" and latest.get("conclusion") == "success"

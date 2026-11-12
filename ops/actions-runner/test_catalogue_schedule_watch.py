@@ -125,7 +125,7 @@ class CatalogueAlertTests(unittest.TestCase):
         marker, body = alert.prepare(self.state(), self.now)
         self.assertEqual(marker, "<!-- ps-showcase-catalogue-watch:2026-11-12T07:29Z:missing -->")
         self.assertIn("scheduled-catalogue watchdog alert", body)
-        self.assertIn("No confirmed run", body)
+        self.assertIn("No qualifying timely GitHub schedule event", body)
         self.assertIn("not permission to dispatch, deploy or promote", body)
 
     def test_rejects_invalid_catalogue_slot_and_workflow_injection(self):
