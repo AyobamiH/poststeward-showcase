@@ -79,6 +79,34 @@ scripts to the existing web host (not a customer installation):
     python3 -m unittest discover -s ops/actions-runner -p 'test_*.py'
     systemctl --user cat poststeward-showcase-schedule-watch.service
 
+### Independent catalogue readback when GitHub misses a schedule
+
+The existing :42 watchdog additionally uses the **same reviewed, GET-only**
+`scripts/verify-live-operation-contract.mjs` and `public/catalog.json`
+already exercised by `npm run verify:live-catalogue`. It runs only when the
+daily catalogue's natural run is missing, failed or pending; it never dispatches
+GitHub Actions. The independent result is recorded as
+`catalogue_public_readback` (passed with bounded operation count, or unknown),
+always separate from `catalogue.state` and never satisfying the missing
+natural-run acceptance gate. A timeout, drift or malformed response is unknown,
+not a fabricated success. Independent readbacks run concurrently within the
+existing systemd oneshot deadline with a credential-free subprocess
+environment; no extra monitor, timer, runner or provider write is permitted.
+
+**After PR merge, completed exact-main CI and source-owner acceptance only:**
+snapshot existing host-private scripts for rollback, confirm the existing
+watchdog and alert service are not running, then atomically replace
+`watch-schedule.py` and `alert-schedule.py` from the exact merged source.
+Create private `scripts` and `public` directories under the **existing**
+`~/.local/share/poststeward-showcase-runner` and atomically install the
+merged `scripts/verify-live-operation-contract.mjs` and
+`public/catalog.json` at those relative paths. Compare all four installed
+SHA-256 digests to the merged Git tree before any observation. Keep the
+original service/timer units unchanged and preserve rollback copies. A
+one-time GET-only readback can prove the installed checker, but only the next
+natural :42 watchdog cycle can prove unattended operation. Do not infer
+GitHub schedule recovery from this fallback.
+
 Keep the existing timer and its slot-grace semantics; a copied unit replaces
 its file, it does not create a new timer. Preserve the previous installed
 units/scripts for rollback. Before claiming alert-channel acceptance, prove
