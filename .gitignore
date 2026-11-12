@@ -2,3 +2,6 @@
 /public/install.sh
 /public/releases/*.json
 /.wrangler/
+
+__pycache__/
+*.pyc
