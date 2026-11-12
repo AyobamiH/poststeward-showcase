@@ -90,6 +90,35 @@ def prepare(state, now):
     return marker, body
 
 
+
+def prepare_all(state, now):
+    """Retain distinct alerts when both existing natural schedules fail.
+
+    The watchdog's primary outcome is reconciliation if BOTH jobs are unhealthy;
+    the daily catalogue is then nested in that same atomic state handoff.
+    Alerting only on the primary misses the catalogue-specific incident marker.
+    Validate BOTH messages before any GitHub write, preserving fail-closed
+    behaviour if the owner-private state is corrupt or unexpectedly shaped.
+    """
+    alerts = [prepare(state, now)]
+    if state.get("workflow", "reconcile") != "reconcile" or "catalogue" not in state:
+        return alerts
+    catalogue = state["catalogue"]
+    if not isinstance(catalogue, dict) or catalogue.get("workflow") != "catalogue":
+        raise ValueError("invalid nested catalogue result")
+    status = catalogue.get("state")
+    if status == "passed":
+        return alerts
+    if status not in ALLOWED:
+        raise ValueError("invalid nested catalogue status")
+    # Do not permit a nested JSON object to control the checked_at timestamp
+    # or the independent readback text delivered under the existing alert.
+    distinct = dict(catalogue)
+    distinct["checked_at"] = state["checked_at"]
+    distinct["public_readback"] = state.get("public_readback", {})
+    alerts.append(prepare(distinct, now))
+    return alerts
+
 def deliver(marker, body):
     # Only comments by the authenticated repository owner can suppress delivery.
     # The read-before-write check makes an ambiguous POST recoverable on later runs.
@@ -126,13 +155,19 @@ def main():
                 "No missed schedule, failed reconciliation, provider effect or deployment is asserted. "
                 "This confirms only the issue-comment escalation path and independent readback."
             )
+            alerts = [(marker, body)]
         elif len(sys.argv) == 1:
             state = json.loads(STATE_PATH.read_text())
-            marker, body = prepare(state, dt.datetime.now(dt.timezone.utc))
+            alerts = prepare_all(state, dt.datetime.now(dt.timezone.utc))
         else:
             raise ValueError("unknown command line argument")
-        result = deliver(marker, body)
-        print(json.dumps({"delivery": result, "marker": marker}), flush=True)
+        results = []
+        for marker, body in alerts:
+            # Each marker has its own remote read-before-write and readback.
+            # An ambiguous POST stops this cycle without replaying the effect.
+            results.append({"delivery": deliver(marker, body), "marker": marker})
+        output = results[0] if len(results) == 1 else {"deliveries": results}
+        print(json.dumps(output), flush=True)
         return 0
     except (OSError, ValueError, KeyError, TypeError, subprocess.SubprocessError, RuntimeError) as error:
         print(json.dumps({"delivery": "unconfirmed", "reason": type(error).__name__}), flush=True)
