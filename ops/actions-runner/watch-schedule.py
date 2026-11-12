@@ -6,6 +6,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import time
 from pathlib import Path
 
 REPO = "AyobamiH/poststeward-showcase"
@@ -15,11 +16,23 @@ STATE_PATH = Path.home() / ".local/state/poststeward-showcase/schedule-watch-las
 
 
 def get_runs():
-    result = subprocess.run(
-        ["gh", "api", f"repos/{REPO}/actions/workflows/{WORKFLOW}/runs?event=schedule&per_page=30"],
-        capture_output=True, text=True, timeout=35, check=True,
-    )
-    return json.loads(result.stdout)["workflow_runs"]
+    """Retry transport-only reads without dispatching or modifying any workflow.
+
+    Three attempts stay below systemd's default 90-second oneshot limit, even
+    when each gh process reaches its own 20-second timeout. Schema errors are
+    not retried and all unresolved failures remain fail-closed/unknown.
+    """
+    command = ["gh", "api", f"repos/{REPO}/actions/workflows/{WORKFLOW}/runs?event=schedule&per_page=30"]
+    for attempt in range(3):
+        try:
+            result = subprocess.run(
+                command, capture_output=True, text=True, timeout=20, check=True,
+            )
+            return json.loads(result.stdout)["workflow_runs"]
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError):
+            if attempt == 2:
+                raise
+            time.sleep(attempt + 1)
 
 
 def assess(now, runs):

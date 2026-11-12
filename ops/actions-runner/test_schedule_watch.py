@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 HERE = Path(__file__).resolve().parent
@@ -29,6 +30,36 @@ def run(created="2026-11-11T21:58:54Z", status="completed", conclusion="success"
 
 
 class WatchTests(unittest.TestCase):
+    def test_get_runs_retries_read_only_transport_failure(self):
+        failed = subprocess.CalledProcessError(1, ["gh", "api"])
+        response = SimpleNamespace(stdout=json.dumps({"workflow_runs": [run()]}))
+        with patch.object(watch.subprocess, "run", side_effect=[failed, response]) as invoked, \
+             patch.object(watch.time, "sleep") as sleeping:
+            self.assertEqual(watch.get_runs(), [run()])
+            self.assertEqual(invoked.call_count, 2)
+            self.assertEqual(sleeping.call_args.args, (1,))
+            for call in invoked.call_args_list:
+                self.assertEqual(call.args[0][:2], ["gh", "api"])
+                self.assertNotIn("POST", " ".join(call.args[0]))
+                self.assertEqual(call.kwargs["timeout"], 20)
+                self.assertTrue(call.kwargs["check"])
+
+    def test_get_runs_bounded_timeouts_remain_failure(self):
+        with patch.object(watch.subprocess, "run", side_effect=subprocess.TimeoutExpired("gh", 20)) as invoked, \
+             patch.object(watch.time, "sleep") as sleeping:
+            with self.assertRaises(subprocess.TimeoutExpired):
+                watch.get_runs()
+            self.assertEqual(invoked.call_count, 3)
+            self.assertEqual([c.args[0] for c in sleeping.call_args_list], [1, 2])
+
+    def test_get_runs_schema_failure_is_not_retried(self):
+        with patch.object(watch.subprocess, "run", return_value=SimpleNamespace(stdout="{}")) as invoked, \
+             patch.object(watch.time, "sleep") as sleeping:
+            with self.assertRaises(KeyError):
+                watch.get_runs()
+            self.assertEqual(invoked.call_count, 1)
+            sleeping.assert_not_called()
+
     def test_grace_retains_earlier_slot(self):
         actual = watch.assess(dt.datetime(2026, 11, 12, 0, 40, tzinfo=UTC), [run()])
         self.assertEqual(actual["slot"], "2026-11-11T21:17:00+00:00")
