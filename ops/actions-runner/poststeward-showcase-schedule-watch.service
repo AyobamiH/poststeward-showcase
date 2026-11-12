@@ -1,0 +1,9 @@
+[Unit]
+Description=Independent read-only PostSteward Showcase scheduled-run watchdog
+OnFailure=poststeward-showcase-schedule-alert.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 %h/.local/share/poststeward-showcase-runner/watch-schedule.py
+NoNewPrivileges=true
+PrivateTmp=true

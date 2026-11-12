@@ -1,0 +1,8 @@
+[Unit]
+Description=Check GitHub PostSteward Showcase scheduled reconciliation independently
+[Timer]
+OnCalendar=*-*-* *:42:00 UTC
+Persistent=true
+Unit=poststeward-showcase-schedule-watch.service
+[Install]
+WantedBy=timers.target
