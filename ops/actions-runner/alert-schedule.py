@@ -26,10 +26,15 @@ def prepare(state, now):
     status = state["state"]
     if status not in ALLOWED:
         raise ValueError("not an alertable watchdog result")
+    workflow = state.get("workflow", "reconcile")
+    if workflow not in {"reconcile", "catalogue"}:
+        raise ValueError("invalid workflow")
     slot = state.get("slot") if status != "unknown" else None
     if slot:
         parsed = dt.datetime.fromisoformat(slot.replace("Z", "+00:00"))
-        if parsed.tzinfo is None or parsed.minute != 17 or parsed.hour % 3 != 0:
+        valid_slot = (parsed.hour == 7 and parsed.minute == 29) if workflow == "catalogue" else (
+            parsed.minute == 17 and parsed.hour % 3 == 0)
+        if parsed.tzinfo is None or not valid_slot or parsed.second != 0:
             raise ValueError("invalid slot")
         slot = parsed.astimezone(dt.timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
     else:
@@ -54,12 +59,30 @@ def prepare(state, now):
                 f"Independent public release readback: **{readback_state}** "
                 f"(stable {stable[:12]}, beta {beta[:12]})."
             )
-    marker = f"<!-- ps-showcase-watch:{slot}:{status} -->"
+    catalogue_line = ""
+    other = state.get("catalogue")
+    if workflow == "reconcile" and isinstance(other, dict):
+        other_state, other_slot = other.get("state"), other.get("slot")
+        if isinstance(other_state, str) and other_state in {"passed", "missing", "failed", "pending"} and isinstance(other_slot, str):
+            try:
+                parsed_other = dt.datetime.fromisoformat(other_slot.replace("Z", "+00:00"))
+                if (parsed_other.tzinfo is not None and parsed_other.hour == 7
+                        and parsed_other.minute == 29 and parsed_other.second == 0):
+                    catalogue_line = (
+                        f"Daily catalogue scheduled-run check: **{other_state}** "
+                        f"for {parsed_other.astimezone(dt.timezone.utc).strftime('%Y-%m-%dT%H:%MZ')}.\n"
+                    )
+            except ValueError:
+                pass
+    kind = "catalogue" if workflow == "catalogue" else "reconciliation"
+    marker_prefix = "ps-showcase-catalogue-watch" if workflow == "catalogue" else "ps-showcase-watch"
+    marker = f"<!-- {marker_prefix}:{slot}:{status} -->"
     body = (
         f"{marker}\n"
-        f"PostSteward Showcase scheduled-reconciliation watchdog alert.\n\n"
+        f"PostSteward Showcase scheduled-{kind} watchdog alert.\n\n"
         f"Observed state: **{status}**. Expected slot: **{slot}**. {run_part}.\n"
         f"Checked: {checked.astimezone(dt.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')}.\n\n"
+        f"{catalogue_line}"
         f"{readback_line} This does not satisfy scheduled-run acceptance.\n\n"
         "This is a read-only watchdog observation, not permission to dispatch, deploy or promote. "
         "Verify the GitHub schedule-event run and independent public readback before closing incident #29."
