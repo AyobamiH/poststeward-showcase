@@ -116,6 +116,68 @@ class WatchTests(unittest.TestCase):
             self.assertEqual(saved.call_args.args[0]["state"], "unknown")
 
 
+class PublicFallbackTests(unittest.TestCase):
+    script = Path("/fake/distribution-reconcile.mjs")
+    beta = "a" * 40
+    stable = "b" * 40
+
+    def response(self, drift=False):
+        return SimpleNamespace(stdout="DISTRIBUTION_RECONCILE " + json.dumps({
+            "drift": drift, "beta": self.beta, "stable": self.stable}) + "\n")
+
+    def test_readback_uses_bounded_non_mutating_existing_inspector(self):
+        with patch.object(Path, "is_file", return_value=True), \
+             patch.object(watch.subprocess, "run", return_value=self.response()) as invoked:
+            self.assertEqual(watch.inspect_public_distribution(self.script),
+                             {"state": "converged", "beta": self.beta, "stable": self.stable})
+            self.assertEqual(invoked.call_args.args[0],
+                             ["/usr/bin/node", str(self.script), "inspect"])
+            self.assertEqual(invoked.call_args.kwargs["timeout"], 18)
+            self.assertTrue(invoked.call_args.kwargs["check"])
+            env = invoked.call_args.kwargs["env"]
+            self.assertNotIn("GITHUB_TOKEN", env)
+            self.assertNotIn("CLOUDFLARE_API_TOKEN", env)
+            self.assertNotIn("GITHUB_OUTPUT", env)
+
+    def test_real_drift_not_treated_as_converged(self):
+        with patch.object(Path, "is_file", return_value=True), \
+             patch.object(watch.subprocess, "run", return_value=self.response(True)):
+            self.assertEqual(watch.inspect_public_distribution(self.script)["state"], "drift")
+
+    def test_unknown_on_timeout_and_malformed_untrusted_stdout(self):
+        with patch.object(Path, "is_file", return_value=True), \
+             patch.object(watch.subprocess, "run",
+                          side_effect=subprocess.TimeoutExpired("node", 18)):
+            self.assertEqual(watch.inspect_public_distribution(self.script)["state"], "unknown")
+        with patch.object(Path, "is_file", return_value=True), \
+             patch.object(watch.subprocess, "run",
+                          return_value=SimpleNamespace(stdout="DISTRIBUTION_RECONCILE {}\n")):
+            self.assertEqual(watch.inspect_public_distribution(self.script)["state"], "unknown")
+
+    def test_missing_pinned_inspector_does_not_launch_any_command(self):
+        with patch.object(Path, "is_file", return_value=False), \
+             patch.object(watch.subprocess, "run") as invoked:
+            self.assertEqual(watch.inspect_public_distribution(self.script)["state"], "unknown")
+            invoked.assert_not_called()
+
+    def test_healthy_public_readback_never_masks_missing_schedule(self):
+        independent = {"state": "converged", "beta": self.beta, "stable": self.stable}
+        with patch.object(watch, "get_runs", return_value=[]), \
+             patch.object(watch, "inspect_public_distribution", return_value=independent), \
+             patch.object(watch, "save_state") as saved:
+            self.assertEqual(watch.main(), 1)
+            self.assertEqual(saved.call_args.args[0]["state"], "missing")
+            self.assertEqual(saved.call_args.args[0]["public_readback"], independent)
+
+    def test_passed_schedule_does_not_repeat_public_readback(self):
+        with patch.object(watch, "assess", return_value={"state": "passed"}), \
+             patch.object(watch, "get_runs", return_value=[]), \
+             patch.object(watch, "inspect_public_distribution") as inspector, \
+             patch.object(watch, "save_state"):
+            self.assertEqual(watch.main(), 0)
+            inspector.assert_not_called()
+
+
 class AlertTests(unittest.TestCase):
     now = dt.datetime(2026, 11, 12, 0, 43, tzinfo=UTC)
 
@@ -135,6 +197,24 @@ class AlertTests(unittest.TestCase):
                  "checked_at": "2026-11-12T00:42:00+00:00"}, self.now)
         self.assertIn("api-unknown-2026-11-12T00Z", marker)
         self.assertNotIn("unsafe text", body)
+
+    def test_public_readback_is_explicitly_separate_from_schedule(self):
+        state = self.state()
+        state["public_readback"] = {"state": "converged", "beta": "a" * 40, "stable": "b" * 40}
+        _, body = alert.prepare(state, self.now)
+        self.assertIn("Independent public release readback: **converged**", body)
+        self.assertIn("does not satisfy scheduled-run acceptance", body)
+        self.assertIn("stable bbbbbbbbbbbb", body)
+
+    def test_malformed_readback_cannot_inject_incident_content(self):
+        state = self.state()
+        state["public_readback"] = {"state": "drift", "beta": "private\ntext", "stable": "b" * 40}
+        _, body = alert.prepare(state, self.now)
+        self.assertIn("readback: **unknown**", body)
+        self.assertNotIn("private", body)
+        state["public_readback"] = {"state": "malicious payload"}
+        _, body = alert.prepare(state, self.now)
+        self.assertNotIn("malicious payload", body)
 
     def test_accepted_status_is_not_alerted(self):
         state = self.state()

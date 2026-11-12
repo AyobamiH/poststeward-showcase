@@ -3,6 +3,7 @@
 import datetime as dt
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -13,6 +14,8 @@ REPO = "AyobamiH/poststeward-showcase"
 WORKFLOW = "distribution-reconcile.yml"
 GRACE = dt.timedelta(minutes=75)
 STATE_PATH = Path.home() / ".local/state/poststeward-showcase/schedule-watch-last.json"
+READBACK_SCRIPT = Path.home() / ".local/share/poststeward-showcase-runner/distribution-reconcile.mjs"
+REVISION = re.compile(r"^[0-9a-f]{40}$")
 
 
 def get_runs():
@@ -63,6 +66,37 @@ def assess(now, runs):
     }
 
 
+def inspect_public_distribution(script=READBACK_SCRIPT):
+    """Bounded, unprivileged GET-only fallback; never counts as a scheduled run.
+
+    Invoke the existing canonical JavaScript inspector, not a second release
+    implementation. Its inspect mode cannot dispatch, install or promote.
+    The command runs without GitHub/Cloudflare credentials or GITHUB_OUTPUT.
+    """
+    if not script.is_file():
+        return {"state": "unknown"}
+    try:
+        result = subprocess.run(
+            ["/usr/bin/node", str(script), "inspect"],
+            capture_output=True, text=True, timeout=18, check=True,
+            env={"PATH": "/usr/bin:/bin", "HOME": str(Path.home())},
+        )
+        lines = [line for line in result.stdout.splitlines()
+                 if line.startswith("DISTRIBUTION_RECONCILE ")]
+        if len(lines) != 1:
+            raise ValueError("invalid inspector response")
+        payload = json.loads(lines[0].removeprefix("DISTRIBUTION_RECONCILE "))
+        if type(payload.get("drift")) is not bool:
+            raise ValueError("invalid inspector drift flag")
+        if not all(isinstance(payload.get(key), str) and REVISION.fullmatch(payload[key])
+                   for key in ("beta", "stable")):
+            raise ValueError("invalid inspector source identity")
+        return {"state": "drift" if payload["drift"] else "converged",
+                "beta": payload["beta"], "stable": payload["stable"]}
+    except (subprocess.SubprocessError, OSError, ValueError, TypeError, KeyError):
+        return {"state": "unknown"}
+
+
 def save_state(outcome, path=STATE_PATH):
     """Atomic, owner-private state file for systemd OnFailure delivery."""
     path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
@@ -87,6 +121,9 @@ def main():
     except Exception as error:
         outcome = {"state": "unknown", "reason": type(error).__name__}
     outcome["checked_at"] = now.isoformat()
+    if outcome["state"] != "passed":
+        # Independent public evidence does not change the missing-run verdict.
+        outcome["public_readback"] = inspect_public_distribution()
     try:
         save_state(outcome)
     except OSError as error:
