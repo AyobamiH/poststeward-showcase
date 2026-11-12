@@ -29,6 +29,8 @@ jobs:
         run: node --test tests/*.test.mjs
       - name: Verify self-hosted runner recovery safeguards
         run: python3 -B ops/actions-runner/test_runner_lifecycle.py
+      - name: Verify existing schedule watchdog and on-failure alert safeguards
+        run: python3 -B -m unittest discover -s ops/actions-runner -p 'test_*.py'
       - name: Check distribution reconciler syntax
         run: node --check scripts/distribution-reconcile.mjs
       - name: Check GitHub release controller syntax

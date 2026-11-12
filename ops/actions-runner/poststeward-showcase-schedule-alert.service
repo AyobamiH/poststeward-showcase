@@ -1,0 +1,8 @@
+[Unit]
+Description=Deduplicated incident evidence for PostSteward Showcase watchdog failure
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/python3 %h/.local/share/poststeward-showcase-runner/alert-schedule.py
+NoNewPrivileges=true
+PrivateTmp=true

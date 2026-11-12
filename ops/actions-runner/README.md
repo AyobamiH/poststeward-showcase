@@ -48,3 +48,48 @@ files under `~/.config/systemd/user/` and Python scripts under
 daemon-reload` and enable the two timers. The GitHub Actions workflows and
 Cloudflare production deployment gates remain authoritative. Do not mistake
 recovery timers for an independently verified successful release.
+
+### Existing schedule watchdog: on-failure incident delivery
+
+The already-installed poststeward-showcase-schedule-watch.timer checks at :42
+UTC every hour. The guard allows GitHub scheduling up to 75 minutes late. A
+workflow_dispatch run never counts as a natural scheduled occurrence.
+
+The existing watchdog gains an atomic private last-result file under
+~/.local/state/poststeward-showcase/schedule-watch-last.json. For missing,
+failed, unobservable or still-pending schedule evidence after the grace period,
+the existing systemd oneshot fails. Its OnFailure hook invokes a separate
+bounded notifier which adds a sanitised, once-per-slot/state note to the
+already-open incident #29, with pre-write deduplication and post-write GitHub
+readback. GitHub failure remains unconfirmed, not silently retried as a new
+effect. The notifier does not dispatch jobs, deploy or promote releases.
+Do not introduce a second timer or separate deployment executor.
+
+Install only after exact-source CI and review; copy the following units and
+scripts to the existing web host (not a customer installation):
+
+    install -m 0700 -d "$HOME/.local/share/poststeward-showcase-runner"
+    install -m 0700 ops/actions-runner/watch-schedule.py "$HOME/.local/share/poststeward-showcase-runner/watch-schedule.py"
+    install -m 0700 ops/actions-runner/alert-schedule.py "$HOME/.local/share/poststeward-showcase-runner/alert-schedule.py"
+    install -m 0644 ops/actions-runner/poststeward-showcase-schedule-watch.service "$HOME/.config/systemd/user/"
+    install -m 0644 ops/actions-runner/poststeward-showcase-schedule-alert.service "$HOME/.config/systemd/user/"
+    install -m 0644 ops/actions-runner/poststeward-showcase-schedule-watch.timer "$HOME/.config/systemd/user/"
+    systemctl --user daemon-reload
+    systemctl --user enable --now poststeward-showcase-schedule-watch.timer
+    python3 -m unittest discover -s ops/actions-runner -p 'test_*.py'
+    systemctl --user cat poststeward-showcase-schedule-watch.service
+
+Keep the existing timer and its slot-grace semantics; a copied unit replaces
+its file, it does not create a new timer. Preserve the previous installed
+units/scripts for rollback. Before claiming alert-channel acceptance, prove
+one explicitly labelled bounded canary and independently confirm its issue
+comment, then observe consecutive natural reconciliation cycles. A local
+systemd failure without delivered/read-back issue evidence is not acceptance.
+
+A manual, **non-incident** alert-route test after reviewed installation is:
+
+    python3 "$HOME/.local/share/poststeward-showcase-runner/alert-schedule.py" --canary
+
+It posts an explicitly labelled delivery-only canary, at most once per UTC day,
+to incident #29 and independently checks the posted comment. Do not use a
+fabricated failed schedule observation as an alert-route test.
