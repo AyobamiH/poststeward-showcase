@@ -1,5 +1,13 @@
 # Isolated Showcase runner maintenance
 
+**Single source of truth:** ops/cleanup-stale-runners.py contains all
+runner-cleanup logic. ops/actions-runner/cleanup-stale-runners.py is a
+compatibility entry point only, loading the canonical implementation for old
+tests or command-line invocations. Do not copy the compatibility entry point
+into the live host installation; install the exact reviewed canonical file.
+A regression test ensures the legacy import resolves functions from the
+canonical source rather than maintaining a divergent deletion algorithm.
+
 `cleanup-stale-runners.py` is the canonical, tested source of the existing
 `poststeward-showcase-stale-runner-cleanup.service` on `web`. It is **not**
 part of the website build or deployment. The systemd timer and JIT listener
