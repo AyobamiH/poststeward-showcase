@@ -17,6 +17,11 @@ cleanup = load('cleanup', 'cleanup-stale-runners.py')
 recover = load('recover', 'recover-offline-listener.py')
 
 class LifecycleTests(unittest.TestCase):
+    def test_legacy_import_uses_canonical_cleanup_implementation(self):
+        canonical = (ROOT.parent / 'cleanup-stale-runners.py').resolve()
+        self.assertEqual(pathlib.Path(cleanup.candidates.__code__.co_filename).resolve(), canonical)
+        self.assertEqual(pathlib.Path(cleanup.cleanup.__code__.co_filename).resolve(), canonical)
+
     def test_only_old_offline_idle_exact_prefix_is_eligible(self):
         now = 20000
         runners = [
