@@ -55,16 +55,48 @@ def execute(kind, now=None, root=ROOT, commands=None):
         lag_seconds = observed - slot
         checked_at = datetime.fromtimestamp(observed, timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
         receipt = root / (kind + '-' + str(slot) + '.json')
+        if receipt.is_symlink():
+            raise RuntimeError('slot receipt must not be a symlink')
         if receipt.exists():
             old = json.loads(receipt.read_text())
-            # Historic un-timestamped successes are retained, not promoted into
-            # evidence of timely execution. Never re-run an ambiguous slot.
+            # A completed pass is idempotent only with exact clock provenance.
             if isinstance(old, dict) and old.get('kind') == kind and old.get('slot') == slot and old.get('state') == 'passed' and old.get('origin') == ORIGIN:
                 delay = old.get('lag_seconds')
                 if (type(delay) is int and 0 <= delay <= MAX_START_LAG_SECONDS
                         and old.get('checked_at') == datetime.fromtimestamp(slot + delay, timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')):
                     return old
-            raise RuntimeError('slot already attempted or legacy receipt has no timely provenance')
+            # Only an orphaned *running* read-only check is safe to resume.
+            # The flock has already been acquired: the previous clock process
+            # cannot still hold it. No failed, late, legacy or unverifiable
+            # attempt may be replayed; no external mutation occurs here.
+            if (isinstance(old, dict)
+                    and set(old) == {'kind', 'slot', 'state', 'checked_at', 'lag_seconds', 'origin'}
+                    and old['kind'] == kind and old['slot'] == slot
+                    and old['state'] == 'running' and old['origin'] == ORIGIN
+                    and type(old['lag_seconds']) is int
+                    and 0 <= old['lag_seconds'] <= MAX_START_LAG_SECONDS
+                    and old['checked_at'] == datetime.fromtimestamp(
+                        slot + old['lag_seconds'], timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+                    and slot + old['lag_seconds'] <= observed
+                    and lag_seconds <= MAX_START_LAG_SECONDS):
+                # This immutable exclusive-create snapshot fences a second
+                # recovery, including if the resumed process itself crashes.
+                # The first receipt is preserved before any read-only retry.
+                recovery = root / (kind + '-' + str(slot) + '.interrupted.json')
+                if recovery.exists() or recovery.is_symlink():
+                    raise RuntimeError('interrupted slot recovery already attempted')
+                fd = os.open(recovery, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+                with os.fdopen(fd, 'w') as stream:
+                    json.dump({'kind': kind, 'slot': slot, 'state': 'interrupted',
+                               'original_receipt': old, 'recovery_started_at': checked_at}, stream)
+                    stream.write('\n')
+                    stream.flush()
+                    os.fsync(stream.fileno())
+                directory_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY)
+                try: os.fsync(directory_fd)
+                finally: os.close(directory_fd)
+            else:
+                raise RuntimeError('slot already attempted or legacy receipt has no timely provenance')
         def save(state):
             tmp = receipt.with_suffix('.tmp')
             with tmp.open('w') as stream:

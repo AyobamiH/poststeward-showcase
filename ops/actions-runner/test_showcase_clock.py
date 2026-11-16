@@ -26,6 +26,151 @@ class ClockTests(unittest.TestCase):
                 with self.assertRaises(ValueError): clock.execute('distribution', now=12*3600+23*60, root=Path(folder))
                 with self.assertRaises(RuntimeError): clock.execute('distribution', now=12*3600+23*60, root=Path(folder))
                 self.assertEqual(run.call_count, 1)
+    def test_interrupted_read_only_slot_recovers_once_with_immutable_audit(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            slot = 12*3600 + 17*60
+            original = {'kind': 'distribution', 'slot': slot, 'state': 'running',
+                        'checked_at': '1970-01-01T12:22:00Z', 'lag_seconds': 300,
+                        'origin': clock.ORIGIN}
+            (root / f'distribution-{slot}.json').write_text(json.dumps(original))
+            class Result: stdout = 'DISTRIBUTION_RECONCILE {"drift":false}\n'
+            with patch.object(clock.subprocess, 'run', return_value=Result()) as run:
+                result = clock.execute('distribution', now=12*3600+23*60, root=root)
+                self.assertEqual(result['state'], 'passed')
+                audit = root / f'distribution-{slot}.interrupted.json'
+                proof = json.loads(audit.read_text())
+                self.assertEqual(proof['state'], 'interrupted')
+                self.assertEqual(proof['original_receipt'], original)
+                self.assertEqual(proof['recovery_started_at'], '1970-01-01T12:23:00Z')
+                self.assertEqual(audit.stat().st_mode & 0o777, 0o600)
+                self.assertEqual(clock.execute('distribution', now=12*3600+24*60, root=root), result)
+                self.assertEqual(run.call_count, 1)
+
+    def test_interrupted_recovery_does_not_repeat_after_another_crash(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            slot = 12*3600 + 17*60
+            receipt = root / f'distribution-{slot}.json'
+            original = {'kind': 'distribution', 'slot': slot, 'state': 'running',
+                        'checked_at': '1970-01-01T12:22:00Z', 'lag_seconds': 300,
+                        'origin': clock.ORIGIN}
+            receipt.write_text(json.dumps(original))
+            # Simulate an abrupt parent death after the immutable recovery
+            # marker was made and before a final pass/fail receipt was saved.
+            with patch.object(clock.subprocess, 'run', side_effect=KeyboardInterrupt) as run:
+                with self.assertRaises(KeyboardInterrupt):
+                    clock.execute('distribution', now=12*3600+23*60, root=root)
+                with self.assertRaisesRegex(RuntimeError, 'already attempted'):
+                    clock.execute('distribution', now=12*3600+24*60, root=root)
+                self.assertEqual(run.call_count, 1)
+                self.assertEqual(json.loads(receipt.read_text())['state'], 'running')
+                self.assertTrue((root / f'distribution-{slot}.interrupted.json').exists())
+
+    def test_interrupted_slot_recovery_denies_unverifiable_or_terminal_receipts(self):
+        slot = 12*3600 + 17*60
+        base = {'kind': 'distribution', 'slot': slot, 'state': 'running',
+                'checked_at': '1970-01-01T12:22:00Z', 'lag_seconds': 300,
+                'origin': clock.ORIGIN}
+        invalid = [
+            {**base, 'state': 'failed'},
+            {**base, 'state': 'late'},
+            {**base, 'state': 'passed', 'checked_at': 'bad'},
+            {**base, 'origin': 'github_schedule'},
+            {**base, 'lag_seconds': True},
+            {**base, 'lag_seconds': 1300},
+            {**base, 'checked_at': '1970-01-01T12:22:01Z'},
+            {**base, 'extra': 'unapproved'},
+            {**base, 'kind': 'catalogue'},
+            {**base, 'slot': slot - 10800},
+        ]
+        for value in invalid:
+            with self.subTest(value=value), tempfile.TemporaryDirectory() as folder:
+                root = Path(folder)
+                receipt = root / f'distribution-{slot}.json'
+                receipt.write_text(json.dumps(value))
+                with patch.object(clock.subprocess, 'run') as invoked:
+                    with self.assertRaises(RuntimeError):
+                        clock.execute('distribution', now=12*3600+23*60, root=root)
+                    invoked.assert_not_called()
+                self.assertEqual(json.loads(receipt.read_text()), value)
+                self.assertFalse((root / f'distribution-{slot}.interrupted.json').exists())
+
+    def test_overdue_interrupted_slot_cannot_be_relabelled_as_timely(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            slot = 12*3600 + 17*60
+            (root / f'distribution-{slot}.json').write_text(json.dumps({
+                'kind': 'distribution', 'slot': slot, 'state': 'running',
+                'checked_at': '1970-01-01T12:22:00Z', 'lag_seconds': 300,
+                'origin': clock.ORIGIN,
+            }))
+            with patch.object(clock.subprocess, 'run') as invoked:
+                with self.assertRaises(RuntimeError):
+                    clock.execute('distribution', now=12*3600+40*60, root=root)
+                invoked.assert_not_called()
+                self.assertFalse((root / f'distribution-{slot}.interrupted.json').exists())
+
+    def test_recovered_drift_remains_failed_and_never_promotes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            slot = 12*3600 + 17*60
+            receipt = root / f'distribution-{slot}.json'
+            receipt.write_text(json.dumps({
+                'kind': 'distribution', 'slot': slot, 'state': 'running',
+                'checked_at': '1970-01-01T12:22:00Z', 'lag_seconds': 300,
+                'origin': clock.ORIGIN,
+            }))
+            class Result: stdout = 'DISTRIBUTION_RECONCILE {"drift":true}\n'
+            with patch.object(clock.subprocess, 'run', return_value=Result()) as run:
+                with self.assertRaises(ValueError):
+                    clock.execute('distribution', now=12*3600+23*60, root=root)
+                self.assertEqual(json.loads(receipt.read_text())['state'], 'failed')
+                with self.assertRaises(RuntimeError):
+                    clock.execute('distribution', now=12*3600+24*60, root=root)
+                self.assertEqual(run.call_count, 1)
+                self.assertTrue((root / f'distribution-{slot}.interrupted.json').exists())
+
+    def test_existing_interrupted_recovery_marker_prevents_ambiguous_replay(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            slot = 12*3600 + 17*60
+            original = {'kind': 'distribution', 'slot': slot, 'state': 'running',
+                        'checked_at': '1970-01-01T12:22:00Z', 'lag_seconds': 300,
+                        'origin': clock.ORIGIN}
+            (root / f'distribution-{slot}.json').write_text(json.dumps(original))
+            marker = root / f'distribution-{slot}.interrupted.json'
+            marker.write_text('existing immutable crash evidence')
+            with patch.object(clock.subprocess, 'run') as invoked:
+                with self.assertRaisesRegex(RuntimeError, 'already attempted'):
+                    clock.execute('distribution', now=12*3600+23*60, root=root)
+                invoked.assert_not_called()
+                self.assertEqual(marker.read_text(), 'existing immutable crash evidence')
+
+    def test_symlinked_receipt_rejected_before_read_only_execution(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            slot = 12*3600 + 17*60
+            external = root / 'other'
+            external.write_text('untrusted')
+            (root / f'distribution-{slot}.json').symlink_to(external)
+            with patch.object(clock.subprocess, 'run') as invoked:
+                with self.assertRaisesRegex(RuntimeError, 'symlink'):
+                    clock.execute('distribution', now=12*3600+23*60, root=root)
+                invoked.assert_not_called()
+                self.assertEqual(external.read_text(), 'untrusted')
+
+    def test_existing_clock_unit_restarts_only_with_bounded_rate(self):
+        path = Path(__file__).with_name('poststeward-showcase-clock@.service')
+        unit = path.read_text()
+        self.assertIn('Type=oneshot', unit)
+        self.assertIn('Restart=on-failure', unit)
+        self.assertIn('RestartSec=30s', unit)
+        self.assertIn('StartLimitBurst=2', unit)
+        self.assertIn('StartLimitIntervalSec=180', unit)
+        self.assertIn('showcase-clock.py %i', unit)
+        self.assertNotIn('workflow_dispatch', unit)
+
     def test_catalogue_requires_actual_pass(self):
         with tempfile.TemporaryDirectory() as folder:
             class Result:

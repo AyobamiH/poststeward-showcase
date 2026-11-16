@@ -1,7 +1,11 @@
 [Unit]
 Description=Independent read-only Showcase %i slot reconciliation
+StartLimitIntervalSec=180
+StartLimitBurst=2
 [Service]
 Type=oneshot
+Restart=on-failure
+RestartSec=30s
 ExecStart=/usr/bin/python3 %h/.local/share/poststeward-showcase-runner/showcase-clock.py %i
 TimeoutStartSec=110
 NoNewPrivileges=true
