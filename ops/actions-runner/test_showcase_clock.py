@@ -204,7 +204,7 @@ class ClockTests(unittest.TestCase):
             {**good, 'contract': 'unreviewed contract'},
             {**good, 'operations': True},
             {**good, 'operations': 0},
-            {**good, 'operations': 511},
+            {**good, 'operations': 501},
             {**good, 'unexpected': 'unreviewed'},
             ['PASS'],
         ]
