@@ -20,7 +20,7 @@ STATE_PATH = Path.home() / ".local/state/poststeward-showcase/schedule-watch-las
 READBACK_SCRIPT = Path.home() / ".local/share/poststeward-showcase-runner/distribution-reconcile.mjs"
 CATALOGUE_READBACK_SCRIPT = Path.home() / ".local/share/poststeward-showcase-runner/scripts/verify-live-operation-contract.mjs"
 CATALOGUE_CHECKER_SHA256 = "ad184abc5726eae621f4f89e39c46b69d5a104f0ebfc918f008ac46720d60b22"
-CATALOGUE_SNAPSHOT_SHA256 = "830672e6d957d75eb836f7ac31fc09108c8023fdb36d56524f0269b484892db8"
+CATALOGUE_SNAPSHOT_SHA256 = "9322e8aee793abdaffe2c68afc8b177e5b14cf053b9eca598344cb3d1abd5d06"
 REVISION = re.compile(r"^[0-9a-f]{40}$")
 
 
