@@ -175,7 +175,7 @@ class ClockTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as folder:
             class Result:
                 stdout = json.dumps({
-                    'status': 'PASS', 'operations': 50,
+                    'status': 'PASS', 'operations': 51,
                     'contract': clock.CATALOGUE_CONTRACT,
                     'origin': clock.CATALOGUE_ORIGIN,
                 }) + '\n'
@@ -197,14 +197,14 @@ class ClockTests(unittest.TestCase):
             self.assertEqual(receipt['state'], 'failed')
 
     def test_catalogue_rejects_wrong_origin_contract_or_ambiguous_evidence(self):
-        good = {'status': 'PASS', 'operations': 50,
+        good = {'status': 'PASS', 'operations': 51,
                 'contract': clock.CATALOGUE_CONTRACT, 'origin': clock.CATALOGUE_ORIGIN}
         bad = [
             {**good, 'origin': 'https://attacker.example/help.json'},
             {**good, 'contract': 'unreviewed contract'},
             {**good, 'operations': True},
             {**good, 'operations': 0},
-            {**good, 'operations': 501},
+            {**good, 'operations': 511},
             {**good, 'unexpected': 'unreviewed'},
             ['PASS'],
         ]

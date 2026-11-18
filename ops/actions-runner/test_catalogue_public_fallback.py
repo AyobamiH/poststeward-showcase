@@ -32,7 +32,7 @@ class HostedCatalogueFallbackTests(unittest.TestCase):
         return SimpleNamespace(stdout=json.dumps({
             "status": "PASS",
             "contract": "PostSteward public operation catalogue",
-            "operations": 50,
+            "operations": 51,
             "origin": "https://app.poststeward.com/help.json",
         }) + "\n")
 
@@ -43,7 +43,7 @@ class HostedCatalogueFallbackTests(unittest.TestCase):
                     side_effect=lambda p: SCRIPT_BYTES if p.suffix == ".mjs" else CATALOGUE_BYTES), \
                 patch.object(watch.subprocess, "run", return_value=self.passed()) as invoked:
             self.assertEqual(watch.inspect_public_catalogue(self.checker),
-                             {"state": "passed", "operations": 50})
+                             {"state": "passed", "operations": 51})
         call = invoked.call_args
         self.assertEqual(call.args[0], ["/usr/bin/node", str(self.checker)])
         self.assertEqual(call.kwargs["timeout"], 18)
@@ -77,13 +77,13 @@ class HostedCatalogueFallbackTests(unittest.TestCase):
             subprocess.CalledProcessError(1, ["node"]),
             subprocess.TimeoutExpired(["node"], 18),
             SimpleNamespace(stdout="not-json"),
-            SimpleNamespace(stdout='{"status":"PASS","operations":50}'),
+            SimpleNamespace(stdout='{"status":"PASS","operations":51}'),
             SimpleNamespace(stdout=json.dumps({
                 "status": "PASS", "operations": True,
                 "contract": "PostSteward public operation catalogue",
                 "origin": "https://app.poststeward.com/help.json"})),
             SimpleNamespace(stdout=json.dumps({
-                "status": "PASS", "operations": 50,
+                "status": "PASS", "operations": 51,
                 "contract": "PostSteward public operation catalogue",
                 "origin": "https://attacker.example/help.json"})),
         ]
@@ -99,7 +99,7 @@ class HostedCatalogueFallbackTests(unittest.TestCase):
                     self.assertEqual(watch.inspect_public_catalogue(self.checker), {"state": "unknown"})
 
     def test_missed_schedules_keep_failure_even_if_live_catalogue_matches(self):
-        independent = {"state": "passed", "operations": 50}
+        independent = {"state": "passed", "operations": 51}
         with patch.object(watch, "get_runs", return_value=[]), \
                 patch.object(watch, "inspect_public_distribution",
                              return_value={"state": "converged"}) as distribution, \
@@ -145,15 +145,15 @@ class HostedCatalogueFallbackTests(unittest.TestCase):
             "state": "missing", "workflow": "catalogue",
             "slot": "2026-11-12T07:29:00+00:00",
             "checked_at": "2026-11-12T10:42:00+00:00",
-            "catalogue_public_readback": {"state": "passed", "operations": 50},
+            "catalogue_public_readback": {"state": "passed", "operations": 51},
         }
         marker, body = alert.prepare(state, now)
         self.assertIn("ps-showcase-catalogue-watch", marker)
-        self.assertIn("operation catalogue (GET-only): **passed** (50 operations)", body)
+        self.assertIn("operation catalogue (GET-only): **passed** (51 operations)", body)
         self.assertIn("Not a natural scheduled-run receipt.\n", body)
         self.assertIn("does not satisfy scheduled-run acceptance", body)
         state["catalogue_public_readback"] = {
-            "state": "passed", "operations": "50\nINJECTED"}
+            "state": "passed", "operations": "51\nINJECTED"}
         _, body = alert.prepare(state, now)
         self.assertIn("operation catalogue (GET-only): **unknown**", body)
         self.assertNotIn("INJECTED", body)
@@ -165,7 +165,7 @@ class HostedCatalogueFallbackTests(unittest.TestCase):
             "checked_at": "2026-11-12T10:42:00+00:00",
             "catalogue": {"state": "missing", "workflow": "catalogue",
                           "slot": "2026-11-12T07:29:00+00:00"},
-            "catalogue_public_readback": {"state": "passed", "operations": 50},
+            "catalogue_public_readback": {"state": "passed", "operations": 51},
         }
         alerts = alert.prepare_all(state, now)
         self.assertEqual(len(alerts), 2)
