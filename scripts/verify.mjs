@@ -46,6 +46,7 @@ const operationNames = [
   "metrics_capture",
   "publishing_pause",
   "automation_configure",
+  "engagement_inspect",
   "automation_inspect",
   "automation_preview",
   "automation_enable",

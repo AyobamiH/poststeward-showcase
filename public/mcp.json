@@ -22,7 +22,7 @@
       "registration": "same scoped operation catalogue"
     }
   },
-  "operationCount": 50,
+  "operationCount": 51,
   "operations": [
     {
       "name": "autonomy_request",
@@ -342,6 +342,14 @@
       "tier": "advanced",
       "effects": [
         "STATE_WRITE"
+      ]
+    },
+    {
+      "name": "engagement_inspect",
+      "scope": "read",
+      "tier": "free",
+      "effects": [
+        "READ_ONLY"
       ]
     },
     {
